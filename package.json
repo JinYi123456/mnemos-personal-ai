@@ -1,0 +1,21 @@
+{
+  "name": "mnemos-personal-ai",
+  "version": "1.0.0",
+  "description": "Mnemos — the personal AI that dreams: a privacy-first memory-keeper with a visual memory galaxy, a replayable Dream Engine, and a transparent agentic loop. Built for the Nebius x NVIDIA Global AI Hackathon (Best Apps and Agents track).",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.19.1",
+    "typescript": "^5.9.3"
+  }
+}

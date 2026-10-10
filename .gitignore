@@ -1,0 +1,14 @@
+# Mnemos private vault — never commit
+vault/
+.env
+.env.local
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+node_modules/
+.freebuff/
+
+# Builder-private notes (contain submission strategy) — never commit
+SUBMISSION.md
+PRIVATE_NOTES.md

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mnemos — the AI that dreams</title>
+<meta name="description" content="A privacy-first personal AI with a visual memory galaxy and a Dream Engine you can watch consolidate." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='6' fill='%23ffd9a0'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23ffd9a0' stroke-opacity='.35'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+<canvas id="galaxy"></canvas>
+<div id="vignette"></div>
+
+<!-- top bar -->
+<header id="topbar">
+  <div class="brand" title="Mnemos — Greek titaness of memory">
+    <span class="brand-star">✶</span>
+    <span class="brand-name">Mnemos</span>
+    <span class="brand-sub">the AI that dreams</span>
+  </div>
+  <div class="top-stats" id="top-stats" aria-label="vault stats"></div>
+  <div class="top-actions">
+    <button id="btn-provider" class="pill" title="Language core: active provider + model"></button>
+    <button id="btn-redzone" class="pill" title="Red zone — topics Mnemos must never discuss">🛡 Red zone</button>
+    <button id="btn-dream" class="btn-dream" title="Let Mnemos sleep and consolidate memories">☾ Dream</button>
+    <button id="btn-panel" class="pill" title="Open vault panel">☰ Vault</button>
+  </div>
+</header>
+
+<!-- onboarding -->
+<section id="onboard" class="overlay hidden">
+  <div class="onboard-card">
+    <div class="onboard-star">✶</div>
+    <h1>Meet Mnemos</h1>
+    <p>A private AI that <b>remembers you</b> across sessions, shows its memory as a living galaxy,
+       and <b>dreams</b> — replaying your memories at night to distill insights, skills and let go of the rest.
+       Everything lives in a local vault you can read and export.</p>
+    <label for="owner-name">What should Mnemos call you?</label>
+    <div class="onboard-row">
+      <input id="owner-name" maxlength="40" placeholder="Your name" autocomplete="off" />
+      <button id="btn-owner" class="btn-primary">Wake Mnemos</button>
+    </div>
+    <p class="onboard-hint">No key yet? Mnemos runs in <b>demo mode</b> — the galaxy, memory and decay work; generation wakes up once you add a free API key in <code>.env</code>.</p>
+  </div>
+</section>
+
+<!-- dream overlay -->
+<section id="dream-overlay" class="overlay hidden" aria-live="polite">
+  <div class="dream-stage">
+    <div class="dream-moon" id="dream-moon">☾</div>
+    <div class="dream-title" id="dream-title">Dreaming…</div>
+    <div class="dream-stream" id="dream-stream"></div>
+    <div class="dream-result" id="dream-result"></div>
+    <button id="btn-dream-close" class="btn-ghost hidden">Return to waking</button>
+  </div>
+</section>
+
+<!-- chat -->
+<main id="chat">
+  <div id="messages" aria-live="polite"></div>
+  <div id="composer">
+    <div id="chips">
+      <button class="chip" data-q="Give me my morning briefing">☀︎ Morning briefing</button>
+      <button class="chip" data-q="What do you remember about me?">✦ What do you remember?</button>
+      <button class="chip" data-q="Remind me what I'm preparing for and how I like to prepare">⊛ Ask my memory</button>
+      <button class="chip" data-q="Search the web for the best cherry blossom viewing spots in Kyoto">⌕ Web search</button>
+    </div>
+    <div class="composer-row">
+      <textarea id="input" rows="1" placeholder="Talk to Mnemos — it will recall, act, and remember…" autocomplete="off"></textarea>
+      <button id="btn-send" class="btn-primary" title="Send">➤</button>
+    </div>
+    <div id="ticker" class="ticker" aria-live="polite"></div>
+  </div>
+</main>
+
+<!-- vault panel -->
+<aside id="panel" class="hidden" aria-label="Memory vault">
+  <div class="panel-head">
+    <h2>Memory vault</h2>
+    <div>
+      <button id="btn-export" class="pill" title="Download vault JSON">⇩ Export</button>
+      <button id="btn-close-panel" class="pill">✕</button>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="memories">Memories</button>
+    <button class="tab" data-tab="insights">Insights</button>
+    <button class="tab" data-tab="skills">Skills</button>
+    <button class="tab" data-tab="legend">About</button>
+  </nav>
+  <div class="tab-body" id="tab-memories"></div>
+  <div class="tab-body hidden" id="tab-insights"></div>
+  <div class="tab-body hidden" id="tab-skills"></div>
+  <div class="tab-body hidden" id="tab-legend">
+    <h3>How to read the galaxy</h3>
+    <ul class="legend">
+      <li><span class="dot dot-warm"></span> Bright &amp; large = strong, recently used memory</li>
+      <li><span class="dot dot-dim"></span> Small &amp; faint = fading; forgotten after several dreams</li>
+      <li><span class="dot dot-seed"></span> Warm amber tint = demo seed memory</li>
+      <li><span class="line"></span> Constellation lines = insights connecting memories</li>
+    </ul>
+    <h3>Citations = anti-hallucination</h3>
+    <p class="legend-p">When Mnemos answers with <code>[Mxxxx]</code> chips, those are real memories it used — click one and its star flares in the galaxy. If it doesn't remember, it says so.</p>
+    <h3>Your data</h3>
+    <p class="legend-p">The vault is plain JSON in <code>/vault</code>. Export it, read it, carry it anywhere. Nothing leaves your machine except model calls.</p>
+  </div>
+</aside>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- red zone editor -->
+<section id="redzone-overlay" class="overlay hidden" aria-live="polite">
+  <div class="onboard-card">
+    <div class="onboard-star">🛡</div>
+    <h1 style="font-size:22px">Red zone</h1>
+    <p>Topics Mnemos must <b>never</b> discuss with anyone — it will gently decline and redirect,
+       even if asked playfully or under pressure. Stored locally in your vault.</p>
+    <div class="onboard-row">
+      <input id="redzone-input" maxlength="80" placeholder="e.g. my salary, that hospital thing, politics with dad…" />
+      <button id="redzone-add" class="btn-primary">Arm</button>
+    </div>
+    <div id="rz-list" style="text-align:left;margin-top:14px;display:flex;flex-direction:column;gap:7px"></div>
+    <div style="margin-top:18px"><button id="redzone-close" class="btn-ghost">Done</button></div>
+  </div>
+</section>
+<script src="/app.js"></script>
+</body>
+</html>
