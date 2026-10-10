@@ -21,7 +21,7 @@ services:
         sync: false          # optional free fallback
       - key: PUBLIC_BASE_URL
         sync: false          # set to the final onrender.com URL after first deploy
-    disk:
-      name: vault
-      mountPath: /opt/vault
-      sizeGB: 1
+# NOTE: no persistent disk — Render's free tier doesn't support one. The ephemeral
+# filesystem resets on redeploy/restart: the vault is rebuilt from the seeded demo
+# sky on boot, so the judge demo always shows a full galaxy. Persistent personal
+# vaults need the Starter plan ($7/mo) plus a disk block, or the local install.
