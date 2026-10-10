@@ -161,6 +161,11 @@ export class LLM {
   /**
    * Probe GET /models on the active OpenAI-compatible provider and pick a
    * model that actually exists (autodetect; keeps IDs correct over time).
+   *
+   * The priority list matches model *features*, not exact IDs — provider
+   * catalogs evolve (e.g. Nemotron 3 Nano moved from `nano-omni-9b` to
+   * `Nano-30B-A3B`), so we ask the catalog what it has and take the best
+   * families in order. Exact configured IDs always win when present.
    */
   async autodetect() {
     const p = this.active;
@@ -172,11 +177,15 @@ export class LLM {
       if (!res.ok) throw new Error(`models ${res.status}`);
       const data = /** @type {any} */ (await res.json());
       const ids = /** @type {string[]} */ ((/** @type {any[]} */ (data?.data || [])).map((/** @type {any} */ m) => m.id));
-      const want = [/nemotron-3/i, /nemotron/i, /qwen3/i, /deepseek/i, /llama/i, // eslint-disable-line
-        /gpt-oss/i, /mistral/i, /.*/];
+      // Free-tier router IDs (e.g. OpenRouter `:free`) must keep their suffix.
+      const pool = ids.filter((i) => /:free$/i.test(p.model) ? /:free$/i.test(i) : true);
+      const want = [
+        /nemotron-3-nano/i, /nemotron.*nano/i, /nemotron-3/i, /nemotron/i,
+        /qwen3(?!-embedding)/i, /deepseek/i, /llama/i, /gpt-oss/i, /mistral/i, /.*/,
+      ];
       for (const rx of want) {
-        const hit = ids.find((i) => rx.test(i) && i === p.model)
-          || ids.find((i) => rx.test(i));
+        const hit = pool.find((i) => rx.test(i) && i === p.model)
+          || pool.find((i) => rx.test(i));
         if (hit) {
           p.model = hit;
           return { provider: p.id, model: hit, verified: true };
@@ -236,7 +245,15 @@ export class LLM {
       max_tokens: opts.maxTokens ?? 1200,
       temperature: 0.7,
     });
-    if (opts.json) body.response_format = { type: 'json_object' };
+    // Nemotron reasoning models spend their budget thinking unless toggled off;
+    // an empty `content` (burned on reasoning) would break the tool loop.
+    if (/nemotron/i.test(model)) {
+      body.messages = [{ role: 'system', content: '/no_think' }, ...opts.messages];
+    }
+    // Reasoning models need room to think before the answer.
+    if (opts.reasoning && p.reasoningModel && model === p.reasoningModel) {
+      body.max_tokens = Math.max(3000, opts.maxTokens ?? 0);
+    }      if (opts.json && !(opts.reasoning && model === p.reasoningModel)) body.response_format = { type: 'json_object' };
     const res = await fetch(`${p.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -256,7 +273,11 @@ export class LLM {
     const data = /** @type {any} */ (await res.json());
     const msg = data?.choices?.[0]?.message;
     let text = String(msg?.content || '');
-    if (msg?.reasoning_content && !text) text = String(msg.reasoning_content);
+    // Reasoning models return hidden thinking under `reasoning` (Nemotron 3)
+    // or `reasoning_content` (DeepSeek-style). If content is empty because the
+    // budget was spent thinking, fall back so the call never hard-fails.
+    if (!text && msg?.reasoning_content) text = String(msg.reasoning_content);
+    if (!text && msg?.reasoning) text = String(msg.reasoning);
     if (!text.trim()) throw new Error(`${p.id} empty response`);
     return text;
   }

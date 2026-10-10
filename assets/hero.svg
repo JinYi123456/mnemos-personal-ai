@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" font-family="Segoe UI, system-ui, sans-serif">
+  <defs>
+    <radialGradient id="sky" cx="70%" cy="-10%" r="130%">
+      <stop offset="0%" stop-color="#10163a"/>
+      <stop offset="44%" stop-color="#070b22"/>
+      <stop offset="100%" stop-color="#030514"/>
+    </radialGradient>
+    <radialGradient id="star" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#ffd9a0"/>
+      <stop offset="100%" stop-color="#ffd9a000"/>
+    </radialGradient>
+    <radialGradient id="starB" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#9fe8b5"/>
+      <stop offset="100%" stop-color="#9fe8b500"/>
+    </radialGradient>
+    <radialGradient id="neb" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8f7bff55"/>
+      <stop offset="60%" stop-color="#8f7bff14"/>
+      <stop offset="100%" stop-color="#8f7bff00"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="560" fill="url(#sky)"/>
+  <circle cx="900" cy="120" r="260" fill="url(#neb)"/>
+  <circle cx="200" cy="380" r="220" fill="url(#neb)" opacity="0.6"/>
+
+  <!-- dust -->
+  <g fill="#c6cdfb" opacity="0.5">
+    <circle cx="140" cy="90" r="1.1"/><circle cx="300" cy="150" r="0.9"/><circle cx="520" cy="70" r="1.2"/>
+    <circle cx="680" cy="180" r="0.8"/><circle cx="1050" cy="420" r="1.1"/><circle cx="980" cy="80" r="0.9"/>
+    <circle cx="420" cy="470" r="1.0"/><circle cx="240" cy="260" r="0.8"/><circle cx="760" cy="330" r="1.0"/>
+  </g>
+
+  <!-- constellation -->
+  <g stroke="#8f7bff" stroke-opacity="0.5" stroke-width="1.4" fill="none">
+    <path d="M 300 300 L 410 240 L 520 300 L 610 220"/>
+    <path d="M 410 240 L 470 150"/>
+  </g>
+  <g>
+    <circle cx="300" cy="300" r="10" fill="url(#star)"/>
+    <circle cx="410" cy="240" r="14" fill="url(#star)"/>
+    <circle cx="520" cy="300" r="8" fill="url(#star)"/>
+    <circle cx="610" cy="220" r="11" fill="url(#star)"/>
+    <circle cx="470" cy="150" r="6" fill="url(#star)"/>
+  </g>
+
+  <!-- newborn star (green) -->
+  <circle cx="820" cy="200" r="26" fill="url(#starB)"/>
+  <text x="820" y="250" text-anchor="middle" fill="#9fe8b5" font-size="13">new memory, born in chat</text>
+
+  <!-- fading stars -->
+  <g opacity="0.35" fill="#aab3d8">
+    <circle cx="150" cy="450" r="4"/><circle cx="1010" cy="480" r="5"/><circle cx="1090" cy="300" r="4"/>
+  </g>
+  <text x="1010" y="510" text-anchor="middle" fill="#6b7399" font-size="12">fading…</text>
+
+  <!-- citation chip -->
+  <g transform="translate(560,410)">
+    <rect width="220" height="66" rx="12" fill="#0a0e2286" stroke="#8f7bff44"/>
+    <text x="14" y="24" fill="#e8ecff" font-size="14">You rehearsed it twice —</text>
+    <text x="14" y="44" fill="#e8ecff" font-size="14">you'll be calm. <tspan fill="#7fd7e8">M4f2b91a1</tspan></text>
+  </g>
+  <path d="M 410 240 L 560 415" stroke="#7fd7e8" stroke-opacity="0.5" stroke-dasharray="4 5" stroke-width="1.2"/>
+
+  <!-- wordmark -->
+  <text x="60" y="80" fill="#ffd9a0" font-size="40" font-weight="700">✶ Mnemos</text>
+  <text x="60" y="112" fill="#9aa3c7" font-size="18" font-style="italic">the AI that dreams — every memory is a star</text>
+
+  <!-- pipeline strip -->
+  <g font-size="14" fill="#c6cdfb">
+    <text x="60" y="520">talk</text>
+    <text x="150" y="520" fill="#6b7399">→</text>
+    <text x="185" y="520">recall</text>
+    <text x="280" y="520" fill="#6b7399">→</text>
+    <text x="315" y="520">Nebius Nemotron 3</text>
+    <text x="500" y="520" fill="#6b7399">→</text>
+    <text x="535" y="520">cite</text>
+    <text x="610" y="520" fill="#6b7399">→</text>
+    <text x="645" y="520">dream (Nemotron Super)</text>
+    <text x="880" y="520" fill="#6b7399">→</text>
+    <text x="915" y="520">decay</text>
+    <text x="990" y="520" fill="#6b7399">→</text>
+    <text x="1020" y="520" fill="#9fe8b5">new stars</text>
+  </g>
+</svg>

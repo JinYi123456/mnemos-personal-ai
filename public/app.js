@@ -24,6 +24,15 @@ const state = {
   busy: false,
 };
 
+/* birth animation: ids of stars freshly created during THIS session's chats */
+const newborn = new Map(); // id → {bornAt, hue}
+function markNewborns(newIds) {
+  const known = new Set(state.galaxy.stars.map((s) => s.id));
+  for (const id of newIds) {
+    if (!known.has(id)) newborn.set(id, { bornAt: performance.now(), hue: 92 });
+  }
+}
+
 /* ================= GALAXY RENDERER ================= */
 const canvas = els.galaxy;
 const ctx = canvas.getContext('2d');
@@ -150,20 +159,29 @@ function starHue(seed01) {
 function buildStars() {
   const g = state.galaxy;
   const old = new Map(stars.map((s) => [s.id, s]));
+  // any star not previously rendered but present in `newborn` is BORN NOW
+  for (const m of g.stars) {
+    if (!old.has(m.id) && newborn.has(m.id)) {
+      newborn.get(m.id).bornAt = performance.now(); // arm the pop-in
+    } else if (!old.has(m.id) && !newborn.has(m.id)) {
+      // star existed before this page session — no animation
+    }
+  }
   stars = g.stars.map((m, i) => {
     const prev = old.get(m.id);
     const pos = prev ? { x: prev.x, y: prev.y } : hashPos(m.id, i);
     // per-star hue/speed derived from id hash (stable across sessions)
     let h = 0;
     for (let c = 0; c < m.id.length; c += 1) h = (h * 31 + m.id.charCodeAt(c)) >>> 0;
-    const rndSeed = (h / 4294967296);
+    const isBorn = !prev && newborn.has(m.id);
     return {
       id: m.id, x: pos.x, y: pos.y,
       r: m.size * devicePixelRatio * 0.9,
+      bornAt: isBorn ? performance.now() : 0,
       tw: Math.random() * Math.PI * 2,
       base: 0.45 + (m.seed ? 0.15 : 0),
       text: m.text, tags: m.tags, seed: m.seed,
-      hue: prev ? prev.hue : starHue(rndSeed),
+      hue: isBorn ? 92 /* spring green — a just-learned memory */ : (prev ? prev.hue : starHue(h / 4294967296)),
       speed: 0.35 + ((h >>> 8 & 255) / 255) * 0.9, // parallax drift speed
       tx: 0, ty: 0,
     };
@@ -300,7 +318,22 @@ function draw() {
     if (flare) { r *= 1.9; alpha = 1; }
     if (hover) { alpha = Math.min(1, alpha + 0.35); r *= 1.25; }
 
-    const hue = s.seed ? (38 + s.hue * 0.2) : s.hue;
+    // birth animation: a new memory pops in green and settles to its palette hue
+    let birthGlow = 0;
+    if (s.bornAt) {
+      const age = (performance.now() - s.bornAt) / 1000;
+      if (age < 4) {
+        const k = age / 4;
+        birthGlow = Math.sin(k * Math.PI); // 0→1→0 over 4s
+        r *= 1 + 0.9 * birthGlow;
+        alpha = Math.min(1, alpha + birthGlow * 0.7);
+      } else {
+        s.bornAt = 0;
+        newborn.delete(s.id);
+      }
+    }
+
+    const hue = birthGlow > 0.05 ? (92 + (s.hue - 92) * (1 - birthGlow)) : s.hue;
     const glowR = r * 6;
     const g = ctx.createRadialGradient(wx, wy, 0, wx, wy, glowR);
     g.addColorStop(0, hsl(hue, 90, 82, 0.6 * alpha));
@@ -462,7 +495,7 @@ function ticker(msg, sticky) {
   if (msg && !sticky) tickerTimer = setTimeout(() => { els.ticker.textContent = ''; }, 4000);
 }
 
-async function sendChat() {
+function sendChat() {
   const text = els.input.value.trim();
   if (!text || state.busy) return;
   state.busy = true;
@@ -483,6 +516,14 @@ async function sendChat() {
       b.innerHTML += `<div style="font-size:11.5px;color:var(--cyan);margin-top:6px">⊛ ${esc(ev.name)}${ev.args && ev.args.query ? `: “${esc(ev.args.query)}”` : ''}</div>`;
     } else if (ev.type === 'learned') {
       ticker(`✦ learned ${ev.count} new memor${ev.count === 1 ? 'y' : 'ies'}`);
+      // stamp ids that exist now but weren't in the sky before this turn:
+      // the next buildStars() (on 'done') will paint them NEWBORN GREEN.
+      api('/api/galaxy').then((r) => {
+        const known = new Set(state.galaxy.stars.map((s) => s.id));
+        for (const s of r.stars) {
+          if (!known.has(s.id) && !newborn.has(s.id)) newborn.set(s.id, { bornAt: 0, hue: 92 });
+        }
+      }).catch(() => { /* cosmetic only */ });
     } else if (ev.type === 'done') {
       b.innerHTML = renderReplyHtml(ev.reply, ev.cites);
       state.busy = false;
@@ -575,7 +616,26 @@ function renderPanel() {
   const mems = state.vaultMemories || [];
   const insights = state.vaultInsights || [];
   const skills = state.vaultSkills || [];
+  const timeline = state.timeline || [];
 
+  $('tab-timeline').innerHTML = timeline.length
+    ? timeline.map((m) => {
+      const d = new Date(m.created);
+      const dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const timeStr = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+      const icon = m.source === 'web' ? '⌕' : m.source === 'dream' ? '☾' : m.source === 'user' ? '✦' : '✶';
+      const src = m.source === 'web' ? 'web-dream' : m.source;
+      return `
+      <div class="tl-item">
+        <div class="tl-rail"><span class="tl-dot"></span></div>
+        <div class="tl-card">
+          <div class="tl-top"><span class="tl-date">${dateStr}</span><span class="tl-time">${timeStr}</span><span class="tl-src">${icon} ${src}</span></div>
+          <div class="tl-text">${esc(m.text)}</div>
+        </div>
+      </div>`;
+    }).join('')
+    : '<p class="legend-p">No memories yet — talk to Mnemos.</p>';
+  
   $('tab-memories').innerHTML = mems.length
     ? mems.map((m) => `
       <div class="mem-item">
@@ -706,6 +766,8 @@ async function refreshStatus() {
   const activeChain = p.chain.find((c) => c.id === p.active);
   els.provider.textContent = p.active ? `${p.nvidia ? '◆' : '◇'} ${p.active}` : '◇ demo mode';
   els.provider.title = activeChain ? `${activeChain.label} · ${activeChain.model}` : 'No language core yet — add a free API key in .env';
+  const badge = $('provider-badge');
+  if (badge) badge.classList.toggle('hidden', !p.nvidia);
   // returning user: restore identity and skip onboarding
   if (!state.owner && v.owner) {
     state.owner = v.owner;
@@ -714,18 +776,20 @@ async function refreshStatus() {
 }
 
 async function refreshAll() {
-  const [galaxy, mems, insights, skills, redzone] = await Promise.all([
+  const [galaxy, mems, insights, skills, redzone, timeline] = await Promise.all([
     api('/api/galaxy'),
     api('/api/memories').then((r) => r.memories),
     api('/api/insights').then((r) => r.insights),
     api('/api/skills').then((r) => r.skills),
     api('/api/redzone').then((r) => r.redZone).catch(() => []),
+    api('/api/timeline').then((r) => r.memories).catch(() => []),
   ]);
   state.galaxy = galaxy;
   state.vaultMemories = mems;
   state.vaultInsights = insights;
   state.vaultSkills = skills;
   state.redZone = redzone;
+  state.timeline = timeline;
   buildStars();
   if (!els.panel.classList.contains('hidden')) renderPanel();
 }

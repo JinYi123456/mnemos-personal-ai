@@ -1,0 +1,27 @@
+# Render Blueprint — one-click deploy of Mnemos
+# In Render: New + → Blueprint → point at this repo → Apply.
+# Add your NEBIUS_API_KEY (and optionally TAVILY_API_KEY) as sync:false env vars —
+# Render prompts for secret values at deploy time; they never touch this file.
+services:
+  - type: web
+    name: mnemos-personal-ai
+    runtime: node
+    plan: free
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NEBIUS_API_KEY
+        sync: false          # judge-visible demo runs on the real Nebius Token Factory
+      - key: NEBIUS_BASE_URL
+        value: https://api.tokenfactory.nebius.com/v1
+      - key: TAVILY_API_KEY
+        sync: false          # enables live web search + outward dreams
+      - key: OPENROUTER_API_KEY
+        sync: false          # optional free fallback
+      - key: PUBLIC_BASE_URL
+        sync: false          # set to the final onrender.com URL after first deploy
+    disk:
+      name: vault
+      mountPath: /opt/vault
+      sizeGB: 1

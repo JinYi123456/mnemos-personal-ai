@@ -9,10 +9,13 @@ export class Dreamer {
   /**
    * @param {import('./store.js').Store} store
    * @param {LLM} llm
+   * @param {{searcher?: {search:(q:string)=>Promise<any>}|null}} [opts]
    */
-  constructor(store, llm) {
+  constructor(store, llm, { searcher = null } = {}) {
     this.store = store;
     this.llm = llm;
+    /** @type {{search:(q:string)=>Promise<any>}|null} external search (Tavily) */
+    this.searcher = /** @type {{search:(q:string)=>Promise<any>}|null} */ (searcher);
     this.running = false;
   }
 
@@ -45,10 +48,50 @@ export class Dreamer {
         if (pace) await sleep(pace);
       }
 
-      if (!sampled.length) {
-        emit({ phase: 'done', message: 'Nothing to dream about yet — memories first, dreams after.' });
-        return { insights: 0, decayed: 0, removed: 0, empty: true };
+    if (!sampled.length) {
+      emit({ phase: 'done', message: 'Nothing to dream about yet — memories first, dreams after.' });
+      return { insights: 0, decayed: 0, removed: 0, empty: true };
+    }
+
+    // 1b. EXTERNAL DREAM — dream about the world, not just the vault. A brace of
+    // memories seeds a web search; what comes back is stored as a 'web' memory,
+    // so the user's sky accumulates ambient knowledge tied to their own life.
+    if (this.searcher && typeof this.searcher.search === 'function') {
+      emit({ phase: 'replay', message: 'Drifting outward — dreaming of the world…' });
+      try {
+        const qSeed = sampled[Math.floor(Math.random() * sampled.length)].text.slice(0, 90);
+        const { text: qText } = await this.llm.chat({
+          json: true,
+          maxTokens: 240, // reasoning models need room even for one JSON line
+          messages: [
+            { role: 'system', content: 'Turn this memory into ONE short web-search query (max 8 words) about a topic the person would love to learn overnight. Reply ONLY JSON: {"query":"…"}' },
+            { role: 'user', content: qSeed },
+          ],
+        });
+        const qObj = LLM.parseJSON(qText);
+        const q = typeof qObj?.query === 'string' ? qObj.query.slice(0, 120) : '';
+        if (q) {
+          const found = await this.searcher.search(q);
+          const results = (found && Array.isArray(found.results)) ? found.results.filter((/** @type {any} */ r) => r && r.url) : [];
+          emit({ phase: 'replay', message: `web dream: “${q}”` });
+          let stored = 0;
+          for (const r of results.slice(0, 2)) {
+            const text = `${(r.title || '').slice(0, 120)}: ${String(r.snippet || '').replace(/\s+/g, ' ').slice(0, 200)} [${r.url}] .`.slice(0, 480);
+            const mem = this.store.addMemory(text, 'web');
+            if (mem) {
+              stored += 1;
+              emit({ phase: 'replay', star: mem.id.slice(0, 8), text: `web-dreamed · ${mem.text.slice(0, 80)}…` });
+            }
+          }
+          if (stored) {
+            sampled.push(...(this.store.vault.memories.filter((m) => m.source === 'web').slice(0, stored).map((m) => ({ id: m.id.slice(0, 8), text: m.text }))));
+            sampled.splice(0, sampled.length - 14); // keep the dream focused
+          }
+        }
+      } catch (e) {
+        emit({ phase: 'replay', message: `external dream skipped (${String(/** @type {any} */ (e).message || e).slice(0, 60)})` });
       }
+    }
 
       // 2. CONSOLIDATE — the LLM finds non-obvious cross-memory links.
       emit({ phase: 'consolidate', message: 'Weaving connections…' });

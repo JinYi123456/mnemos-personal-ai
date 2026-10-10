@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "allowJs": true
   },
-  "include": ["src/**/*.js", "test/**/*.js"],
+  "include": ["src/**/*.js", "test/**/*.js", "tools/**/*.js"],
   "exclude": ["node_modules", "vault"]
 }

@@ -32,7 +32,13 @@ if (store.vault.memories.length === 0) {
 const env = readEnvFile(ROOT);
 const llm = new LLM(buildProviders(ROOT));
 const brain = new Brain(store, llm, env.TAVILY_API_KEY || process.env.TAVILY_API_KEY || '', env.PUBLIC_BASE_URL || '');
-const dreamer = new Dreamer(store, llm);
+// Dreams extend outward: with a Tavily key, the Dreamer also searches the web
+// (through the same brain API) and dreams about the world, storing web memories.
+const dreamer = new Dreamer(store, llm, {
+  searcher: brain.tavilyKey
+    ? /** @type {{search:(q:string)=>Promise<any>}} */ ({ search: (/** @type {string} */ q) => brain.execSearch(q) })
+    : null,
+});
 const night = new NightDreamer(store, llm, { log: (m) => console.log(`  ✦ ${m}`) });
 
 // Gentle boot catch-up if yesterday had no dream, then schedule 03:30 nightly.
@@ -133,6 +139,23 @@ async function api(req, res) {
     store.setOwner(safeText(body.name, 40));
     await store.flush();
     return json(res, { ok: true, owner: store.vault.owner });
+  }
+  if (p === '/api/timeline') {
+    const now = Date.now();
+    return json(res, {
+      memories: store.vault.memories
+        .map((m) => ({
+          id: `M${m.id.slice(0, 8)}`,
+          text: m.text,
+          tags: m.tags,
+          source: m.source,
+          uses: m.uses,
+          created: m.created,
+          ageDays: Math.max(0, (now - m.created) / 86400000),
+        }))
+        .sort((a, b) => b.created - a.created)
+        .slice(0, 200),
+    });
   }
   if (p === '/api/memories') {
     return json(res, {

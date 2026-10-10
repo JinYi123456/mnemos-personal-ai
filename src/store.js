@@ -5,6 +5,7 @@ import { sha256, uuid, num, safeText, clamp, tokenize } from './util.js';
 
 const DECAY_HALF_LIFE_D = 21;
 const MIN_SCORE = 0.04;
+export { DECAY_HALF_LIFE_D };
 
 /** Embeddings are truncated (Matryoshka-style) to keep the JSON vault small. */
 export const EMBED_DIMS = 256;
