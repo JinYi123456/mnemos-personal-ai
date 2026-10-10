@@ -829,6 +829,8 @@ window.addEventListener('keydown', (e) => {
 });
 
 /* boot */
+resize();
+draw(); // start the render loop immediately — the sky should never wait on the network
 (async function boot() {
   await refreshStatus();
   await refreshAll();
