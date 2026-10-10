@@ -112,6 +112,22 @@
 
 <div id="toast" class="toast hidden"></div>
 
+<!-- generic prompt dialog (replaces browser prompt()) -->
+<section id="ask-overlay" class="overlay hidden" aria-live="polite">
+  <div class="onboard-card" style="max-width:430px">
+    <div class="onboard-star">✶</div>
+    <h1 id="ask-title" style="font-size:20px">Title</h1>
+    <p id="ask-detail" class="onboard-hint" style="white-space:pre-line;text-align:left"></p>
+    <div class="onboard-row">
+      <input id="ask-input" style="width:100%" />
+    </div>
+    <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
+      <button id="ask-ok" class="btn-primary">OK</button>
+      <button id="ask-cancel" class="btn-ghost">Cancel</button>
+    </div>
+  </div>
+</section>
+
 <!-- red zone editor -->
 <section id="redzone-overlay" class="overlay hidden" aria-live="polite">
   <div class="onboard-card">

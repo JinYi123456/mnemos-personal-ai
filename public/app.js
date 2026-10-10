@@ -13,6 +13,8 @@ const els = {
   send: $('btn-send'), ticker: $('ticker'), toast: $('toast'),
   redzone: $('btn-redzone'), rzOverlay: $('redzone-overlay'), rzList: $('rz-list'),
   rzInput: $('redzone-input'), rzAdd: $('redzone-add'), rzClose: $('redzone-close'),
+  askOverlay: $('ask-overlay'), askTitle: $('ask-title'), askDetail: $('ask-detail'),
+  askInput: $('ask-input'), askOk: $('ask-ok'), askCancel: $('ask-cancel'),
 };
 
 /* ---------- state ---------- */
@@ -359,7 +361,7 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-canvas.addEventListener('click', (e) => {
+canvas.addEventListener('click', async (e) => {
   if (dragMoved) return; // was a pan, not a pick
   const wx = (e.clientX * devicePixelRatio - view.x);
   const wy = (e.clientY * devicePixelRatio - view.y);
@@ -388,9 +390,9 @@ canvas.addEventListener('click', (e) => {
   }
   if (bl) {
     const label = bl.name ? `“${bl.name}”` : 'an unnamed constellation';
-    const name = prompt(`This constellation links:\n\n· ${bl.from.text}\n· ${bl.to.text}\n\nCurrently ${label}. Name it:`, bl.name || '');
-    if (name && name.trim()) {
-      nameConstellation(bl.insightId, name.trim());
+    const name = await ask('Name this constellation', `This constellation links:\n· ${bl.from.text}\n· ${bl.to.text}\n\nCurrently ${label}.`, bl.name || '');
+    if (name) {
+      nameConstellation(bl.insightId, name);
     }
   }
 });
@@ -665,8 +667,8 @@ function renderPanel() {
   });
   document.querySelectorAll('.const-rename').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      const name = prompt('Name this constellation:', btn.getAttribute('data-name') || '');
-      if (name && name.trim()) nameConstellation(btn.getAttribute('data-id'), name.trim());
+      const name = await ask('Name this constellation', 'Insight constellations deserve names you choose.', btn.getAttribute('data-name') || '');
+      if (name) nameConstellation(btn.getAttribute('data-id'), name);
     });
   });
 }
@@ -732,12 +734,40 @@ els.rzAdd.addEventListener('click', async () => {
 els.rzInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') els.rzAdd.click(); });
 
 /* ================= PROVIDER PICKER ================= */
+/** Promise-based in-app prompt (replaces window.prompt — native dialogs break the night-sky look). */
+function ask(title, detail, initial) {
+  return new Promise((resolve) => {
+    els.askTitle.textContent = title;
+    els.askDetail.textContent = detail || '';
+    els.askInput.value = initial || '';
+    els.askOverlay.classList.remove('hidden');
+    els.askInput.focus();
+    els.askInput.select();
+    const done = (val) => {
+      els.askOverlay.classList.add('hidden');
+      els.askOk.removeEventListener('click', ok);
+      els.askCancel.removeEventListener('click', cancel);
+      els.askInput.removeEventListener('keydown', onKey);
+      resolve(val);
+    };
+    const ok = () => done(els.askInput.value.trim());
+    const cancel = () => done(null);
+    const onKey = (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); ok(); }
+      if (e.key === 'Escape') cancel();
+    };
+    els.askOk.addEventListener('click', ok);
+    els.askCancel.addEventListener('click', cancel);
+    els.askInput.addEventListener('keydown', onKey);
+  });
+}
+
 els.provider.addEventListener('click', async () => {
   const st = state.status;
   if (!st) return;
   const chain = st.provider.chain;
-  const lines = chain.map((p, i) => `${i + 1}. ${p.label} — ${p.model}${p.nvidia ? '  [NVIDIA open model]' : ''}`).join('\n');
-  const pick = prompt(`Language core (active: ${st.provider.active}):\n\n${lines}\n\nEnter a provider id to switch:`, st.provider.active);
+  const detail = `Active core: ${st.provider.active}\n\nAvailable:\n${chain.map((p, i) => `${i + 1}. ${p.id} — ${p.model}${p.nvidia ? '  [NVIDIA open model]' : ''}`).join('\n')}`;
+  const pick = await ask('Language core', detail, st.provider.active);
   if (!pick) return;
   if (!chain.some((c) => c.id === pick.trim())) { toast('Unknown provider.'); return; }
   await api('/api/provider', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: pick.trim() }) });
@@ -796,6 +826,14 @@ async function refreshAll() {
 
 function toast(msg) {
   els.toast.textContent = msg;
+  // anchor the toast just above the composer so it never covers the input
+  const composer = document.getElementById('composer');
+  if (composer) {
+    const r = composer.getBoundingClientRect();
+    els.toast.style.bottom = `${Math.round(window.innerHeight - r.top + 12)}px`;
+  } else {
+    els.toast.style.bottom = '24px';
+  }
   els.toast.classList.remove('hidden');
   clearTimeout(toast._t);
   toast._t = setTimeout(() => els.toast.classList.add('hidden'), 2600);

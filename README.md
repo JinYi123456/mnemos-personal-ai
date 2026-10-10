@@ -6,6 +6,10 @@
 
 **A private AI that remembers you, shows its memory as a living galaxy, and dreams.**
 
+<p align="left">
+  <a href="https://mnemos-personal-ai.onrender.com"><b>▶ Live demo</b></a> — hosted on Render (free tier; first load after idle takes ~50 s to warm up, then it's instant)
+</p>
+
 Mnemos is not another chatbot with a system prompt. It is a personal AI whose inner life you can *watch*:
 
 - **Memory Galaxy** — every memory is a star. Bright stars are strong, recently used memories; faint ones are fading away. The sky *is* the vault.
@@ -17,6 +21,8 @@ Mnemos is not another chatbot with a system prompt. It is a personal AI whose in
 Built for the **Nebius x NVIDIA Global AI Hackathon** (Best Apps and Agents track).
 
 One-click deploy on [Render](https://render.com): it's a `render.yaml` Blueprint — commit this repo, "New +" → Blueprint, pick the repo, done. Mnemos also runs anywhere Node 20+ runs (`npm start`).
+
+> **Note on the free Render tier:** the filesystem is ephemeral — the vault resets to the seeded demo sky on each redeploy/restart, and the instance sleeps after ~15 min idle (first request then cold-starts ~50 s). That's fine for a judge demo; for persistent personal vaults use the Starter plan plus a disk block.
 
 ---
 
