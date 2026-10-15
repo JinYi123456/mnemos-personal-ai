@@ -12,3 +12,5 @@ node_modules/
 # Builder-private notes (contain submission strategy) — never commit
 SUBMISSION.md
 PRIVATE_NOTES.md
+DEVPOST.md
+VIDEO_PLAN.md
