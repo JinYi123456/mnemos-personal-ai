@@ -300,13 +300,15 @@ function drawMeteors(dt) {
       vx: (0.6 + Math.random() * 0.7) * (Math.random() < 0.5 ? 1 : -1) * devicePixelRatio,
       vy: (1.4 + Math.random() * 1.1) * devicePixelRatio,
       life: 1, len: (90 + Math.random() * 120) * devicePixelRatio,
+      wishable: true, // click it before it burns out
     });
   }
   for (let i = meteors.length - 1; i >= 0; i -= 1) {
     const m = meteors[i];
     m.x += m.vx * dt * 60; m.y += m.vy * dt * 60; m.life -= dt * 0.35;
     if (m.life <= 0 || m.y > H + 60) { meteors.splice(i, 1); continue; }
-    const nx = m.x + view.x * 0.1, ny = m.y + view.y * 0.1;
+    m.sx = m.x + view.x * 0.1; m.sy = m.y + view.y * 0.1;
+    const nx = m.sx, ny = m.sy;
     const tailX = nx - m.vx / Math.hypot(m.vx, m.vy) * m.len;
     const tailY = ny - m.vy / Math.hypot(m.vx, m.vy) * m.len;
     const g = ctx.createLinearGradient(nx, ny, tailX, tailY);
@@ -318,6 +320,18 @@ function drawMeteors(dt) {
     ctx.fillStyle = `rgba(255,250,235,${0.9 * m.life})`;
     ctx.beginPath(); ctx.arc(nx, ny, 1.6 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
   }
+}
+
+/** make a wish: clicking a live meteor turns it into a new memory */
+async function wishOnMeteor(m) {
+  m.life = 0;
+  const phrase = 'Wished on a shooting star: ';
+  try {
+    const r = await api('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: `${phrase}remember that I saw this comet and it felt lucky` }) });
+    const reader = r.body && r.body.getReader ? r.body.getReader() : null;
+    if (reader) { try { await reader.cancel(); } catch { /* stream is best-effort */ } }
+  } catch { /* offline — the wish still felt nice */ }
+  toast('✦ Wish made on a shooting star — Mnemos keeps it as a memory.');
 }
 
 let lastFrame = performance.now();
@@ -423,6 +437,14 @@ canvas.addEventListener('click', async (e) => {
   if (dragMoved) return; // was a pan, not a pick
   const wx = (e.clientX * devicePixelRatio - view.x);
   const wy = (e.clientY * devicePixelRatio - view.y);
+  // a live meteor can be clicked for a wish — rarest pick in the sky
+  let hitMeteor = null, hitMd = Infinity;
+  for (const m of meteors) {
+    if (!m.wishable) continue;
+    const d = Math.hypot((m.sx || m.x) - e.clientX * devicePixelRatio, (m.sy || m.y) - e.clientY * devicePixelRatio);
+    if (d < 46 * devicePixelRatio && d < hitMd) { hitMeteor = m; hitMd = d; }
+  }
+  if (hitMeteor) { wishOnMeteor(hitMeteor); return; }
   // nearest star within pick radius
   let best = null, bestD = Infinity;
   for (const s of stars) {

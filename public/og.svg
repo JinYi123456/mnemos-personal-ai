@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="-10%" r="130%">
+      <stop offset="0%" stop-color="#10163a"/>
+      <stop offset="44%" stop-color="#070b22"/>
+      <stop offset="100%" stop-color="#030514"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffe9c4" stop-opacity=".85"/>
+      <stop offset="35%" stop-color="#8f7bff" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="#8f7bff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g fill="#e8ecff">
+    <circle cx="120" cy="120" r="2.2" opacity=".8"/><circle cx="340" cy="90" r="1.4" opacity=".5"/>
+    <circle cx="560" cy="140" r="1.8" opacity=".65"/><circle cx="830" cy="80" r="1.2" opacity=".45"/>
+    <circle cx="1060" cy="150" r="2" opacity=".7"/><circle cx="960" cy="260" r="1.5" opacity=".5"/>
+    <circle cx="180" cy="330" r="1.6" opacity=".55"/><circle cx="1120" cy="420" r="1.8" opacity=".6"/>
+    <circle cx="80" cy="500" r="1.3" opacity=".4"/><circle cx="420" cy="540" r="1.5" opacity=".5"/>
+    <circle cx="700" cy="560" r="2" opacity=".6"/><circle cx="990" cy="520" r="1.4" opacity=".45"/>
+  </g>
+  <circle cx="600" cy="315" r="190" fill="url(#glow)"/>
+  <g stroke="#8f7bff" stroke-opacity=".35" stroke-width="1.5" fill="none">
+    <polyline points="500,380 560,300 640,340 700,260 800,300"/>
+  </g>
+  <g>
+    <circle cx="560" cy="300" r="7" fill="#7fd7e8"/><circle cx="640" cy="340" r="9" fill="#ffd9a0"/>
+    <circle cx="700" cy="260" r="6" fill="#e8ecff"/><circle cx="800" cy="300" r="8" fill="#8f7bff"/>
+    <circle cx="500" cy="380" r="5" fill="#ffd9a0"/>
+  </g>
+  <text x="600" y="470" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="64" font-weight="700" fill="#e8ecff">Mnemos</text>
+  <text x="600" y="520" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="26" fill="#9aa3c7">the AI that dreams — every memory is a star</text>
+  <text x="600" y="565" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="18" fill="#ffd9a0">✦ Nebius Token Factory · NVIDIA Nemotron · Tavily ✦</text>
+</svg>

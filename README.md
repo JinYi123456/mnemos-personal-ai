@@ -13,10 +13,12 @@
 Mnemos is not another chatbot with a system prompt. It is a personal AI whose inner life you can *watch*:
 
 - **Memory Galaxy** — every memory is a star. Bright stars are strong, recently used memories; faint ones are fading away. The sky *is* the vault.
+- **Reshape your sky** — drag any star to move it, apply patterns (spiral, heart, halo, Big Dipper, Cassiopeia, **all 12 zodiac constellations**) or spell out a word — your layout persists everywhere. Or just *ask the agent in chat* — `sky.shape` lets Mnemos rearrange its own sky on request.
+- **Wishes** — when a meteor streaks past, click it before it burns out and Mnemos keeps the wish as a memory.
 - **Cited recall (anti-hallucination UX)** — when Mnemos answers from memory, it cites the exact stars it used (`M4f2b91a1`). Click a citation and the star flares in the galaxy. Cites that don't resolve are marked red — the UI shows you what the model *actually* remembered.
 - **Dream Engine** — tell Mnemos to sleep. It replays memories one by one, distills non-obvious cross-memory insights (drawn as constellation lines), learns reusable skills, and lets forgotten things decay. With a Tavily key it also **dreams outward**: it searches the web for something the owner would love to learn overnight and stores it as a memory. You watch it happen, live.
 - **Local vault** — all memories, insights and skills live in a plain JSON file (`vault/vault.json`). Read it, export it, carry it. Nothing leaves your machine except the model calls.
-- **Transparent agentic loop** — tool calls (`memory.search`, `time.now`, `math.eval`, `web.fetch`, `web.search` via Tavily, `skill.run`) stream into the ticker as they happen.
+- **Transparent agentic loop** — tool calls (`memory.search`, `time.now`, `math.eval`, `web.fetch`, `web.search` via Tavily, `skill.run`, `sky.shape`) stream into the ticker as they happen.
 
 Built for the **Nebius x NVIDIA Global AI Hackathon** (Best Apps and Agents track).
 
@@ -64,7 +66,7 @@ npm test
 npm run doctor   # Vault Doctor: C1–C7 vault quality audit
 ```
 
-15 tests cover the store (dedupe/recall/reinforce/persistence), the Dream Engine
+19 tests cover the store (dedupe/recall/reinforce/persistence), the Dream Engine
 (with and without a model), the citation parser, provider failover, the red-block
 system prompt, and a **full agent-loop integration test** against a fake
 OpenAI-compatible server (tool call round-trip → citation → memory extraction).
@@ -84,7 +86,8 @@ OpenAI-compatible server (tool call round-trip → citation → memory extractio
           │      model replies with {"tool": …} JSON or the final answer
           ▼
         tools: memory.search/remember/forget · time · math · web.fetch (SSRF-guarded)
-               web.search (Tavily) · skill.run (vault skills)
+               web.search (Tavily) · skill.run (vault skills) · sky.shape (agent reshapes
+               its own sky — user patterns or all 12 zodiac constellations)
           │
           ▼
         post-turn extraction (one cheap JSON call) → new stars born
@@ -129,7 +132,7 @@ public/
   app.js      galaxy renderer (canvas), chat client, dream overlay, vault panel
   app.css     night-sky design system
 vault/        your data (gitignored) — plain JSON
-test/         15 node:test suites (unit + agent-loop integration)
+test/         19 node:test suites (unit + agent-loop integration)
 ```
 
 ## Privacy
