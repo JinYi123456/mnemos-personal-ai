@@ -344,9 +344,10 @@ function draw() {
   for (const l of links) {
     const lit = state.highlighted.has(l.from.id) && state.highlighted.has(l.to.id);
     ctx.strokeStyle = lit ? 'rgba(255,217,160,0.85)' : 'rgba(143,123,255,0.16)';
+    // tx/ty are the per-frame drifted positions — lines follow stars as they fly or are dragged
     ctx.beginPath();
-    ctx.moveTo(l.from.x, l.from.y);
-    ctx.lineTo(l.to.x, l.to.y);
+    ctx.moveTo(l.from.tx, l.from.ty);
+    ctx.lineTo(l.to.tx, l.to.ty);
     ctx.stroke();
     // constellation name at midpoint
     if (l.name) {
@@ -359,9 +360,12 @@ function draw() {
   }
 
   for (const s of stars) {
+    // ease the anchor home toward its target (drag + shape Apply both set homeX/homeY)
+    s.x += (s.homeX - s.x) * 0.12;
+    s.y += (s.homeY - s.y) * 0.12;
     // gentle orbital drift: each star circles its home very slowly
-    s.tx = s.homeX + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio;
-    s.ty = s.homeY + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio;
+    s.tx = s.x + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio;
+    s.ty = s.y + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio;
     const wx = s.tx, wy = s.ty;
     const d = Math.hypot(wx + view.x - mouse.x, wy + view.y - mouse.y) * view.zoom;
     const hover = d < 26 * devicePixelRatio;
@@ -506,6 +510,22 @@ els.arrangeReset.addEventListener('click', async () => {
   toast('Sky returned to its natural order.');
 });
 
+/* 12 zodiac constellations — hand-plotted main-star skeletons (normalized 0..1, [x1,y1,x2,y2] segments) */
+const ZODIAC = {
+  aries: [[0.25, 0.55, 0.45, 0.42], [0.45, 0.42, 0.78, 0.38]],
+  taurus: [[0.28, 0.35, 0.42, 0.48], [0.42, 0.48, 0.72, 0.48], [0.72, 0.48, 0.82, 0.6], [0.82, 0.6, 0.7, 0.66]],
+  gemini: [[0.3, 0.3, 0.34, 0.75], [0.62, 0.3, 0.6, 0.75], [0.34, 0.75, 0.6, 0.75], [0.3, 0.3, 0.32, 0.5], [0.62, 0.3, 0.61, 0.5]],
+  cancer: [[0.32, 0.35, 0.5, 0.5], [0.5, 0.5, 0.68, 0.62]],
+  leo: [[0.22, 0.45, 0.35, 0.32], [0.35, 0.32, 0.5, 0.38], [0.5, 0.38, 0.52, 0.55], [0.52, 0.55, 0.78, 0.6], [0.78, 0.6, 0.72, 0.38], [0.72, 0.38, 0.52, 0.55]],
+  virgo: [[0.2, 0.6, 0.34, 0.48], [0.34, 0.48, 0.32, 0.3], [0.32, 0.3, 0.48, 0.28], [0.48, 0.28, 0.62, 0.42], [0.62, 0.42, 0.85, 0.4]],
+  libra: [[0.24, 0.35, 0.55, 0.3], [0.55, 0.3, 0.5, 0.68], [0.5, 0.68, 0.78, 0.72]],
+  scorpio: [[0.25, 0.32, 0.4, 0.4], [0.4, 0.4, 0.52, 0.35], [0.52, 0.35, 0.6, 0.5], [0.6, 0.5, 0.72, 0.72], [0.72, 0.72, 0.62, 0.8]],
+  sagittarius: [[0.28, 0.6, 0.42, 0.42], [0.42, 0.42, 0.56, 0.56], [0.56, 0.56, 0.42, 0.68], [0.42, 0.68, 0.28, 0.6], [0.56, 0.56, 0.78, 0.45]],
+  capricorn: [[0.24, 0.35, 0.45, 0.3], [0.45, 0.3, 0.55, 0.6], [0.55, 0.6, 0.78, 0.7]],
+  aquarius: [[0.22, 0.4, 0.4, 0.32], [0.4, 0.32, 0.58, 0.45], [0.58, 0.45, 0.8, 0.5], [0.8, 0.5, 0.78, 0.66]],
+  pisces: [[0.24, 0.7, 0.42, 0.6], [0.42, 0.6, 0.5, 0.4], [0.5, 0.4, 0.66, 0.3], [0.66, 0.3, 0.82, 0.32]],
+};
+
 /** Generate n normalized (0..1) points for a shape. */
 function shapePoints(kind, n, word) {
   const pts = [];
@@ -540,6 +560,24 @@ function shapePoints(kind, n, word) {
     for (let i = 0; i < n; i++) {
       const p = cas[i % 5];
       pts.push({ x: p[0] + jitter(), y: p[1] + jitter() });
+    }
+  } else if (ZODIAC[kind]) {
+    // zodiac constellations: star-line skeleton sampled evenly along each segment
+    const segs = ZODIAC[kind];
+    const total = segs.reduce((acc, s) => acc + Math.hypot(s[2] - s[0], s[3] - s[1]), 0);
+    let placed = 0;
+    for (const s of segs) {
+      const seg = Math.hypot(s[2] - s[0], s[3] - s[1]);
+      const cnt = Math.max(1, Math.round((seg / total) * n));
+      for (let i = 0; i < cnt && placed < n; i++, placed++) {
+        const f = (i + 0.5) / cnt;
+        pts.push({ x: s[0] + (s[2] - s[0]) * f + jitter(), y: s[1] + (s[3] - s[1]) * f + jitter() });
+      }
+    }
+    while (placed < n) {
+      const anchor = segs[placed % segs.length];
+      pts.push({ x: anchor[0] + jitter() * 2, y: anchor[1] + jitter() * 2 });
+      placed++;
     }
   } else if (kind === 'letter' && word) {
     const s = 180;
@@ -727,6 +765,21 @@ function sendChat() {
     } else if (ev.type === 'tool') {
       ticker(`⊛ ${ev.name} (${ev.ms}ms)`);
       b.innerHTML += `<div style="font-size:11.5px;color:var(--cyan);margin-top:6px">⊛ ${esc(ev.name)}${ev.args && ev.args.query ? `: “${esc(ev.args.query)}”` : ''}</div>`;
+      // agent-driven sky reshape: Mnemos can rearrange the stars at its owner's request
+      if (ev.name === 'sky.shape' && ev.args && ev.args.shape) {
+        const raw = String(ev.args.shape).toLowerCase().trim();
+        flyToShape(raw.startsWith('word:') ? 'letter' : raw, raw.startsWith('word:') ? raw.slice(5) : '');
+        // persist the arrangement so it survives reloads
+        setTimeout(() => {
+          for (const s of stars) {
+            api('/api/star/pos', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: s.id, x: s.homeX, y: s.homeY, w: W, h: H }),
+            }).catch(() => {});
+          }
+        }, 0);
+        toast(`✧ Mnemos reshaped your sky: ${raw}`);
+      }
     } else if (ev.type === 'learned') {
       ticker(`✦ learned ${ev.count} new memor${ev.count === 1 ? 'y' : 'ies'}`);
       // stamp ids that exist now but weren't in the sky before this turn:

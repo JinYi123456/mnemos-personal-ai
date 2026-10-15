@@ -52,6 +52,11 @@ const TOOLS = [
     args: { name: 'skill name', input: 'what to apply it to' },
     desc: 'Run a saved skill from the vault by name.',
   },
+  {
+    name: 'sky.shape',
+    args: { shape: 'spiral|heart|ring|bigdipper|cassiopeia|aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces|word:hello' },
+    desc: 'Reshape the star sky so memories arrange into a pattern or constellation. Use word:<text> to spell a word.',
+  },
 ];
 
 function toolsBlock() {
@@ -301,6 +306,20 @@ Warm, precise, concise. Default under 120 words unless the user asks for depth. 
           return { ok: true, ...(await Brain.fetchPage(String(args.url || ''), this.publicBaseUrl)) };
         case 'web.search':
           return this.execSearch(String(args.query || ''));
+        case 'sky.shape': {
+          const raw = String(args.shape || '').toLowerCase().trim();
+          const WORD_KINDS = ['spiral', 'heart', 'ring', 'bigdipper', 'cassiopeia', 'letter'];
+          const kind = raw.startsWith('word:') ? 'letter' : (WORD_KINDS.includes(raw) ? raw : raw);
+          const word = raw.startsWith('word:') ? raw.slice(5) : '';
+          const valid = WORD_KINDS.includes(kind) || [
+            'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio',
+            'sagittarius', 'capricorn', 'aquarius', 'pisces',
+          ].includes(kind);
+          if (!valid) {
+            return { ok: false, error: 'unknown shape', hint: 'spiral|heart|ring|bigdipper|cassiopeia|word:<text>' };
+          }
+          return { ok: true, shape: kind, ...(word ? { word } : {}), note: 'client reshapes the sky when it sees this event' };
+        }
         case 'skill.run': {
           const name = String(args.name || '').toLowerCase();
           const skill = this.store.vault.skills.find((s) => s.name.toLowerCase().includes(name));

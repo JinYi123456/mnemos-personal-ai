@@ -136,31 +136,43 @@
   </div>
 </section>
 
-<!-- star arranger: design your sky's shape -->
-<section id="arranger-overlay" class="overlay hidden" aria-live="polite">
-  <div class="onboard-card" style="max-width:470px">
-    <div class="onboard-star">✧</div>
-    <h1 style="font-size:22px">Shape your sky</h1>
-    <p>Drag any star to move it (arranger must be armed). Or pick a pattern and every star gracefully flies to its new place.</p>
-    <div style="display:flex;gap:8px;justify-content:center;margin:14px 0 6px">
-      <button id="arrange-arm" class="pill">✋ Drag stars: off</button>
+<!-- star arranger: compact floating card, sky stays fully interactive -->
+<section id="arranger-overlay" class="arranger hidden" aria-live="polite">
+  <div class="arranger-card">
+    <div class="arranger-head">
+      <span>✧ Shape your sky</span>
+      <button id="arranger-close" class="pill" title="Close">✕</button>
     </div>
-    <div class="onboard-row" style="margin-top:8px">
-      <select id="arrange-shape" style="background:rgba(20,26,54,0.9);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px">
+    <label class="arranger-row">
+      <input type="checkbox" id="arrange-arm-checkbox" />
+      <button id="arrange-arm" class="pill">✋ Drag stars: off</button>
+    </label>
+    <p class="arranger-hint">Arm dragging to grab stars directly, or pick a pattern — the whole sky glides there.</p>
+    <div class="arranger-row">
+      <select id="arrange-shape">
+        <option value="aries">♈ Aries</option>
+        <option value="taurus">♉ Taurus</option>
+        <option value="gemini">♊ Gemini</option>
+        <option value="cancer">♋ Cancer</option>
+        <option value="leo">♌ Leo</option>
+        <option value="virgo">♍ Virgo</option>
+        <option value="libra">♎ Libra</option>
+        <option value="scorpio">♏ Scorpio</option>
+        <option value="sagittarius">♐ Sagittarius</option>
+        <option value="capricorn">♑ Capricorn</option>
+        <option value="aquarius">♒ Aquarius</option>
+        <option value="pisces">♓ Pisces</option>
+        <option value="bigdipper">⌄ Big Dipper</option>
+        <option value="cassiopeia">✦ Cassiopeia (W)</option>
         <option value="spiral">✧ Spiral galaxy</option>
         <option value="heart">♥ Heart</option>
         <option value="ring">◎ Halo ring</option>
-        <option value="bigdipper">⌄ Big Dipper</option>
-        <option value="cassiopeia">✦ Cassiopeia (W)</option>
         <option value="letter">✍ Spell a word…</option>
       </select>
       <button id="arrange-apply" class="btn-primary">Apply</button>
     </div>
-    <input id="arrange-word" maxlength="12" placeholder="word to spell (a–z)" class="hidden" style="margin-top:10px;width:100%;background:rgba(20,26,54,0.9);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px" />
-    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center">
-      <button id="arrange-reset" class="btn-ghost">↺ Back to natural sky</button>
-      <button id="arranger-close" class="btn-ghost">Done</button>
-    </div>
+    <input id="arrange-word" maxlength="12" placeholder="word to spell (a–z)" class="hidden" />
+    <button id="arrange-reset" class="btn-ghost">↺ Back to natural sky</button>
   </div>
 </section>
 
