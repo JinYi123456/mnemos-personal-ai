@@ -52,6 +52,7 @@ export const EMBED_DIMS = 256;
  * @property {number} startedAt
  * @property {number} dreamCount
  * @property {number|null} lastDreamAt
+ * @property {Record<string, {x:number, y:number}>} [layout]  dragged star positions (0..1 relative)
  */
 
 /**
@@ -109,6 +110,7 @@ export class Store {
       startedAt: Date.now(),
       dreamCount: 0,
       lastDreamAt: null,
+      layout: {},
     };
     /** @type {Map<string, Set<string>>} */
     this.index = new Map();
@@ -131,6 +133,7 @@ export class Store {
           startedAt: num(raw.startedAt, Date.now()),
           dreamCount: num(raw.dreamCount, 0),
           lastDreamAt: num(raw.lastDreamAt, 0) || null,
+          layout: raw.layout && typeof raw.layout === 'object' ? raw.layout : {},
         };
       } catch {
         // corrupted vault: start fresh rather than crash
@@ -364,6 +367,7 @@ export class Store {
         uses: m.uses,
         size: 1.6 + 5.4 * decayedScore(m.strength, m.lastUsed),
         ageDays: Math.max(0, (now - m.created) / 86400000),
+        ...(this.vault.layout && this.vault.layout[m.id] ? { layout: this.vault.layout[m.id] } : {}),
       })),
       links: this.vault.insights.map((i) => ({
         id: i.id,
@@ -377,6 +381,35 @@ export class Store {
   /** @param {string|null} name */
   setOwner(name) {
     this.vault.owner = name ? safeText(name, 40) : null;
+  }
+
+  /**
+   * Persist a dragged star position (relative 0..1, so it survives resizes).
+   * @param {string} id memory id
+   * @param {number} rx 0..1 across width
+   * @param {number} ry 0..1 down height
+   * @param {number} w canvas width in device px
+   * @param {number} h canvas height in device px
+   * @returns {{x:number, y:number}|null}
+   */
+  setStarPos(id, rx, ry, w, h) {
+    const m = this.vault.memories.find((x) => x.id === id);
+    if (!m || !w || !h) return null;
+    const x = clamp(Math.round((rx / w) * 1000) / 1000, 0, 1);
+    const y = clamp(Math.round((ry / h) * 1000) / 1000, 0, 1);
+    if (!this.vault.layout) this.vault.layout = {};
+    this.vault.layout[id] = { x, y };
+    return this.vault.layout[id];
+  }
+
+  /** @param {string} id */
+  clearStarPos(id) {
+    if (this.vault.layout) delete this.vault.layout[id];
+  }
+
+  /** Reset all dragged positions → deterministic hash layout returns. */
+  clearLayout() {
+    this.vault.layout = {};
   }
 
   countDream() {

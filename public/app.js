@@ -15,6 +15,11 @@ const els = {
   rzInput: $('redzone-input'), rzAdd: $('redzone-add'), rzClose: $('redzone-close'),
   askOverlay: $('ask-overlay'), askTitle: $('ask-title'), askDetail: $('ask-detail'),
   askInput: $('ask-input'), askOk: $('ask-ok'), askCancel: $('ask-cancel'),
+  starPeek: $('star-peek'), chatTools: $('chat-tools'),
+  chatCollapse: $('btn-chat-collapse'), chatClear: $('btn-chat-clear'),
+  arranger: $('arranger-overlay'), arrangeArm: $('arrange-arm'), arrangeShape: $('arrange-shape'),
+  arrangeApply: $('arrange-apply'), arrangeWord: $('arrange-word'), arrangeReset: $('arrange-reset'),
+  arrangerClose: $('arranger-close'),
 };
 
 /* ---------- state ---------- */
@@ -101,13 +106,44 @@ function buildAmbience() {
 /* --- pan & zoom --- */
 const view = { x: 0, y: 0, zoom: 1 };
 let dragging = false, dragMoved = false, lastX = 0, lastY = 0;
+/** star-drag: null when not dragging a star */
+let dragStar = null;
+let starMoved = false;
+/** arranger armed → dragging grabs stars */
+let starArranger = $('arranger-overlay');
+
+/** nearest star to client coords, or null */
+function starAt(clientX, clientY) {
+  const wx = clientX * devicePixelRatio - view.x;
+  const wy = clientY * devicePixelRatio - view.y;
+  let best = null, bestD = Infinity;
+  for (const s of stars) {
+    const d = Math.hypot(s.tx - wx, s.ty - wy);
+    const pickR = Math.max(18, s.r * 3) * Math.max(1, 1 / view.zoom);
+    if (d < pickR && d < bestD) { best = s; bestD = d; }
+  }
+  return best;
+}
 
 canvas.addEventListener('mousedown', (e) => {
+  // arranger armed: a star under the cursor is grabbed instead of the map pan
+  const s = starAt(e.clientX, e.clientY);
+  if (s && arrangeArmed) {
+    dragStar = s; starMoved = false; return;
+  }
   dragging = true; dragMoved = false; lastX = e.clientX; lastY = e.clientY;
 });
 window.addEventListener('mousemove', (e) => {
   mouse.x = e.clientX * devicePixelRatio;
   mouse.y = e.clientY * devicePixelRatio;
+  if (dragStar) {
+    // move the star with the cursor (device px), remember it moved
+    dragStar.x = mouse.x - view.x;
+    dragStar.y = mouse.y - view.y;
+    dragStar.homeX = dragStar.x; dragStar.homeY = dragStar.y;
+    starMoved = true;
+    return;
+  }
   if (dragging) {
     const dx = e.clientX - lastX, dy = e.clientY - lastY;
     if (Math.abs(dx) + Math.abs(dy) > 3) dragMoved = true;
@@ -116,7 +152,22 @@ window.addEventListener('mousemove', (e) => {
     lastX = e.clientX; lastY = e.clientY;
   }
 });
-window.addEventListener('mouseup', () => { dragging = false; });
+async function endDrag() {
+  if (dragStar) {
+    const s = dragStar; dragStar = null;
+    if (starMoved) {
+      try {
+        await api('/api/star/pos', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: s.id, x: s.x, y: s.y, w: W, h: H }),
+        });
+      } catch { /* offline — layout stays local for this session */ }
+    }
+    starMoved = false;
+  }
+  dragging = false;
+}
+window.addEventListener('mouseup', endDrag);
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   const k = e.deltaY < 0 ? 1.12 : 0.89;
@@ -171,13 +222,16 @@ function buildStars() {
   }
   stars = g.stars.map((m, i) => {
     const prev = old.get(m.id);
-    const pos = prev ? { x: prev.x, y: prev.y } : hashPos(m.id, i);
+    // priority: dragged+saved layout > previous session position > hash layout
+    const pos = prev ? { x: prev.x, y: prev.y }
+      : (m.layout ? { x: m.layout.x * W, y: m.layout.y * H } : hashPos(m.id, i));
     // per-star hue/speed derived from id hash (stable across sessions)
     let h = 0;
     for (let c = 0; c < m.id.length; c += 1) h = (h * 31 + m.id.charCodeAt(c)) >>> 0;
     const isBorn = !prev && newborn.has(m.id);
     return {
       id: m.id, x: pos.x, y: pos.y,
+      homeX: pos.x, homeY: pos.y,
       r: m.size * devicePixelRatio * 0.9,
       bornAt: isBorn ? performance.now() : 0,
       tw: Math.random() * Math.PI * 2,
@@ -306,8 +360,8 @@ function draw() {
 
   for (const s of stars) {
     // gentle orbital drift: each star circles its home very slowly
-    s.tx = s.x + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio;
-    s.ty = s.y + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio;
+    s.tx = s.homeX + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio;
+    s.ty = s.homeY + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio;
     const wx = s.tx, wy = s.ty;
     const d = Math.hypot(wx + view.x - mouse.x, wy + view.y - mouse.y) * view.zoom;
     const hover = d < 26 * devicePixelRatio;
@@ -373,7 +427,12 @@ canvas.addEventListener('click', async (e) => {
     if (d < pickR && d < bestD) { best = s; bestD = d; }
   }
   if (best) {
-    toast(best.text);
+    // toggle: clicking the same star again dismisses the peek card
+    if (!els.starPeek.classList.contains('hidden') && els.starPeek.dataset.id === best.id) {
+      hideStarPeek();
+    } else {
+      showStarPeek(best, e);
+    }
     state.highlighted.clear();
     state.highlighted.add(best.id);
     for (const l of links) {
@@ -395,6 +454,157 @@ canvas.addEventListener('click', async (e) => {
       nameConstellation(bl.insightId, name);
     }
   }
+});
+
+/* ---- star peek: memory card anchored next to the star, out of the chat's way ---- */
+function showStarPeek(s, clickEvent) {
+  const card = els.starPeek;
+  card.dataset.id = s.id;
+  card.innerHTML = `${esc(s.text)}<div class="peek-meta">${s.seed ? 'seed · ' : ''}M${s.id.slice(0, 8)}${s.tags && s.tags.length ? ' · ' + s.tags.slice(0, 4).join(', ') : ''}</div>`;
+  card.classList.remove('hidden');
+  positionStarPeek(s, clickEvent);
+}
+function positionStarPeek(s, clickEvent) {
+  const card = els.starPeek;
+  if (card.classList.contains('hidden')) return;
+  // device-px star position → css px
+  const sx = (s.tx + view.x) / devicePixelRatio;
+  const sy = (s.ty + view.y) / devicePixelRatio;
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  let x = sx + 18, y = sy - ch / 2;
+  if (x + cw > window.innerWidth - 12) x = sx - cw - 18;
+  x = Math.max(12, x);
+  y = Math.max(12, Math.min(window.innerHeight - ch - 12, y));
+  card.style.left = `${Math.round(x)}px`;
+  card.style.top = `${Math.round(y)}px`;
+}
+function hideStarPeek() {
+  els.starPeek.classList.add('hidden');
+  els.starPeek.dataset.id = '';
+}
+document.addEventListener('mousedown', (e) => {
+  if (!els.starPeek.classList.contains('hidden') && !els.starPeek.contains(e.target)) {
+    hideStarPeek();
+  }
+});
+
+/* ================= STAR ARRANGER — design your sky ================= */
+let arrangeArmed = false;
+els.arrangeArm.addEventListener('click', () => {
+  arrangeArmed = !arrangeArmed;
+  els.arrangeArm.textContent = arrangeArmed ? '✋ Drag stars: ON' : '✋ Drag stars: off';
+  els.arrangeArm.style.borderColor = arrangeArmed ? 'rgba(255,217,160,0.6)' : '';
+  toast(arrangeArmed ? 'Grab any star and drag it.' : 'Dragging off — the map pans again.');
+});
+els.arrangeShape.addEventListener('change', () => {
+  els.arrangeWord.classList.toggle('hidden', els.arrangeShape.value !== 'letter');
+});
+els.arrangerClose.addEventListener('click', () => els.arranger.classList.add('hidden'));
+els.arrangeReset.addEventListener('click', async () => {
+  try { await api('/api/layout/reset', { method: 'POST' }); } catch { /* offline */ }
+  await refreshAll();
+  toast('Sky returned to its natural order.');
+});
+
+/** Generate n normalized (0..1) points for a shape. */
+function shapePoints(kind, n, word) {
+  const pts = [];
+  let seedNum = 9301 ^ (n * 7919);
+  const rnd = () => { seedNum = (seedNum * 9301 + 49297) % 233280; return seedNum / 233280; };
+  const jitter = () => (rnd() - 0.5) * 0.035;
+  if (kind === 'spiral') {
+    const arms = 2, turns = 1.6;
+    for (let i = 0; i < n; i++) {
+      const tt = i / n, r = 0.08 + tt * 0.38;
+      const a = tt * turns * Math.PI * 2 + (i % 2 ? Math.PI : 0);
+      pts.push({ x: 0.5 + Math.cos(a) * r, y: 0.45 + Math.sin(a) * r * 0.62 });
+    }
+  } else if (kind === 'heart') {
+    for (let i = 0; i < n; i++) {
+      const t2 = (i / n) * Math.PI * 2;
+      pts.push({ x: 0.5 + 0.42 * Math.pow(Math.sin(t2), 3), y: 0.42 - (0.36 * Math.cos(t2) - 0.14 * Math.cos(2 * t2) - 0.05 * Math.cos(3 * t2) - 0.02 * Math.cos(4 * t2)) });
+    }
+  } else if (kind === 'ring') {
+    for (let i = 0; i < n; i++) {
+      const t3 = (i / n) * Math.PI * 2;
+      pts.push({ x: 0.5 + Math.cos(t3) * 0.36, y: 0.45 + Math.sin(t3) * 0.36 });
+    }
+  } else if (kind === 'bigdipper') {
+    const dip = [[0.22, 0.38], [0.32, 0.42], [0.42, 0.44], [0.50, 0.46], [0.60, 0.52], [0.68, 0.60], [0.74, 0.66]];
+    for (let i = 0; i < n; i++) {
+      const p = dip[i % 7];
+      pts.push({ x: p[0] + jitter(), y: p[1] + jitter() });
+    }
+  } else if (kind === 'cassiopeia') {
+    const cas = [[0.20, 0.55], [0.32, 0.44], [0.46, 0.52], [0.60, 0.40], [0.76, 0.50]];
+    for (let i = 0; i < n; i++) {
+      const p = cas[i % 5];
+      pts.push({ x: p[0] + jitter(), y: p[1] + jitter() });
+    }
+  } else if (kind === 'letter' && word) {
+    const s = 180;
+    const oc = document.createElement('canvas'); oc.width = s; oc.height = s;
+    const octx = oc.getContext('2d');
+    octx.fillStyle = '#fff';
+    octx.font = 'bold 110px monospace';
+    octx.textAlign = 'center'; octx.textBaseline = 'middle';
+    octx.fillText(word.slice(0, 9), s / 2, s / 2);
+    const data = octx.getImageData(0, 0, s, s).data;
+    const lit = [];
+    for (let y = 0; y < s; y += 2) {
+      for (let x = 0; x < s; x += 2) {
+        if (data[(y * s + x) * 4 + 3] > 120) lit.push([x / s, y / s]);
+      }
+    }
+    if (lit.length) {
+      for (let i = 0; i < n; i++) {
+        const p = lit[Math.floor(rnd() * lit.length) % lit.length];
+        pts.push({ x: 0.5 + (p[0] - 0.5) * 0.85 + jitter(), y: 0.45 + (p[1] - 0.5) * 0.85 + jitter() });
+      }
+    }
+  }
+  return pts;
+}
+
+/** Assign every star a target home on the shape (largest stars claim the first points). */
+function flyToShape(kind, word) {
+  const pts = shapePoints(kind, stars.length, word);
+  if (!pts.length) return;
+  const order = stars.slice().sort((a, b) => b.r - a.r);
+  order.forEach((s, i) => {
+    const p = pts[i % pts.length];
+    s.homeX = p.x * W;
+    s.homeY = p.y * H;
+  });
+}
+
+els.arrangeApply.addEventListener('click', async () => {
+  const kind = els.arrangeShape.value;
+  const word = (els.arrangeWord.value || '').toLowerCase().replace(/[^a-z]/g, '');
+  flyToShape(kind, word);
+  for (const s of stars) {
+    try {
+      await api('/api/star/pos', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: s.id, x: s.homeX, y: s.homeY, w: W, h: H }),
+      });
+    } catch { /* offline — keep local */ }
+  }
+  toast('Sky reshaped — saved, everywhere you open it.');
+});
+
+/* ---- transcript controls: collapse hides it (sky fully visible), clear empties it ---- */
+els.chatCollapse.addEventListener('click', () => {
+  const hidden = els.messages.style.display === 'none';
+  els.messages.style.display = hidden ? '' : 'none';
+  els.chatCollapse.textContent = hidden ? '⌃ Hide chat' : '⌄ Show chat';
+  if (hidden) els.messages.scrollTop = els.messages.scrollHeight;
+});
+els.chatClear.addEventListener('click', () => {
+  els.messages.innerHTML = '';
+  els.chatTools.classList.add('hidden');
+  els.messages.style.display = '';
+  els.chatCollapse.textContent = '⌃ Hide chat';
 });
 
 async function nameConstellation(id, name) {
@@ -505,6 +715,7 @@ function sendChat() {
   els.input.value = '';
   els.input.style.height = 'auto';
   bubble('user', esc(text));
+  els.chatTools.classList.remove('hidden'); // the transcript is clearable from now on
 
   const b = bubble('ai', '<span class="thinking">✶ thinking…</span>');
 
@@ -700,6 +911,9 @@ function openRedZone() {
 }
 function closeRedZone() { els.rzOverlay.classList.add('hidden'); }
 els.redzone.addEventListener('click', openRedZone);
+document.getElementById('btn-arranger').addEventListener('click', () => {
+  els.arranger.classList.remove('hidden');
+});
 els.rzClose.addEventListener('click', closeRedZone);
 
 function renderRedZone() {

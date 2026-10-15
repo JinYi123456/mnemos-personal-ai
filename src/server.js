@@ -212,6 +212,21 @@ async function api(req, res) {
     await store.flush();
     return json(res, { ok: true });
   }
+  if (p === '/api/star/pos' && req.method === 'POST') {
+    const body = await readBody(req);
+    const short = safeText(body.id, 20).replace(/^M/, '');
+    const full = store.vault.memories.find((m) => m.id.startsWith(short));
+    if (!full) return json(res, { ok: false, error: 'no such memory' }, 404);
+    const pos = store.setStarPos(full.id, Number(body.x) || 0, Number(body.y) || 0, Number(body.w) || 0, Number(body.h) || 0);
+    if (!pos) return json(res, { ok: false, error: 'bad position' }, 400);
+    await store.flush();
+    return json(res, { ok: true, id: `M${full.id.slice(0, 8)}`, layout: pos });
+  }
+  if (p === '/api/layout/reset' && req.method === 'POST') {
+    store.clearLayout();
+    await store.flush();
+    return json(res, { ok: true });
+  }
   if (p === '/api/reset' && req.method === 'POST') {
     store.vault = {
       memories: [],
@@ -222,6 +237,7 @@ async function api(req, res) {
       startedAt: Date.now(),
       dreamCount: 0,
       lastDreamAt: null,
+      layout: {},
     };
     seedDemoVault(store);
     await store.flush();

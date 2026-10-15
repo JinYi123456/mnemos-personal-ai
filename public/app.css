@@ -27,6 +27,28 @@ body {
 }
 
 #galaxy { position: fixed; inset: 0; z-index: 0; }
+
+/* star peek — anchored next to a clicked star */
+.star-peek {
+  position: fixed; z-index: 55; max-width: 300px;
+  background: rgba(10, 14, 34, 0.95);
+  border: 1px solid rgba(255, 217, 160, 0.35);
+  border-radius: 12px; padding: 10px 14px;
+  font-size: 13px; line-height: 1.5; color: var(--ink);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  cursor: default;
+}
+.star-peek .peek-meta { margin-top: 5px; font-size: 11px; color: var(--ink-faint); }
+.star-peek::before {
+  content: ''; position: absolute; left: -3px; top: 50%; margin-top: -3px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+/* chat tools — keep/clear the transcript */
+.chat-tools { display: flex; gap: 6px; justify-content: center; }
+.chat-tools .pill { font-size: 11px; padding: 3px 10px; }
 #vignette {
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background: radial-gradient(90% 70% at 50% 40%, transparent 55%, rgba(2, 3, 10, 0.55) 100%);
