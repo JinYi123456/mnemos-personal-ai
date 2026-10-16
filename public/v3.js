@@ -188,8 +188,8 @@ const Ablate = (() => {
       : words(r.diff, side);
     body.innerHTML = `
       <div class="ab-metrics"><span>question · <b>${esc(q)}</b></span></div>
+      ${wholesale ? `<div class="ab-shift">withdrawing this memory rewrote <b>${Math.round(100 - (r.similarity || 0) * 100)}%</b> of the answer — read both versions rather than a diff</div>` : ''}
       <div class="ab-cols">
-        ${wholesale ? `<div class="ab-shift">withdrawing this memory rewrote <b>${Math.round(100 - (r.similarity || 0) * 100)}%</b> of the answer — read both versions rather than a diff</div>` : ''}
         <div class="ab-col with"><h3>With the memory</h3><p>${paint('with')}</p>
           <div class="ab-metrics" style="margin-top:10px"><span>cites <b>${(r.with.cites || []).length}</b></span><span>${Math.round(r.with.ms)}ms</span><span>${esc(String(r.with.model || '').split('/').pop())}</span></div></div>
         <div class="ab-col without"><h3>Without it</h3><p>${paint('without')}</p>
