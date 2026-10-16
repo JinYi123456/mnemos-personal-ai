@@ -978,7 +978,9 @@ function parseArgs(argv) {
     else if (a.startsWith('--skills=')) out.skillsDir = path.resolve(a.slice(9));
     else out.bad = out.bad || `unknown argument: ${a}`;
   }
-  if (!out.skillsDir) out.skillsDir = path.join(path.dirname(out.vaultDir), 'skills');
+  // Skills live *inside* the vault directory: export the vault and the learned
+  // skills travel with it, and nothing is written next to a repo by surprise.
+  if (!out.skillsDir) out.skillsDir = path.join(out.vaultDir, 'skills');
   return out;
 }
 

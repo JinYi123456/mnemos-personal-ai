@@ -17,3 +17,6 @@ VIDEO_PLAN.md
 
 # per-visitor sandbox vaults (demo mode) — never commit
 vaults/
+
+# SKILL.md files exported from a vault (generated, portable)
+skills/
