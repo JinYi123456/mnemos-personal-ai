@@ -1,0 +1,42 @@
+# OpenShell network policy for Mnemos — default-deny egress.
+#
+# WHY THIS FILE EXISTS
+# Mnemos promises that your memories stay yours. A promise is not an
+# architecture. Inside an OpenShell sandbox the *process* cannot reach any host
+# that is not listed here, so "your vault never leaves except to your inference
+# API" is enforced by the kernel (Landlock + seccomp user-notation), not by our
+# good intentions.
+#
+# WHAT IS VERIFIED (docs.nvidia.com/openshell + github.com/NVIDIA/OpenShell)
+#   · Default-deny: rules map binaries to endpoints (network-rules doc).
+#   · Shape: network_policies -> <name> -> endpoints: [{host, port}] + binaries: [{path}]
+#   · deny_rules override allows; enforcement: audit logs instead of blocking.
+#   · Install: curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | sh
+#   · Create:  openshell sandbox create --name demo
+#   · OS: Linux, macOS on Apple Silicon, or Windows with WSL 2 (experimental).
+#
+# WHAT IS NOT VERIFIED — CHECK ON YOUR MACHINE BEFORE TRUSTING THIS
+# We could not render the full policy reference from here, so field names beyond
+# the minimal shape above (e.g. `path`, `protocol`, `tls`, top-level
+# `filesystem_policy`) are NOT asserted. Run `openshell policy --help` /
+# `openshell validate policy.yaml` and adjust before you rely on it.
+# A security file you have not validated is worse than no security file.
+
+version: 1
+
+enforcement: enforce
+
+network_policies:
+  token_factory:
+    endpoints:
+      - host: api.tokenfactory.nebius.com
+        port: 443
+    binaries:
+      - path: /usr/local/bin/node
+
+  tavily_search:
+    endpoints:
+      - host: api.tavily.com
+        port: 443
+    binaries:
+      - path: /usr/local/bin/node
