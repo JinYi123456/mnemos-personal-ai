@@ -447,6 +447,18 @@ async function api(req, res) {
   return json(res, { error: 'not found' }, 404);
 }
 
+/**
+ * Only data URLs are accepted, and only images: a visitor cannot make the server
+ * fetch a remote URL through the vision path.
+ * @param {unknown} raw
+ */
+function readImageDataUrl(raw) {
+  const s = typeof raw === 'string' ? raw.trim() : '';
+  if (!/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/=]{16,}$/i.test(s)) return null;
+  // ~1.5 MB of source image is plenty for a whiteboard or screenshot
+  return s.length <= 2_000_000 ? s : null;
+}
+
 /** @param {http.IncomingMessage} req */
 function clientIp(req) {
   const fwd = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
@@ -480,7 +492,8 @@ function budgetReply(allowed) {
 async function handleChat(req, res, ctx) {
   const body = await readBody(req);
   const text = safeText(body.text, 4000);
-  if (!text) return json(res, { error: 'empty message' }, 400);
+  const image = readImageDataUrl(body.image);
+  if (!text && !image) return json(res, { error: 'empty message' }, 400);
   const allowed = gate.check({ ip: clientIp(req), sid: ctx.sid });
   if (!allowed.ok) return json(res, budgetReply(allowed), 429);
   gate.take({ ip: clientIp(req), sid: ctx.sid });
@@ -495,6 +508,7 @@ async function handleChat(req, res, ctx) {
     ping = setInterval(() => res.write(': ping\n\n'), 15000);
     const result = await ctx.brain.runTurn({
       text,
+      image,
       emit: (ev) => res.write(`data: ${JSON.stringify(ev)}\n\n`),
     });
     res.write(`data: ${JSON.stringify({ type: 'done', ...result, budget: gate.remaining(clientIp(req), ctx.sid) })}\n\n`);

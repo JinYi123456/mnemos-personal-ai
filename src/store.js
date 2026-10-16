@@ -114,6 +114,12 @@ export class Store {
     };
     /** @type {Map<string, Set<string>>} */
     this.index = new Map();
+    /** @type {Map<string, number>} document length in tokens */
+    this.dl = new Map();
+    /** @type {Map<string, Map<string, number>>} term frequency per document */
+    this.tf = new Map();
+    /** @type {number} */
+    this.avgdl = 1;
   }
 
   async load() {
@@ -144,13 +150,55 @@ export class Store {
 
   reindex() {
     this.index = new Map();
+    this.tf = new Map();
+    this.dl = new Map();
+    let total = 0;
     for (const m of this.vault.memories) {
-      for (const t of new Set([...m.tags, ...tokenize(m.text)])) {
+      const terms = tokenize(m.text);
+      this.dl.set(m.id, terms.length || 1);
+      total += terms.length || 1;
+      /** @type {Map<string, number>} */
+      const freq = new Map();
+      for (const t of terms) freq.set(t, (freq.get(t) || 0) + 1);
+      this.tf.set(m.id, freq);
+      for (const t of new Set([...m.tags, ...terms])) {
         let set = this.index.get(t);
         if (!set) this.index.set(t, (set = new Set()));
         set.add(m.id);
       }
     }
+    this.avgdl = this.vault.memories.length ? total / this.vault.memories.length : 1;
+  }
+
+  /**
+   * Okapi BM25 over the memory index — term frequency saturation (k1) plus
+   * length normalisation (b) and inverse document frequency, so a two-word
+   * memory that mentions "Kyoto" once and a long one that mentions it four times
+   * are not treated as identical. This is the lexical half of the hybrid scorer.
+   * @param {string[]} terms
+   * @param {{k1?:number, b?:number}} [params]
+   * @returns {Map<string, number>}
+   */
+  bm25(terms, params = {}) {
+    const k1 = params.k1 ?? 1.5;
+    const b = params.b ?? 0.75;
+    const N = this.vault.memories.length;
+    /** @type {Map<string, number>} */
+    const scores = new Map();
+    for (const t of new Set(terms)) {
+      const postings = this.index.get(t);
+      if (!postings) continue;
+      const df = postings.size;
+      const idf = Math.log(1 + (N - df + 0.5) / (df + 0.5));
+      for (const id of postings) {
+        const freqs = this.tf.get(id);
+        const freq = freqs ? (freqs.get(t) || 0) : 0;
+        const len = this.dl.get(id) || 1;
+        const norm = freq * (k1 + 1) / (freq + k1 * (1 - b + b * (len / (this.avgdl || 1))));
+        scores.set(id, (scores.get(id) || 0) + idf * norm);
+      }
+    }
+    return scores;
   }
 
   async flush() {
@@ -200,9 +248,14 @@ export class Store {
    * @param {string} query
    * @param {number} [k=6]
    * @param {number[]} [queryVec] optional normalized query embedding
+   * @param {{mode?: 'lexical'|'bm25'|'vector'|'fusion', alpha?: number, decayWeight?: number}} [opts]
    * @returns {Memory[]}
    */
-  recall(query, k = 6, queryVec) {
+  recall(query, k = 6, queryVec, opts = {}) {
+    const mode = opts.mode || (queryVec ? 'fusion' : 'lexical');
+    if (mode === 'fusion' || mode === 'bm25' || (mode === 'vector' && queryVec)) {
+      return this.#recallHybrid(query, k, queryVec, mode, opts);
+    }
     const terms = tokenize(query);
     /** @type {Map<string, number>} */
     const scores = new Map();
@@ -254,6 +307,48 @@ export class Store {
       .sort((a, b) => /** @type {any} */ (b).score - /** @type {any} */ (a).score)
       .slice(0, k)
       .map((x) => /** @type {any} */ (x).m);
+  }
+
+  /**
+   * Hybrid retrieval: BM25 and cosine are min-max normalised per channel, then
+   * blended (alpha weights the lexical channel), then nudged by retention so a
+   * fading star ranks below an equally relevant bright one.
+   * @param {string} query
+   * @param {number} k
+   * @param {number[]|undefined} queryVec
+   * @param {string} mode
+   * @param {{alpha?:number, decayWeight?:number}} opts
+   * @returns {Memory[]}
+   */
+  #recallHybrid(query, k, queryVec, mode, opts) {
+    const alpha = opts.alpha ?? 0.5;
+    const decayWeight = opts.decayWeight ?? 0.25;
+    const lex = this.bm25(tokenize(query));
+    const maxLex = lex.size ? Math.max(...lex.values()) : 0;
+    const useVec = mode !== 'bm25' && !!queryVec && this.vault.memories.some((m) => Array.isArray(m.vec));
+    /** @type {Array<{m: Memory, score: number}>} */
+    const ranked = [];
+    for (const m of this.vault.memories) {
+      const l = maxLex ? (lex.get(m.id) || 0) / maxLex : 0;
+      const c = useVec && Array.isArray(m.vec) ? Math.max(0, cosine(queryVec, m.vec)) : 0;
+      if (mode === 'bm25') {
+        if (l <= 0) continue;
+        ranked.push({ m, score: l });
+        continue;
+      }
+      if (mode === 'vector') {
+        if (c <= 0.02) continue;
+        ranked.push({ m, score: c });
+        continue;
+      }
+      const fused = alpha * l + (1 - alpha) * c;
+      if (fused <= 0.01) continue;
+      const decay = decayedScore(m.strength, m.lastUsed);
+      ranked.push({ m, score: fused * (1 - decayWeight + decayWeight * decay) });
+    }
+    ranked.sort((a, b) => b.score - a.score);
+    if (ranked.length) return ranked.slice(0, k).map((x) => x.m);
+    return this.vault.memories.slice(0, k); // empty sky is better than a crash
   }
 
   /**

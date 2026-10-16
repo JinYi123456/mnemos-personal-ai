@@ -12,6 +12,7 @@ import path from 'node:path';
  * @property {string} [reasoningModel]
  * @property {string} [frontierModel]
  * @property {string} [embeddingModel]
+ * @property {string} [visionModel]
  * @property {boolean} nvidiaModel
  * @property {boolean} [toolsSupported]
  * @property {boolean} [reasoningSupported]
@@ -41,6 +42,7 @@ const REASONING_PREFERENCE = [
 /** Frontier tier: only used for the nightly synthesis showpiece, never per-turn. */
 const FRONTIER_PREFERENCE = [/nemotron-3-ultra/i, /nemotron[^/]*(ultra|super)/i, /nemotron/i];
 const EMBEDDING_PREFERENCE = [/qwen3-embedding/i, /embedding/i, /embed/i];
+const VISION_PREFERENCE = [/nemotron.*-vl/i, /vision/i, /vl-/i];
 
 /**
  * Token Factory published list prices, USD per 1M tokens, keyed by family pattern
@@ -116,6 +118,7 @@ export function buildProviders(root) {
     reasoningModel: env.NEBIUS_REASONING_MODEL || 'nvidia/nemotron-3-super-120b-a12b',
     frontierModel: env.NEBIUS_FRONTIER_MODEL || '',
     embeddingModel: env.NEBIUS_EMBEDDING_MODEL || 'Qwen/Qwen3-Embedding-8B',
+    visionModel: env.NEBIUS_VISION_MODEL || '',
     nvidiaModel: true,
   });
   const orModel = env.OPENROUTER_MODEL || 'nvidia/nemotron-nano-9b-v2:free';
@@ -170,7 +173,7 @@ function pickProcessEnv() {
   const keys = [
     'NEBIUS_API_KEY','NEBIUS_BASE_URL','NEBIUS_MODEL','NEBIUS_REASONING_MODEL','NEBIUS_FRONTIER_MODEL','NEBIUS_EMBEDDING_MODEL',
     'OPENROUTER_API_KEY','OPENROUTER_MODEL','GROQ_API_KEY','GROQ_MODEL',
-    'GOOGLE_API_KEY','GOOGLE_MODEL','NVIDIA_API_KEY','NVIDIA_MODEL',
+    'NEBIUS_VISION_MODEL','GOOGLE_API_KEY','GOOGLE_MODEL','NVIDIA_API_KEY','NVIDIA_MODEL',
     'TAVILY_API_KEY','PUBLIC_BASE_URL',
   ];
   /** @type {Record<string, string>} */
@@ -191,7 +194,7 @@ export class LLM {
     /** @type {Record<string, {ok: number, fail: number, lastError?: string}>} */
     this.health = {};
     for (const p of providers) this.health[p.id] = { ok: 0, fail: 0 };
-    /** @type {{size:number, at:number, chat?:any, reasoning?:any, frontier?:any}|null} last catalog sync */
+    /** @type {{size:number, at:number, chat?:any, reasoning?:any, frontier?:any, vision?:any}|null} last catalog sync */
     this.catalog = null;
     /** @type {Record<string, any>|null} verbose model metadata keyed by id */
     this.modelMeta = null;
@@ -313,6 +316,13 @@ export class LLM {
     if (p.embeddingModel || p.id === 'nebius') {
       p.embeddingModel = pin(EMBEDDING_PREFERENCE, p.embeddingModel || '', 'embedding');
     }
+    if (typeof p.visionModel === 'string' && p.visionModel) {
+      p.visionModel = pin(VISION_PREFERENCE, p.visionModel, 'vision') || '';
+    } else if (p.id === 'nebius') {
+      // Discover the multimodal tier from the catalog rather than hard-coding it.
+      const found = pool.find((i) => VISION_PREFERENCE.some((rx) => rx.test(i)));
+      if (found) { p.visionModel = found; healed.push(`vision: auto → ${found}`); }
+    }
     // Capability map for the three tiers we actually use — the router reads this
     // instead of discovering tool support by getting a 400 in front of a judge.
     /** @type {Record<string, any>} */
@@ -327,6 +337,7 @@ export class LLM {
       chat: { id: p.model, features: feats(p.model), context: meta?.[p.model]?.context_length, quantization: meta?.[p.model]?.quantization, pricing: meta?.[p.model]?.pricing, limits: meta?.[p.model]?.per_request_limits, regions: (meta?.[p.model]?.regions || []).map((/** @type {any} */ r) => r.name) },
       reasoning: { id: p.reasoningModel, features: feats(p.reasoningModel || p.model) },
       frontier: p.frontierModel ? { id: p.frontierModel, features: feats(p.frontierModel) } : null,
+      vision: p.visionModel ? { id: p.visionModel, modality: meta?.[p.visionModel]?.architecture?.modality } : null,
     };
     return {
       provider: p.id,
@@ -413,6 +424,67 @@ export class LLM {
 
   /** @type {{at:number, map:Record<string,any>}|null} */
   #cardCache = null;
+
+  /**
+   * Look at an image with an NVIDIA multimodal open model. The photo never
+   * leaves for a third party: it goes to Token Factory and back as a data URL.
+   * @param {{prompt: string, dataUrl: string, maxTokens?: number, account?: string}} opts
+   * @returns {Promise<{text:string, model:string, provider:string, ms:number, cost:{usd:number, known:boolean}, usage:any}|null>}
+   */
+  async vision(opts) {
+    const ordered = [this.active, ...this.providers.filter((p) => p.id !== this.activeId)].filter(Boolean);
+    for (const p of /** @type {Provider[]} */ (ordered)) {
+      if (p.kind !== 'openai' || !p.visionModel) continue;
+      const t0 = Date.now();
+      try {
+        const res = await fetch(`${p.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${p.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: p.visionModel,
+            // Super-VL is a reasoning model: without the toggle it can spend the
+            // whole budget thinking and return content:null.
+            messages: [
+              { role: 'system', content: '/no_think' },
+              { role: 'user', content: [
+                { type: 'text', text: opts.prompt },
+                { type: 'image_url', image_url: { url: opts.dataUrl } },
+              ] },
+            ],
+            max_tokens: opts.maxTokens ?? 700,
+            temperature: 0.2,
+          }),
+        });
+        if (!res.ok) {
+          const t = await res.text().catch(() => '');
+          throw new Error(`${p.id} vision ${res.status}: ${t.slice(0, 180)}`);
+        }
+        const data = /** @type {any} */ (await res.json());
+        const msg = data?.choices?.[0]?.message;
+        let text = String(msg?.content || '');
+        if (!text.trim()) {
+          if (data?.choices?.[0]?.message?.reasoning_content) text = String(msg.reasoning_content);
+          else throw new Error(`${p.id} vision empty response`);
+        }
+        const u = data?.usage || {};
+        const usage = {
+          promptTokens: Number(u.prompt_tokens ?? 0),
+          completionTokens: Number(u.completion_tokens ?? 0),
+          reasoningTokens: Number(u.completion_tokens_details?.reasoning_tokens ?? 0),
+          cachedTokens: Number(u.prompt_tokens_details?.cached_tokens ?? 0),
+        };
+        this.health[p.id].ok += 1;
+        const cost = LLM.costUSD(p.visionModel, usage.promptTokens, usage.completionTokens);
+        this.#meter({ tier: 'vision', model: p.visionModel, provider: p.id, usage, ms: Date.now() - t0, account: opts.account });
+        return { text: text.trim(), model: p.visionModel, provider: p.id, ms: Date.now() - t0, cost, usage };
+      } catch (e) {
+        this.health[p.id].fail += 1;
+        this.health[p.id].lastError = String(/** @type {any} */ (e).message || e);
+        if (LLM.isModelError(String(/** @type {any} */ (e).message || e))) await this.syncCatalog();
+      }
+    }
+    return null;
+  }
 
   /**
    * Back-compatible entry point used by the UI on first load.

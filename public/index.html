@@ -87,8 +87,11 @@
       <button class="chip" data-q="Remind me what I'm preparing for and how I like to prepare">⊛ Ask my memory</button>
       <button class="chip" data-q="Search the web for the best cherry blossom viewing spots in Kyoto">⌕ Web search</button>
     </div>
+    <div id="attach-preview" class="attach-preview hidden"></div>
     <div class="composer-row">
       <textarea id="input" rows="1" placeholder="Talk to Mnemos — it will recall, act, and remember…" autocomplete="off"></textarea>
+      <button id="btn-attach" class="pill attach-btn" title="Attach a photo or screenshot — an NVIDIA vision model reads it into memory">📎 Photo</button>
+      <input type="file" id="attach-file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" />
       <button id="btn-send" class="btn-primary" title="Send">➤</button>
     </div>
     <div id="ticker" class="ticker" aria-live="polite"></div>

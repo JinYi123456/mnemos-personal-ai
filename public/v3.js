@@ -328,5 +328,39 @@ if (tourBtn) tourBtn.addEventListener('click', () => {
 $('btn-panel').addEventListener('click', () => { renderOwnership(); });
 renderOwnership();
 
+/* ---------- Photo memory: attach an image, an NVIDIA vision model reads it ---------- */
+const Photo = (() => {
+  /** @type {string|null} */
+  let dataUrl = null;
+  const input = $('attach-file');
+  const preview = $('attach-preview');
+  function show(label) {
+    preview.innerHTML = `<span class="attach-thumb"><img alt="attached" src="${dataUrl || ''}" /></span>
+      <span class="attach-name">${esc(label)}</span>
+      <button class="pill attach-drop" id="attach-drop">✕ drop</button>`;
+    preview.classList.remove('hidden');
+    $('attach-drop').addEventListener('click', clear);
+  }
+  function clear() {
+    dataUrl = null;
+    preview.classList.add('hidden');
+    preview.innerHTML = '';
+    if (input) input.value = '';
+  }
+  input.addEventListener('change', () => {
+    const f = /** @type {any} */ (input.files && input.files[0]);
+    if (!f) return;
+    if (f.size > 1_500_000) { toast('Too big — keep photos under ~1.5 MB.'); clear(); return; }
+    const fr = new FileReader();
+    fr.onload = () => {
+      dataUrl = String(fr.result || '');
+      show(`${f.name || 'photo'} · ${(f.size / 1024) | 0} KB · Nemotron-3.5-Super-VL will read it`);
+      Sound.think();
+    };
+    fr.readAsDataURL(f);
+  });
+  return { get dataUrl() { return dataUrl; }, clear };
+})();
+
 /* expose for app.js's chat stream hooks (loaded earlier, called later) */
-Object.assign(window, { Sound, Hood, Ablate, Tour, tracePulse, renderOwnership });
+Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership });

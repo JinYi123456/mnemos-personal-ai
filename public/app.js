@@ -781,12 +781,24 @@ function sendChat() {
   if (window.Ablate) Ablate.setQuery(text);
   if (window.Sound) Sound.think();
 
-  SSE('/api/chat', { text }, (ev) => {
+  const payload = { text, image: window.Photo && Photo.dataUrl ? Photo.dataUrl : undefined };
+  if (payload.image && window.Photo) {
+    b.innerHTML += `<div class="seen-card">📎 photo attached — an NVIDIA vision model will read it into memory</div>`;
+  }
+  SSE('/api/chat', payload, (ev) => {
     if (ev.type === 'recall') {
       state.highlighted.clear();
       for (const s of ev.stars || []) state.highlighted.add(s.id);
       if (window.tracePulse) tracePulse((ev.stars || []).map((s) => s.id));
       ticker(`✦ recalling ${ev.stars ? ev.stars.length : 0} memories`, true);
+    } else if (ev.type === 'seeing') {
+      ticker(`◉ ${String(ev.model || 'vision model').split('/').pop()} reading your photo…`, true);
+    } else if (ev.type === 'seen') {
+      if (ev.error) { b.innerHTML += `<div class="seen-card">⚠ ${esc(ev.error)}</div>`; }
+      else {
+        b.innerHTML += `<div class="seen-card"><b>${esc(String(ev.model).split('/').pop())}</b> read your photo in ${Math.round(ev.ms)}ms ($${(ev.cost || 0).toFixed(5)}):<br>${esc(ev.text).slice(0, 600)}</div>`;
+        if (window.Sound) Sound.born();
+      }
     } else if (ev.type === 'meter') {
       if (window.Hood) Hood.record(ev);
       if (ev.cost) ticker(`⚙ ${ev.tier} · ${ev.model.split('/').pop()} · ${Math.round(ev.ms)}ms · $${ev.cost.toFixed(5)}`);
@@ -827,6 +839,7 @@ function sendChat() {
       state.busy = false;
       els.send.disabled = false;
       els.input.focus();
+      if (window.Photo) Photo.clear();
       refreshAll();
       if (window.Hood) Hood.refresh();
     } else if (ev.type === 'error') {
