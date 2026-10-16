@@ -144,7 +144,7 @@ test('red block present in system prompt and not leaked by tools list', () => {
   const sys = b.systemPrompt();
   assert.match(sys, /MEMORY PROTOCOL/);
   assert.match(sys, /SECRET PROTOCOL/);
-  assert.match(sys, /Never fabricate a memory/);
+  assert.match(sys, /NEVER fabricate or guess a personal fact/);
 });
 
 test('providers: chain order puts nebius first, flags nvidia models', () => {

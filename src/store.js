@@ -5,6 +5,8 @@ import { sha256, uuid, num, safeText, clamp, tokenize } from './util.js';
 
 const DECAY_HALF_LIFE_D = 21;
 const MIN_SCORE = 0.04;
+/** Below this blended score a memory is not relevant to the question at all. */
+const MIN_FUSED = 0.09;
 export { DECAY_HALF_LIFE_D };
 
 /** Embeddings are truncated (Matryoshka-style) to keep the JSON vault small. */
@@ -22,6 +24,7 @@ export const EMBED_DIMS = 256;
  * @property {string} source     'chat' | 'user' | 'dream'
  * @property {boolean} [seed]    true for demo-seeded memories
  * @property {number[]} [vec]    optional normalized embedding vector
+ * @property {string} [supersededBy]  id of the newer memory that replaced this one
  */
 
 /**
@@ -258,7 +261,7 @@ export class Store {
    * @param {string} query
    * @param {number} [k=6]
    * @param {number[]} [queryVec] optional normalized query embedding
-   * @param {{mode?: 'lexical'|'bm25'|'vector'|'fusion', alpha?: number, decayWeight?: number}} [opts]
+   * @param {{mode?: 'lexical'|'bm25'|'vector'|'fusion', alpha?: number, decayWeight?: number, floor?: number}} [opts]
    * @returns {Memory[]}
    */
   recall(query, k = 6, queryVec, opts = {}) {
@@ -286,8 +289,9 @@ export class Store {
     const maxLex = scores.size ? Math.max(...scores.values()) : 0;
 
     const vecReady = !!queryVec && this.vault.memories.some((m) => Array.isArray(m.vec));
+    const live = (/** @type {Memory} */ m) => !m.supersededBy;
     if (vecReady) {
-      const ranked = this.vault.memories
+      const ranked = this.vault.memories.filter(live)
         .map((m) => {
           const lex = maxLex ? (scores.get(m.id) || 0) / maxLex : 0;
           const cos = Array.isArray(m.vec) ? cosine(queryVec, m.vec) : 0;
@@ -300,23 +304,22 @@ export class Store {
         .slice(0, k)
         .map((x) => x.m);
       if (ranked.length) return ranked;
-      return this.vault.memories.slice(0, k); // nothing matched at all → recency
-    }
-
-    if (scores.size === 0 && this.vault.memories.length) {
-      // no lexical hit: return most recent as context
+      // Only if every live memory was superseded do we look at history at all.
       return this.vault.memories.slice(0, k);
     }
-    return Array.from(scores.entries())
-      .map(([id, s]) => {
+
+    if (scores.size === 0) return []; // nothing matched: say so, do not improvise
+    const hits = Array.from(scores.entries())
+      .map(([id, sc]) => {
         const m = byId.get(id);
         if (!m) return null;
-        return { m, score: s * (0.35 + 0.65 * decayedScore(m.strength, m.lastUsed)) };
+        return { m, score: (sc / (maxLex || 1)) * (0.35 + 0.65 * decayedScore(m.strength, m.lastUsed)) };
       })
-      .filter((x) => x && x.score > MIN_SCORE)
+      .filter((x) => x && x.score >= (opts.floor ?? MIN_FUSED))
       .sort((a, b) => /** @type {any} */ (b).score - /** @type {any} */ (a).score)
       .slice(0, k)
       .map((x) => /** @type {any} */ (x).m);
+    return hits;
   }
 
   /**
@@ -327,7 +330,7 @@ export class Store {
    * @param {number} k
    * @param {number[]|undefined} queryVec
    * @param {string} mode
-   * @param {{alpha?:number, decayWeight?:number}} opts
+   * @param {{alpha?:number, decayWeight?:number, floor?:number}} opts
    * @returns {Memory[]}
    */
   #recallHybrid(query, k, queryVec, mode, opts) {
@@ -342,23 +345,27 @@ export class Store {
       const l = maxLex ? (lex.get(m.id) || 0) / maxLex : 0;
       const c = useVec && Array.isArray(m.vec) ? Math.max(0, cosine(queryVec, m.vec)) : 0;
       if (mode === 'bm25') {
-        if (l <= 0) continue;
+        if (l < (opts.floor ?? MIN_FUSED)) continue;
         ranked.push({ m, score: l });
         continue;
       }
       if (mode === 'vector') {
-        if (c <= 0.02) continue;
+        if (c < (opts.floor ?? MIN_FUSED)) continue;
         ranked.push({ m, score: c });
         continue;
       }
       const fused = alpha * l + (1 - alpha) * c;
-      if (fused <= 0.01) continue;
+      // A floor is the whole difference between a memory system and a text
+      // spinner. Below it there is nothing relevant, and the honest answer is
+      // "I don't remember" — not the six nearest stars.
+      if (fused < (opts.floor ?? MIN_FUSED)) continue;
       const decay = decayedScore(m.strength, m.lastUsed);
       ranked.push({ m, score: fused * (1 - decayWeight + decayWeight * decay) });
     }
     ranked.sort((a, b) => b.score - a.score);
-    if (ranked.length) return ranked.slice(0, k).map((x) => x.m);
-    return this.vault.memories.slice(0, k); // empty sky is better than a crash
+    // No recency fallback here on purpose: silently handing the model six
+    // unrelated memories is how a memory system learns to confabulate.
+    return ranked.slice(0, k).map((x) => x.m);
   }
 
   /**
@@ -374,9 +381,29 @@ export class Store {
       const cut = raw.slice(0, EMBED_DIMS);
       const norm = Math.sqrt(cut.reduce((s, v) => s + v * v, 0)) || 1;
       m.vec = cut.map((v) => Math.round((v / norm) * 10000) / 10000);
+      this.#supersede(m);
       n += 1;
     }
     return n;
+  }
+
+  /**
+   * When a memory's vector arrives, check whether it *replaces* an older one:
+   * same subject (cosine ≥ 0.84) but different wording. Marking the old one
+   * superseded is what makes "I moved to Berlin" beat "I live in Kuala Lumpur"
+   * without deleting history — the sky still shows the old star, dimmer, and the
+   * model is told it was replaced.
+   * @param {Memory} fresh
+   */
+  #supersede(fresh) {
+    if (!Array.isArray(fresh.vec)) return;
+    for (const older of this.vault.memories) {
+      if (older.id === fresh.id || !Array.isArray(older.vec) || older.supersededBy) continue;
+      if (older.created > fresh.created) continue;
+      if (cosine(fresh.vec, older.vec) < 0.84) continue;
+      older.supersededBy = fresh.id;
+      older.strength = Math.min(older.strength, 0.2);
+    }
   }
 
   /**

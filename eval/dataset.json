@@ -1,0 +1,3335 @@
+{
+  "meta": {
+    "name": "mnemos-longmemeval-style-40",
+    "version": "1.0.0",
+    "protocol": "LongMemEval-style ability taxonomy (Wu et al., arXiv:2410.10813) applied to an in-house 40-question set. NOT score-comparable with published LongMemEval numbers.",
+    "persona": "Ola — cognitive-science master student and freelance UI designer; moves Kraków to Wrocław, changes job, design tool, teaching slot, relationship status and coffee habit, adopts a cat named after a star.",
+    "nowIso": "2026-10-16T12:00:00.000Z",
+    "clockNote": "Memory dates are day offsets from an injected now. This file uses nowIso; the runner re-anchors the vault on the live clock so the 21-day decay half-life behaves the same whenever the benchmark is run.",
+    "oracle": "lowercased substring mustAll / mustAny / mustNot over the answer text; abstention graded by the I-dont-remember pattern; fromAge questions are graded on the memory age the prompt shows.",
+    "counts": {
+      "memories": 59,
+      "questions": 40,
+      "sessions": 9,
+      "byAbility": {
+        "single-session-user": 9,
+        "multi-session": 8,
+        "temporal-reasoning": 7,
+        "knowledge-update": 9,
+        "abstention": 7
+      },
+      "updatePairs": 9,
+      "abstainClean": 4,
+      "abstainNearMiss": 3
+    }
+  },
+  "memories": [
+    {
+      "ref": "origin_gdansk",
+      "id": "cdc109fa1b6fa54c8e9e7a4d10ce75a6b9a0aada97ba603c4f0f67e4aa816512",
+      "short": "cdc109fa",
+      "text": "Ola lived her whole childhood in Gdańsk near the Shipyard Square and her family is still there.",
+      "session": "s01",
+      "day": 420,
+      "lastUsedDay": 412,
+      "strength": 0.78,
+      "uses": 2,
+      "source": "user",
+      "created": 1755864000000,
+      "lastUsed": 1756555200000,
+      "tokens": [
+        "ola",
+        "lived",
+        "whole",
+        "childhood",
+        "gdańsk",
+        "near",
+        "shipyard",
+        "square",
+        "family",
+        "still",
+        "there"
+      ]
+    },
+    {
+      "ref": "mother_aneta",
+      "id": "58ddc32e3659d76d5ee7ffa0bdb5c779768204bd7a50425f16e0ab654973c55a",
+      "short": "58ddc32e",
+      "text": "Her mother Aneta lives in the Gdańsk flat and gardens at the weekend.",
+      "session": "s01",
+      "day": 418,
+      "lastUsedDay": 400,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1756036800000,
+      "lastUsed": 1757592000000,
+      "tokens": [
+        "mother",
+        "aneta",
+        "lives",
+        "gdańsk",
+        "flat",
+        "gardens",
+        "weekend"
+      ]
+    },
+    {
+      "ref": "move_krakow",
+      "id": "ec52f237500125c524c21f829f0b18fd47628ebd75613803b63f22a21a7c46de",
+      "short": "ec52f237",
+      "text": "Ola lived in Kraków after moving from Gdańsk for a master of cognitive science at Jagiellonian University.",
+      "session": "s01",
+      "day": 400,
+      "lastUsedDay": 390,
+      "strength": 0.8,
+      "uses": 2,
+      "source": "user",
+      "created": 1757592000000,
+      "lastUsed": 1758456000000,
+      "tokens": [
+        "ola",
+        "lived",
+        "kraków",
+        "after",
+        "moving",
+        "gdańsk",
+        "master",
+        "cognitive",
+        "science",
+        "jagiellonian",
+        "university"
+      ]
+    },
+    {
+      "ref": "flat_krakow",
+      "id": "0174dd5e0a80df332f14bf625ac418a12654bcbf41c69806a4db919e38047e0a",
+      "short": "0174dd5e",
+      "text": "Ola lives in Kraków, in a shared flat on Floreńska street with two lab roommates.",
+      "session": "s01",
+      "day": 395,
+      "lastUsedDay": 388,
+      "strength": 0.75,
+      "uses": 2,
+      "source": "user",
+      "created": 1758024000000,
+      "lastUsed": 1758628800000,
+      "tokens": [
+        "ola",
+        "lives",
+        "kraków",
+        "shared",
+        "flat",
+        "floreńska",
+        "street",
+        "two",
+        "lab",
+        "roommates"
+      ]
+    },
+    {
+      "ref": "brother_kuba",
+      "id": "17b0a9f9eec006eccf1183a1a107d67bad835fab6d2c71ac6a4d8a0db7983e9c",
+      "short": "17b0a9f9",
+      "text": "Her younger brother Kuba studies dentistry in Lublin and calls every Sunday evening.",
+      "session": "s01",
+      "day": 365,
+      "lastUsedDay": 120,
+      "strength": 0.72,
+      "uses": 2,
+      "source": "user",
+      "created": 1760616000000,
+      "lastUsed": 1781784000000,
+      "tokens": [
+        "younger",
+        "brother",
+        "kuba",
+        "studies",
+        "dentistry",
+        "lublin",
+        "calls",
+        "every",
+        "sunday",
+        "evening"
+      ]
+    },
+    {
+      "ref": "friend_mateusz",
+      "id": "510e7379e52a57726cdc94f27273610281e63d9f5a914c31dd15e74b6ba825dc",
+      "short": "510e7379",
+      "text": "Mateusz, her friend since Gdańsk, works as a live sound engineer.",
+      "session": "s01",
+      "day": 240,
+      "lastUsedDay": 150,
+      "strength": 0.68,
+      "uses": 2,
+      "source": "user",
+      "created": 1771416000000,
+      "lastUsed": 1779192000000,
+      "tokens": [
+        "mateusz",
+        "friend",
+        "since",
+        "gdańsk",
+        "works",
+        "live",
+        "sound",
+        "engineer"
+      ]
+    },
+    {
+      "ref": "thesis_topic",
+      "id": "619f3b3d633741844ab06d873d8ebae707b19cd9a67ff10ac6e3940c4d542117",
+      "short": "619f3b3d",
+      "text": "Her master thesis studies cognitive load in navigation apps for elderly drivers.",
+      "session": "s02",
+      "day": 380,
+      "lastUsedDay": 300,
+      "strength": 0.82,
+      "uses": 2,
+      "source": "user",
+      "created": 1759320000000,
+      "lastUsed": 1766232000000,
+      "tokens": [
+        "master",
+        "thesis",
+        "studies",
+        "cognitive",
+        "load",
+        "navigation",
+        "apps",
+        "elderly",
+        "drivers"
+      ]
+    },
+    {
+      "ref": "advisor_ewa",
+      "id": "5df817e4d5417ba4413a4706be5bc66c0f7d48b45a38338d89eed44c8bc430fd",
+      "short": "5df817e4",
+      "text": "Her supervisor Dr. Ewa Zielińska expects a written update every Friday.",
+      "session": "s02",
+      "day": 375,
+      "lastUsedDay": 280,
+      "strength": 0.8,
+      "uses": 2,
+      "source": "user",
+      "created": 1759752000000,
+      "lastUsed": 1767960000000,
+      "tokens": [
+        "supervisor",
+        "ewa",
+        "zielińska",
+        "expects",
+        "written",
+        "update",
+        "every",
+        "friday"
+      ]
+    },
+    {
+      "ref": "polish_drafts",
+      "id": "885591c58c0ab8ac23c09db0c567862b8674c295480b2800c871f9f809a5f44b",
+      "short": "885591c5",
+      "text": "Ola drafts every thesis chapter in Polish and translates the abstract into English last.",
+      "session": "s02",
+      "day": 280,
+      "lastUsedDay": 200,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1767960000000,
+      "lastUsed": 1774872000000,
+      "tokens": [
+        "ola",
+        "drafts",
+        "every",
+        "thesis",
+        "chapter",
+        "polish",
+        "translates",
+        "abstract",
+        "into",
+        "english",
+        "last"
+      ]
+    },
+    {
+      "ref": "desktop_windows",
+      "id": "75f399f9866fd49f394fb8bf5581e29d6a5632e085f797b5f55f7b3bc03001f6",
+      "short": "75f399f9",
+      "text": "The machine Ola wrote her thesis on was the university Windows desktop, because it ran the eye tracking software.",
+      "session": "s02",
+      "day": 175,
+      "lastUsedDay": 160,
+      "strength": 0.66,
+      "uses": 2,
+      "source": "user",
+      "created": 1777032000000,
+      "lastUsed": 1778328000000,
+      "tokens": [
+        "machine",
+        "ola",
+        "wrote",
+        "thesis",
+        "university",
+        "windows",
+        "desktop",
+        "because",
+        "ran",
+        "eye",
+        "tracking",
+        "software"
+      ]
+    },
+    {
+      "ref": "lab_internship",
+      "id": "83b8998aa47a888ff803a299cbbf2dfe4034f1e156fc776dbe7c2fdc781aa6f2",
+      "short": "83b8998a",
+      "text": "Ola's job was a research internship at the cognitive science lab, coding eye tracking pilots in Python.",
+      "session": "s02",
+      "day": 300,
+      "lastUsedDay": 290,
+      "strength": 0.72,
+      "uses": 2,
+      "source": "user",
+      "created": 1766232000000,
+      "lastUsed": 1767096000000,
+      "tokens": [
+        "ola's",
+        "job",
+        "research",
+        "internship",
+        "cognitive",
+        "science",
+        "lab",
+        "coding",
+        "eye",
+        "tracking",
+        "pilots",
+        "python"
+      ]
+    },
+    {
+      "ref": "deadline_may",
+      "id": "513b18156a869b260e9b8f1a4dc1c127a950fb3251a87db3648b324cd6e9758f",
+      "short": "513b1815",
+      "text": "Ola set her thesis submission deadline for May.",
+      "session": "s02",
+      "day": 140,
+      "lastUsedDay": 130,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1780056000000,
+      "lastUsed": 1780920000000,
+      "tokens": [
+        "ola",
+        "set",
+        "thesis",
+        "submission",
+        "deadline",
+        "may"
+      ]
+    },
+    {
+      "ref": "birthday",
+      "id": "ed35beb11eb863cd04135780ee9752d0865c822dd9af0301a93256830fb084b2",
+      "short": "ed35beb1",
+      "text": "Ola's birthday is 14 March.",
+      "session": "s03",
+      "day": 370,
+      "lastUsedDay": 40,
+      "strength": 0.85,
+      "uses": 2,
+      "source": "user",
+      "created": 1760184000000,
+      "lastUsed": 1788696000000,
+      "tokens": [
+        "ola's",
+        "birthday",
+        "march"
+      ]
+    },
+    {
+      "ref": "coffee_flatwhite",
+      "id": "d39b8a6d02f9c89316b672b873a3b92123514eaa691769f5e0cb5ca45ee3de3c",
+      "short": "d39b8a6d",
+      "text": "Ola's coffee habit in Kraków was three flat whites a day, and she could not start work without them.",
+      "session": "s03",
+      "day": 330,
+      "lastUsedDay": 300,
+      "strength": 0.75,
+      "uses": 2,
+      "source": "user",
+      "created": 1763640000000,
+      "lastUsed": 1766232000000,
+      "tokens": [
+        "ola's",
+        "coffee",
+        "habit",
+        "kraków",
+        "three",
+        "flat",
+        "whites",
+        "day",
+        "could",
+        "start",
+        "work",
+        "without"
+      ]
+    },
+    {
+      "ref": "guitar",
+      "id": "435b12070d2742d1e564bec13d48fb7538a3e598237724d3c9e77c7432ad554f",
+      "short": "435b1207",
+      "text": "Ola plays a little acoustic guitar, only three chords, mostly at parties.",
+      "session": "s03",
+      "day": 160,
+      "lastUsedDay": 140,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1778328000000,
+      "lastUsed": 1780056000000,
+      "tokens": [
+        "ola",
+        "plays",
+        "little",
+        "acoustic",
+        "guitar",
+        "only",
+        "three",
+        "chords",
+        "mostly",
+        "parties"
+      ]
+    },
+    {
+      "ref": "walks_evening",
+      "id": "a94627470cce22efc5dd33f2e900a0efd126b9fcaad0b24a6cc2797905f41737",
+      "short": "a9462747",
+      "text": "She walks along the Oława river after work to calm down; twenty minutes clears her head.",
+      "session": "s03",
+      "day": 45,
+      "lastUsedDay": 6,
+      "strength": 0.72,
+      "uses": 2,
+      "source": "user",
+      "created": 1788264000000,
+      "lastUsed": 1791633600000,
+      "tokens": [
+        "walks",
+        "along",
+        "oława",
+        "river",
+        "after",
+        "work",
+        "calm",
+        "down",
+        "twenty",
+        "minutes",
+        "clears",
+        "head"
+      ]
+    },
+    {
+      "ref": "late_notes",
+      "id": "4946c6d8aebf16905775d1971b01bd1069008311f380073403c4087cc4cb5405",
+      "short": "4946c6d8",
+      "text": "Reading notes after midnight wrecks her writing block and she sleeps badly.",
+      "session": "s03",
+      "day": 235,
+      "lastUsedDay": 60,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1771848000000,
+      "lastUsed": 1786968000000,
+      "tokens": [
+        "reading",
+        "notes",
+        "after",
+        "midnight",
+        "wrecks",
+        "writing",
+        "block",
+        "sleeps",
+        "badly"
+      ]
+    },
+    {
+      "ref": "morning_block",
+      "id": "8c2c7ec39491a879d053b1a00777e7a9bea67fc9a9f72ecf86e0515fb899e659",
+      "short": "8c2c7ec3",
+      "text": "The best writing of the day happens between 6 and 9, so Ola protects that morning block.",
+      "session": "s03",
+      "day": 210,
+      "lastUsedDay": 30,
+      "strength": 0.78,
+      "uses": 2,
+      "source": "user",
+      "created": 1774008000000,
+      "lastUsed": 1789560000000,
+      "tokens": [
+        "best",
+        "writing",
+        "day",
+        "happens",
+        "between",
+        "ola",
+        "protects",
+        "morning",
+        "block"
+      ]
+    },
+    {
+      "ref": "freelance_start",
+      "id": "be6cdc539643281499e7fd66657a1146ca2522035ba6a0352088ac9101c16bc5",
+      "short": "be6cdc53",
+      "text": "Ola took her first freelance client, a bike rental startup in Kazimierz, while still a student.",
+      "session": "s04",
+      "day": 350,
+      "lastUsedDay": 330,
+      "strength": 0.75,
+      "uses": 2,
+      "source": "user",
+      "created": 1761912000000,
+      "lastUsed": 1763640000000,
+      "tokens": [
+        "ola",
+        "took",
+        "first",
+        "freelance",
+        "client",
+        "bike",
+        "rental",
+        "startup",
+        "kazimierz",
+        "while",
+        "still",
+        "student"
+      ]
+    },
+    {
+      "ref": "tool_figma",
+      "id": "694d69bad7fd503464bb6b89e037425a6bd9249da971e05c7554bffecea1cb73",
+      "short": "694d69ba",
+      "text": "Ola prefers Figma for all her design work and calls it the only design tool she trusts.",
+      "session": "s04",
+      "day": 340,
+      "lastUsedDay": 320,
+      "strength": 0.8,
+      "uses": 2,
+      "source": "user",
+      "created": 1762776000000,
+      "lastUsed": 1764504000000,
+      "tokens": [
+        "ola",
+        "prefers",
+        "figma",
+        "all",
+        "design",
+        "work",
+        "calls",
+        "only",
+        "tool",
+        "trusts"
+      ]
+    },
+    {
+      "ref": "client_nordwind",
+      "id": "fe99ffb34893e9ac3cc4f120bf4090a4433435a76a798eeef0463cc884626348",
+      "short": "fe99ffb3",
+      "text": "Freelance client Nordwind Books still owes an invoice of 2,400 PLN for a cover redesign.",
+      "session": "s04",
+      "day": 270,
+      "lastUsedDay": 250,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1768824000000,
+      "lastUsed": 1770552000000,
+      "tokens": [
+        "freelance",
+        "client",
+        "nordwind",
+        "books",
+        "still",
+        "owes",
+        "invoice",
+        "400",
+        "pln",
+        "cover",
+        "redesign"
+      ]
+    },
+    {
+      "ref": "client_zielone",
+      "id": "489a112a86237aeb28f3d6e39e7b95cacf150d0c6fa88ed4ac0625469a4fa655",
+      "short": "489a112a",
+      "text": "Client Zielone Podróże paid a 3,800 PLN invoice for a booking flow redesign.",
+      "session": "s04",
+      "day": 265,
+      "lastUsedDay": 245,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1769256000000,
+      "lastUsed": 1770984000000,
+      "tokens": [
+        "client",
+        "zielone",
+        "podróże",
+        "paid",
+        "800",
+        "pln",
+        "invoice",
+        "booking",
+        "flow",
+        "redesign"
+      ]
+    },
+    {
+      "ref": "client_astro",
+      "id": "f2c52f777e847530f8b24613a08f85f25206ebd6488b765fdd51b2e97c0314e8",
+      "short": "f2c52f77",
+      "text": "Client Astro Collective sent an invoice for a brand refresh quote of 5,000 PLN.",
+      "session": "s04",
+      "day": 260,
+      "lastUsedDay": 240,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1769688000000,
+      "lastUsed": 1771416000000,
+      "tokens": [
+        "client",
+        "astro",
+        "collective",
+        "sent",
+        "invoice",
+        "brand",
+        "refresh",
+        "quote",
+        "000",
+        "pln"
+      ]
+    },
+    {
+      "ref": "tool_penpot",
+      "id": "1797fec99e235d667fd86df5b75f215c7ba7ab68b02021a732aa5e440ae8a9e6",
+      "short": "1797fec9",
+      "text": "Ola switched her design work to Penpot and calls it the design tool she trusts, because she can self host it.",
+      "session": "s04",
+      "day": 30,
+      "lastUsedDay": 12,
+      "strength": 0.8,
+      "uses": 2,
+      "source": "user",
+      "created": 1789560000000,
+      "lastUsed": 1791115200000,
+      "tokens": [
+        "ola",
+        "switched",
+        "design",
+        "work",
+        "penpot",
+        "calls",
+        "tool",
+        "trusts",
+        "because",
+        "can",
+        "self",
+        "host"
+      ]
+    },
+    {
+      "ref": "tool_vscode",
+      "id": "61701c538bd9a95e3f747ccf0b800a6e9eb6c85b02d1a19924f6d24186ec86e9",
+      "short": "61701c53",
+      "text": "She writes design tokens in a code editor instead of a separate design app.",
+      "session": "s04",
+      "day": 28,
+      "lastUsedDay": 10,
+      "strength": 0.65,
+      "uses": 2,
+      "source": "user",
+      "created": 1789732800000,
+      "lastUsed": 1791288000000,
+      "tokens": [
+        "writes",
+        "design",
+        "tokens",
+        "code",
+        "editor",
+        "instead",
+        "separate",
+        "app"
+      ]
+    },
+    {
+      "ref": "camera_fuji",
+      "id": "ba3fcdad6fd641ec8a1e725bd435298c1ecf7e826bf9fb7c5572ad5bd7f5b229",
+      "short": "ba3fcdad",
+      "text": "Ola bought a used Fujifilm X-T30 camera to photograph the city at night.",
+      "session": "s05",
+      "day": 290,
+      "lastUsedDay": 250,
+      "strength": 0.72,
+      "uses": 2,
+      "source": "user",
+      "created": 1767096000000,
+      "lastUsed": 1770552000000,
+      "tokens": [
+        "ola",
+        "bought",
+        "used",
+        "fujifilm",
+        "x-t30",
+        "camera",
+        "photograph",
+        "city",
+        "night"
+      ]
+    },
+    {
+      "ref": "lens_saving",
+      "id": "53421d65d1a601495570d54d7222ea2235a24eec39e608f9cec4670dcebe6b6d",
+      "short": "53421d65",
+      "text": "She is saving 3,000 PLN for a proper 35mm lens.",
+      "session": "s05",
+      "day": 100,
+      "lastUsedDay": 70,
+      "strength": 0.68,
+      "uses": 2,
+      "source": "user",
+      "created": 1783512000000,
+      "lastUsed": 1786104000000,
+      "tokens": [
+        "saving",
+        "000",
+        "pln",
+        "proper",
+        "35mm",
+        "lens"
+      ]
+    },
+    {
+      "ref": "coffee_v60",
+      "id": "ef7b2c55f9efd2f571516489ac72c9eb3ce1f1adcb353e91de6f6f05c6cc146c",
+      "short": "ef7b2c55",
+      "text": "Ola's coffee now is a V60 filter brewed at home, two cups at most.",
+      "session": "s05",
+      "day": 35,
+      "lastUsedDay": 8,
+      "strength": 0.78,
+      "uses": 2,
+      "source": "user",
+      "created": 1789128000000,
+      "lastUsed": 1791460800000,
+      "tokens": [
+        "ola's",
+        "coffee",
+        "now",
+        "v60",
+        "filter",
+        "brewed",
+        "home",
+        "two",
+        "cups",
+        "most"
+      ]
+    },
+    {
+      "ref": "flat_wroclaw",
+      "id": "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e",
+      "short": "fb06cb89",
+      "text": "Ola lives in Wrocław now, alone in a one bedroom flat on Powstańców Śląskich; she moved there in September.",
+      "session": "s05",
+      "day": 55,
+      "lastUsedDay": 20,
+      "strength": 0.82,
+      "uses": 2,
+      "source": "user",
+      "created": 1787400000000,
+      "lastUsed": 1790424000000,
+      "tokens": [
+        "ola",
+        "lives",
+        "wrocław",
+        "now",
+        "alone",
+        "one",
+        "bedroom",
+        "flat",
+        "powstańców",
+        "śląskich",
+        "moved",
+        "there",
+        "september"
+      ]
+    },
+    {
+      "ref": "bouldering",
+      "id": "6c76fac67b316e0528a52e0de750ec68a8861b2303ba6f7c9993a8647ed44acb",
+      "short": "6c76fac6",
+      "text": "Ola joined a bouldering gym near her old flat and climbed twice a week.",
+      "session": "s06",
+      "day": 320,
+      "lastUsedDay": 200,
+      "strength": 0.74,
+      "uses": 2,
+      "source": "user",
+      "created": 1764504000000,
+      "lastUsed": 1774872000000,
+      "tokens": [
+        "ola",
+        "joined",
+        "bouldering",
+        "gym",
+        "near",
+        "old",
+        "flat",
+        "climbed",
+        "twice",
+        "week"
+      ]
+    },
+    {
+      "ref": "stray_cat",
+      "id": "73b4f0985c651e700aa8f31bbd5a220bb5189bc49f1e0f4a944500c54b02cc1d",
+      "short": "73b4f098",
+      "text": "A grey stray cat kept appearing by the bakery door on Kalwaryjska and Ola left food out for the cat.",
+      "session": "s06",
+      "day": 180,
+      "lastUsedDay": 170,
+      "strength": 0.68,
+      "uses": 2,
+      "source": "user",
+      "created": 1776600000000,
+      "lastUsed": 1777464000000,
+      "tokens": [
+        "grey",
+        "stray",
+        "cat",
+        "kept",
+        "appearing",
+        "bakery",
+        "door",
+        "kalwaryjska",
+        "ola",
+        "left",
+        "food",
+        "out"
+      ]
+    },
+    {
+      "ref": "vega_adopt",
+      "id": "2ebb0b602002bb9d704f12701fb0066a10c061b3afdf13e7a9b1be2ca60fd6a0",
+      "short": "2ebb0b60",
+      "text": "Ola adopted the grey stray cat and named her Vega, after the star in the Lyra constellation.",
+      "session": "s06",
+      "day": 120,
+      "lastUsedDay": 15,
+      "strength": 0.88,
+      "uses": 2,
+      "source": "user",
+      "created": 1781784000000,
+      "lastUsed": 1790856000000,
+      "tokens": [
+        "ola",
+        "adopted",
+        "grey",
+        "stray",
+        "cat",
+        "named",
+        "vega",
+        "after",
+        "star",
+        "lyra",
+        "constellation"
+      ]
+    },
+    {
+      "ref": "vega_sills",
+      "id": "ddc0c2a17f0fe7e0cfc900d8ca72be220414a6dc94cb29e80656c89feb2746c7",
+      "short": "ddc0c2a1",
+      "text": "Vega chews cable sleeves, so Ola hides her laptop charger before working on the train.",
+      "session": "s06",
+      "day": 80,
+      "lastUsedDay": 25,
+      "strength": 0.62,
+      "uses": 2,
+      "source": "user",
+      "created": 1785240000000,
+      "lastUsed": 1789992000000,
+      "tokens": [
+        "vega",
+        "chews",
+        "cable",
+        "sleeves",
+        "ola",
+        "hides",
+        "laptop",
+        "charger",
+        "before",
+        "working",
+        "train"
+      ]
+    },
+    {
+      "ref": "status_single",
+      "id": "c57cc50af19128d4a1a70503581ddfe8fa30e36509efeaaa8397d801fc66546f",
+      "short": "c57cc50a",
+      "text": "Ola says her relationship status is single, with no time for dating while the thesis runs.",
+      "session": "s06",
+      "day": 200,
+      "lastUsedDay": 190,
+      "strength": 0.66,
+      "uses": 2,
+      "source": "user",
+      "created": 1774872000000,
+      "lastUsed": 1775736000000,
+      "tokens": [
+        "ola",
+        "says",
+        "relationship",
+        "status",
+        "single",
+        "time",
+        "dating",
+        "while",
+        "thesis",
+        "runs"
+      ]
+    },
+    {
+      "ref": "partner_piotr",
+      "id": "bb85730f54e5f6a6686e2ba9e0eebaca20885c358c6366e27923e7407d52fb93",
+      "short": "bb85730f",
+      "text": "Ola updated her relationship status: she is with Piotr, a paramedic she met at the bouldering gym.",
+      "session": "s06",
+      "day": 90,
+      "lastUsedDay": 20,
+      "strength": 0.84,
+      "uses": 2,
+      "source": "user",
+      "created": 1784376000000,
+      "lastUsed": 1790424000000,
+      "tokens": [
+        "ola",
+        "updated",
+        "relationship",
+        "status",
+        "piotr",
+        "paramedic",
+        "met",
+        "bouldering",
+        "gym"
+      ]
+    },
+    {
+      "ref": "vega_vet",
+      "id": "e518e39b2f85246ca43b14e01cc87c3cbf21e5096966f319ada32df4336bde99",
+      "short": "e518e39b",
+      "text": "Vega passed her first vet check and needs a dental cleaning next spring.",
+      "session": "s06",
+      "day": 115,
+      "lastUsedDay": 100,
+      "strength": 0.65,
+      "uses": 2,
+      "source": "user",
+      "created": 1782216000000,
+      "lastUsed": 1783512000000,
+      "tokens": [
+        "vega",
+        "passed",
+        "first",
+        "vet",
+        "check",
+        "needs",
+        "dental",
+        "cleaning",
+        "next",
+        "spring"
+      ]
+    },
+    {
+      "ref": "workshop_ux",
+      "id": "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87",
+      "short": "8b04f223",
+      "text": "Ola teaches an Intro to UX workshop on Wednesdays, an evening class at a coding school in Kraków.",
+      "session": "s07",
+      "day": 245,
+      "lastUsedDay": 230,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1770984000000,
+      "lastUsed": 1772280000000,
+      "tokens": [
+        "ola",
+        "teaches",
+        "intro",
+        "workshop",
+        "wednesdays",
+        "evening",
+        "class",
+        "coding",
+        "school",
+        "kraków"
+      ]
+    },
+    {
+      "ref": "balcony_pots",
+      "id": "20027d27a7c7302a080d64ce8f9eed2581f6b1a761d63a0829e0318ceb6cde88",
+      "short": "20027d27",
+      "text": "She keeps cherry tomatoes and basil in pots on the balcony.",
+      "session": "s07",
+      "day": 190,
+      "lastUsedDay": 170,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1775736000000,
+      "lastUsed": 1777464000000,
+      "tokens": [
+        "keeps",
+        "cherry",
+        "tomatoes",
+        "basil",
+        "pots",
+        "balcony"
+      ]
+    },
+    {
+      "ref": "neighbour_dog",
+      "id": "23558d0276069974fccd9cadd107818075362a703fd79142541f7f632093931a",
+      "short": "23558d02",
+      "text": "Her neighbour Pan Henryk has an old beagle called Bursztynek.",
+      "session": "s07",
+      "day": 250,
+      "lastUsedDay": 210,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1770552000000,
+      "lastUsed": 1774008000000,
+      "tokens": [
+        "neighbour",
+        "pan",
+        "henryk",
+        "old",
+        "beagle",
+        "called",
+        "bursztynek"
+      ]
+    },
+    {
+      "ref": "winter_krakow",
+      "id": "fac33551c29bdd965b1873df4db3dd80d1b2e18e348b6d4b30860496dc0ba9f5",
+      "short": "fac33551",
+      "text": "Ola says the Kraków winters were the worst part of living there.",
+      "session": "s07",
+      "day": 200,
+      "lastUsedDay": 190,
+      "strength": 0.55,
+      "uses": 2,
+      "source": "user",
+      "created": 1774872000000,
+      "lastUsed": 1775736000000,
+      "tokens": [
+        "ola",
+        "says",
+        "kraków",
+        "winters",
+        "worst",
+        "part",
+        "living",
+        "there"
+      ]
+    },
+    {
+      "ref": "sunday_run",
+      "id": "9d7da579dfcfed30a8ec2f9536767e5e7e19ed7629b654da98e06e0f4dca8f86",
+      "short": "9d7da579",
+      "text": "She ran six kilometres along the Vistula every Sunday morning.",
+      "session": "s07",
+      "day": 310,
+      "lastUsedDay": 300,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1765368000000,
+      "lastUsed": 1766232000000,
+      "tokens": [
+        "ran",
+        "six",
+        "kilometres",
+        "along",
+        "vistula",
+        "every",
+        "sunday",
+        "morning"
+      ]
+    },
+    {
+      "ref": "half_marathon",
+      "id": "c6f3ad90c8011faa529a5ae08c9b9ed6c4d4fecd23611d092d554181065dc94e",
+      "short": "c6f3ad90",
+      "text": "Ola ran her first half marathon in Wrocław in 2 hours 14 minutes.",
+      "session": "s07",
+      "day": 60,
+      "lastUsedDay": 55,
+      "strength": 0.62,
+      "uses": 2,
+      "source": "user",
+      "created": 1786968000000,
+      "lastUsed": 1787400000000,
+      "tokens": [
+        "ola",
+        "ran",
+        "first",
+        "half",
+        "marathon",
+        "wrocław",
+        "hours",
+        "minutes"
+      ]
+    },
+    {
+      "ref": "job_skyward",
+      "id": "93e76ebcbb495f63ab9b61a555c550ea3fc9f94b99b71687128d9fe1a33f508e",
+      "short": "93e76ebc",
+      "text": "Ola's new job is full time product designer at Skyward, an aviation analytics startup.",
+      "session": "s08",
+      "day": 40,
+      "lastUsedDay": 10,
+      "strength": 0.88,
+      "uses": 2,
+      "source": "user",
+      "created": 1788696000000,
+      "lastUsed": 1791288000000,
+      "tokens": [
+        "ola's",
+        "new",
+        "job",
+        "full",
+        "time",
+        "product",
+        "designer",
+        "skyward",
+        "aviation",
+        "analytics",
+        "startup"
+      ]
+    },
+    {
+      "ref": "team_tomasz",
+      "id": "0c69e6fb4c5b2c67116eea468cb098fe75a6b39b14e88d9bbf4464d211f191f1",
+      "short": "0c69e6fb",
+      "text": "Her team at Skyward is two designers and a research lead named Tomasz.",
+      "session": "s08",
+      "day": 38,
+      "lastUsedDay": 12,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1788868800000,
+      "lastUsed": 1791115200000,
+      "tokens": [
+        "team",
+        "skyward",
+        "two",
+        "designers",
+        "research",
+        "lead",
+        "named",
+        "tomasz"
+      ]
+    },
+    {
+      "ref": "commute_train",
+      "id": "07d70f856b3b80c76261a7e5fdb13f9b661e02407c9a09dee3491e7b8ef772a7",
+      "short": "07d70f85",
+      "text": "She commutes by train and writes on the ride using only the laptop battery.",
+      "session": "s08",
+      "day": 36,
+      "lastUsedDay": 9,
+      "strength": 0.66,
+      "uses": 2,
+      "source": "user",
+      "created": 1789041600000,
+      "lastUsed": 1791374400000,
+      "tokens": [
+        "commutes",
+        "train",
+        "writes",
+        "ride",
+        "using",
+        "only",
+        "laptop",
+        "battery"
+      ]
+    },
+    {
+      "ref": "defence_dec",
+      "id": "74b890f4e4831c12b5b49f48a9b7c3d91a0a2259b609e3a8bd32cc7fdef6ccb5",
+      "short": "74b890f4",
+      "text": "Her thesis defence is booked for 10 December in the psychology building.",
+      "session": "s08",
+      "day": 34,
+      "lastUsedDay": 8,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1789214400000,
+      "lastUsed": 1791460800000,
+      "tokens": [
+        "thesis",
+        "defence",
+        "booked",
+        "december",
+        "psychology",
+        "building"
+      ]
+    },
+    {
+      "ref": "rent_raise",
+      "id": "633a10bed3417aec499046da804fd2508aa024e789669ef4e486cb891dbecf72",
+      "short": "633a10be",
+      "text": "The Wrocław landlord raised the rent, so she looks for a new flat near the office.",
+      "session": "s08",
+      "day": 32,
+      "lastUsedDay": 6,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1789387200000,
+      "lastUsed": 1791633600000,
+      "tokens": [
+        "wrocław",
+        "landlord",
+        "raised",
+        "rent",
+        "looks",
+        "new",
+        "flat",
+        "near",
+        "office"
+      ]
+    },
+    {
+      "ref": "macbook",
+      "id": "0eb9deecd1d9bfd68afd15eea62d6c7920582f2425dbb0e63d8af4009d61aed1",
+      "short": "0eb9deec",
+      "text": "The machine Ola writes her thesis on is a used MacBook Air with Apple silicon.",
+      "session": "s08",
+      "day": 70,
+      "lastUsedDay": 14,
+      "strength": 0.8,
+      "uses": 2,
+      "source": "user",
+      "created": 1786104000000,
+      "lastUsed": 1790942400000,
+      "tokens": [
+        "machine",
+        "ola",
+        "writes",
+        "thesis",
+        "used",
+        "macbook",
+        "air",
+        "apple",
+        "silicon"
+      ]
+    },
+    {
+      "ref": "cycling_club",
+      "id": "ae07831df574a68aba7ef04dc94a22f9cbd1d49f51958a7d7922dc04cf80a903",
+      "short": "ae07831d",
+      "text": "She joined a Thursday cycling club in Wrocław and stopped the Sunday runs of Kraków.",
+      "session": "s09",
+      "day": 25,
+      "lastUsedDay": 4,
+      "strength": 0.76,
+      "uses": 2,
+      "source": "user",
+      "created": 1789992000000,
+      "lastUsed": 1791806400000,
+      "tokens": [
+        "joined",
+        "thursday",
+        "cycling",
+        "club",
+        "wrocław",
+        "stopped",
+        "sunday",
+        "runs",
+        "kraków"
+      ]
+    },
+    {
+      "ref": "class_sat",
+      "id": "14f2c3c70fe84eb3e1700374002510e993cb9d3040b553037285c0c8d547ea6e",
+      "short": "14f2c3c7",
+      "text": "After the move Ola teaches a Saturday design class in Wrocław, a morning workshop for juniors.",
+      "session": "s09",
+      "day": 22,
+      "lastUsedDay": 5,
+      "strength": 0.72,
+      "uses": 2,
+      "source": "user",
+      "created": 1790251200000,
+      "lastUsed": 1791720000000,
+      "tokens": [
+        "after",
+        "move",
+        "ola",
+        "teaches",
+        "saturday",
+        "design",
+        "class",
+        "wrocław",
+        "morning",
+        "workshop",
+        "juniors"
+      ]
+    },
+    {
+      "ref": "deadline_nov",
+      "id": "6a8ca55528515b2eebdcf4bc4142dd2896cff55ad9efe8ed799fd97a76c8c1c6",
+      "short": "6a8ca555",
+      "text": "Ola's thesis submission deadline is now 18 November, after the original date slipped.",
+      "session": "s09",
+      "day": 20,
+      "lastUsedDay": 3,
+      "strength": 0.86,
+      "uses": 2,
+      "source": "user",
+      "created": 1790424000000,
+      "lastUsed": 1791892800000,
+      "tokens": [
+        "ola's",
+        "thesis",
+        "submission",
+        "deadline",
+        "now",
+        "november",
+        "after",
+        "original",
+        "date",
+        "slipped"
+      ]
+    },
+    {
+      "ref": "sister_kaja",
+      "id": "51efd78c5e1f439992dfe244804af881b82f89d725a20ed617a940a3f0ae5620",
+      "short": "51efd78c",
+      "text": "Ola's older sister Kaja is a physiotherapist in Poznań and expects her first baby in February.",
+      "session": "s09",
+      "day": 18,
+      "lastUsedDay": 7,
+      "strength": 0.68,
+      "uses": 2,
+      "source": "user",
+      "created": 1790596800000,
+      "lastUsed": 1791547200000,
+      "tokens": [
+        "ola's",
+        "older",
+        "sister",
+        "kaja",
+        "physiotherapist",
+        "poznań",
+        "expects",
+        "first",
+        "baby",
+        "february"
+      ]
+    },
+    {
+      "ref": "wedding_june",
+      "id": "4e98a43435956d896c991602a7b00047d31a6603a487efd96e4394ccdcadadb1",
+      "short": "4e98a434",
+      "text": "She will be a bridesmaid at her cousin's wedding in Zakopane next June.",
+      "session": "s09",
+      "day": 15,
+      "lastUsedDay": 4,
+      "strength": 0.66,
+      "uses": 2,
+      "source": "user",
+      "created": 1790856000000,
+      "lastUsed": 1791806400000,
+      "tokens": [
+        "will",
+        "bridesmaid",
+        "cousin's",
+        "wedding",
+        "zakopane",
+        "next",
+        "june"
+      ]
+    },
+    {
+      "ref": "birthday_dinner",
+      "id": "15d0efd0d8f70e65264aa38991ec419e25a1f2b3f920960007334c7a2950b09c",
+      "short": "15d0efd0",
+      "text": "Ola plans a small birthday dinner on 14 March with Piotr and Mateusz.",
+      "session": "s09",
+      "day": 12,
+      "lastUsedDay": 2,
+      "strength": 0.7,
+      "uses": 2,
+      "source": "user",
+      "created": 1791115200000,
+      "lastUsed": 1791979200000,
+      "tokens": [
+        "ola",
+        "plans",
+        "small",
+        "birthday",
+        "dinner",
+        "march",
+        "piotr",
+        "mateusz"
+      ]
+    },
+    {
+      "ref": "vega_window",
+      "id": "d00eeeda8c6bfd23d0868679fcd527174d0459ce81c97362a7d15d45b5428a6e",
+      "short": "d00eeeda",
+      "text": "Vega sleeps on the windowsill above the bike path and watches the crows.",
+      "session": "s09",
+      "day": 10,
+      "lastUsedDay": 1,
+      "strength": 0.64,
+      "uses": 2,
+      "source": "user",
+      "created": 1791288000000,
+      "lastUsed": 1792065600000,
+      "tokens": [
+        "vega",
+        "sleeps",
+        "windowsill",
+        "above",
+        "bike",
+        "path",
+        "watches",
+        "crows"
+      ]
+    },
+    {
+      "ref": "gouache_sky",
+      "id": "b63c5e249c7f76702948c9dcae6a2bc52d5ba4f0773f8590cb769ccf80da42cf",
+      "short": "b63c5e24",
+      "text": "She started painting small gouache studies of the night sky at the weekend.",
+      "session": "s09",
+      "day": 8,
+      "lastUsedDay": 1,
+      "strength": 0.58,
+      "uses": 2,
+      "source": "user",
+      "created": 1791460800000,
+      "lastUsed": 1792065600000,
+      "tokens": [
+        "started",
+        "painting",
+        "small",
+        "gouache",
+        "studies",
+        "night",
+        "sky",
+        "weekend"
+      ]
+    },
+    {
+      "ref": "desk_stand",
+      "id": "54fb97a481add5cc9fa2862d144cbe7c5fd90867f2822f40524b60a79e5116f2",
+      "short": "54fb97a4",
+      "text": "Ola bought a standing desk converter and works standing when her back aches.",
+      "session": "s09",
+      "day": 6,
+      "lastUsedDay": 1,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1791633600000,
+      "lastUsed": 1792065600000,
+      "tokens": [
+        "ola",
+        "bought",
+        "standing",
+        "desk",
+        "converter",
+        "works",
+        "when",
+        "back",
+        "aches"
+      ]
+    },
+    {
+      "ref": "piotr_easter",
+      "id": "68082dd8629d63ba10d6aacd677bcd491010d568733775538ae1a2ae601ac1ce",
+      "short": "68082dd8",
+      "text": "Piotr cooks the Easter dinner at her mother's flat in Gdańsk this year.",
+      "session": "s09",
+      "day": 5,
+      "lastUsedDay": 1,
+      "strength": 0.62,
+      "uses": 2,
+      "source": "user",
+      "created": 1791720000000,
+      "lastUsed": 1792065600000,
+      "tokens": [
+        "piotr",
+        "cooks",
+        "easter",
+        "dinner",
+        "mother's",
+        "flat",
+        "gdańsk",
+        "year"
+      ]
+    },
+    {
+      "ref": "late_messages",
+      "id": "395bd46c9bcf3ce39827816db68ee191c1c7b352cfec28d3fb6ef2dd34af40a8",
+      "short": "395bd46c",
+      "text": "She is answering design messages late at night again, which wrecks her morning writing block.",
+      "session": "s09",
+      "day": 4,
+      "lastUsedDay": 1,
+      "strength": 0.6,
+      "uses": 2,
+      "source": "user",
+      "created": 1791806400000,
+      "lastUsed": 1792065600000,
+      "tokens": [
+        "answering",
+        "design",
+        "messages",
+        "late",
+        "night",
+        "again",
+        "which",
+        "wrecks",
+        "morning",
+        "writing",
+        "block"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q01",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "When is my birthday?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "ed35beb11eb863cd04135780ee9752d0865c822dd9af0301a93256830fb084b2"
+      ],
+      "goldShort": [
+        "ed35beb1"
+      ],
+      "goldRefs": [
+        "birthday"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "14 march"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Your birthday is 14 March.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "birthday"
+      ],
+      "reachableRefs": [
+        "birthday"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q02",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "What topic does my thesis study?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "619f3b3d633741844ab06d873d8ebae707b19cd9a67ff10ac6e3940c4d542117"
+      ],
+      "goldShort": [
+        "619f3b3d"
+      ],
+      "goldRefs": [
+        "thesis_topic"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "cognitive load",
+        "navigation"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Cognitive load in navigation apps for elderly drivers.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "topic",
+        "thesis",
+        "study"
+      ],
+      "reachableRefs": [
+        "thesis_topic"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q03",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "Who supervises my thesis?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "5df817e4d5417ba4413a4706be5bc66c0f7d48b45a38338d89eed44c8bc430fd"
+      ],
+      "goldShort": [
+        "5df817e4"
+      ],
+      "goldRefs": [
+        "advisor_ewa"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "zielińska",
+        "friday"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Dr. Ewa Zielińska, who expects a written update every Friday.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "supervises",
+        "thesis"
+      ],
+      "reachableRefs": [
+        "advisor_ewa"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q04",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "What does my brother Kuba study?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "17b0a9f9eec006eccf1183a1a107d67bad835fab6d2c71ac6a4d8a0db7983e9c"
+      ],
+      "goldShort": [
+        "17b0a9f9"
+      ],
+      "goldRefs": [
+        "brother_kuba"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "dentistry",
+        "lublin"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Dentistry in Lublin.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "brother",
+        "kuba",
+        "study"
+      ],
+      "reachableRefs": [
+        "brother_kuba"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q05",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "Which camera do I use for night photographs?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "ba3fcdad6fd641ec8a1e725bd435298c1ecf7e826bf9fb7c5572ad5bd7f5b229"
+      ],
+      "goldShort": [
+        "ba3fcdad"
+      ],
+      "goldRefs": [
+        "camera_fuji"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "fujifilm"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "A used Fujifilm X-T30.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "camera",
+        "night",
+        "photographs"
+      ],
+      "reachableRefs": [
+        "camera_fuji"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q06",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "What language do I draft my thesis chapters in?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "885591c58c0ab8ac23c09db0c567862b8674c295480b2800c871f9f809a5f44b"
+      ],
+      "goldShort": [
+        "885591c5"
+      ],
+      "goldRefs": [
+        "polish_drafts"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "polish"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Polish, with the English abstract last.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "language",
+        "draft",
+        "thesis",
+        "chapters"
+      ],
+      "reachableRefs": [
+        "polish_drafts"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q07",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "What dog does my neighbour Henryk have?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "23558d0276069974fccd9cadd107818075362a703fd79142541f7f632093931a"
+      ],
+      "goldShort": [
+        "23558d02"
+      ],
+      "goldRefs": [
+        "neighbour_dog"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "beagle",
+        "bursztynek"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "An old beagle called Bursztynek.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "dog",
+        "neighbour",
+        "henryk"
+      ],
+      "reachableRefs": [
+        "neighbour_dog"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q08",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "What instrument do I play?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "435b12070d2742d1e564bec13d48fb7538a3e598237724d3c9e77c7432ad554f"
+      ],
+      "goldShort": [
+        "435b1207"
+      ],
+      "goldRefs": [
+        "guitar"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "guitar"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "A little acoustic guitar, three chords.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "instrument",
+        "play"
+      ],
+      "reachableRefs": [
+        "guitar"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q09",
+      "ability": "single-session-user",
+      "update": null,
+      "query": "When is my thesis defence?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "74b890f4e4831c12b5b49f48a9b7c3d91a0a2259b609e3a8bd32cc7fdef6ccb5"
+      ],
+      "goldShort": [
+        "74b890f4"
+      ],
+      "goldRefs": [
+        "defence_dec"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "december"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "10 December, in the psychology building.",
+      "why": "one stored fact",
+      "informativeTerms": [
+        "thesis",
+        "defence"
+      ],
+      "reachableRefs": [
+        "defence_dec"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q10",
+      "ability": "multi-session",
+      "update": null,
+      "query": "Where have I lived?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "cdc109fa1b6fa54c8e9e7a4d10ce75a6b9a0aada97ba603c4f0f67e4aa816512",
+        "ec52f237500125c524c21f829f0b18fd47628ebd75613803b63f22a21a7c46de",
+        "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e"
+      ],
+      "goldShort": [
+        "cdc109fa",
+        "ec52f237",
+        "fb06cb89"
+      ],
+      "goldRefs": [
+        "origin_gdansk",
+        "move_krakow",
+        "flat_wroclaw"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "gdańsk",
+        "kraków",
+        "wrocław"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Gdańsk, then Kraków, now Wrocław.",
+      "why": "three separate sessions",
+      "informativeTerms": [
+        "lived"
+      ],
+      "reachableRefs": [
+        "origin_gdansk",
+        "move_krakow",
+        "flat_wroclaw"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q11",
+      "ability": "multi-session",
+      "update": null,
+      "query": "Which client invoices do I have open or paid?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "fe99ffb34893e9ac3cc4f120bf4090a4433435a76a798eeef0463cc884626348",
+        "489a112a86237aeb28f3d6e39e7b95cacf150d0c6fa88ed4ac0625469a4fa655",
+        "f2c52f777e847530f8b24613a08f85f25206ebd6488b765fdd51b2e97c0314e8"
+      ],
+      "goldShort": [
+        "fe99ffb3",
+        "489a112a",
+        "f2c52f77"
+      ],
+      "goldRefs": [
+        "client_nordwind",
+        "client_zielone",
+        "client_astro"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "nordwind",
+        "zielone",
+        "astro"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Nordwind 2,400 PLN unpaid, Zielone 3,800 PLN paid, Astro a 5,000 PLN quote.",
+      "why": "three client memories",
+      "informativeTerms": [
+        "client",
+        "invoices",
+        "open"
+      ],
+      "reachableRefs": [
+        "client_nordwind",
+        "client_zielone",
+        "client_astro"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q12",
+      "ability": "multi-session",
+      "update": null,
+      "query": "What do you know about my brother and my sister?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "17b0a9f9eec006eccf1183a1a107d67bad835fab6d2c71ac6a4d8a0db7983e9c",
+        "51efd78c5e1f439992dfe244804af881b82f89d725a20ed617a940a3f0ae5620"
+      ],
+      "goldShort": [
+        "17b0a9f9",
+        "51efd78c"
+      ],
+      "goldRefs": [
+        "brother_kuba",
+        "sister_kaja"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "dentistry",
+        "physiotherapist"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Kuba studies dentistry in Lublin; Kaja is a physiotherapist in Poznań, expecting a baby.",
+      "why": "two family memories, two sessions",
+      "informativeTerms": [
+        "brother",
+        "sister"
+      ],
+      "reachableRefs": [
+        "brother_kuba",
+        "sister_kaja"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q13",
+      "ability": "multi-session",
+      "update": null,
+      "query": "How does my morning writing block work, and what wrecks it?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "8c2c7ec39491a879d053b1a00777e7a9bea67fc9a9f72ecf86e0515fb899e659",
+        "4946c6d8aebf16905775d1971b01bd1069008311f380073403c4087cc4cb5405",
+        "395bd46c9bcf3ce39827816db68ee191c1c7b352cfec28d3fb6ef2dd34af40a8"
+      ],
+      "goldShort": [
+        "8c2c7ec3",
+        "4946c6d8",
+        "395bd46c"
+      ],
+      "goldRefs": [
+        "morning_block",
+        "late_notes",
+        "late_messages"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "6 and 9",
+        "midnight"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "6-9am is protected; notes after midnight and late design messages wreck it.",
+      "why": "three habit memories",
+      "informativeTerms": [
+        "morning",
+        "writing",
+        "block",
+        "wrecks"
+      ],
+      "reachableRefs": [
+        "morning_block",
+        "late_notes",
+        "late_messages"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q14",
+      "ability": "multi-session",
+      "update": null,
+      "query": "Which invoices do I have, and how much am I saving for?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "53421d65d1a601495570d54d7222ea2235a24eec39e608f9cec4670dcebe6b6d",
+        "fe99ffb34893e9ac3cc4f120bf4090a4433435a76a798eeef0463cc884626348"
+      ],
+      "goldShort": [
+        "53421d65",
+        "fe99ffb3"
+      ],
+      "goldRefs": [
+        "lens_saving",
+        "client_nordwind"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "3,000",
+        "2,400"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "3,000 PLN being saved for a lens; a 2,400 PLN invoice still owed to her.",
+      "why": "numbers from two sessions",
+      "informativeTerms": [
+        "invoices",
+        "saving"
+      ],
+      "reachableRefs": [
+        "lens_saving",
+        "client_nordwind"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q15",
+      "ability": "multi-session",
+      "update": null,
+      "query": "Where and how often do I climb or walk?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "6c76fac67b316e0528a52e0de750ec68a8861b2303ba6f7c9993a8647ed44acb",
+        "a94627470cce22efc5dd33f2e900a0efd126b9fcaad0b24a6cc2797905f41737"
+      ],
+      "goldShort": [
+        "6c76fac6",
+        "a9462747"
+      ],
+      "goldRefs": [
+        "bouldering",
+        "walks_evening"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "bouldering",
+        "walk"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Bouldering twice a week at the gym; walks along the Oława after work.",
+      "why": "two habits",
+      "informativeTerms": [
+        "often",
+        "climb",
+        "walk"
+      ],
+      "reachableRefs": [
+        "bouldering",
+        "walks_evening"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q16",
+      "ability": "multi-session",
+      "update": null,
+      "query": "What have I told you about my cat Vega?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "2ebb0b602002bb9d704f12701fb0066a10c061b3afdf13e7a9b1be2ca60fd6a0",
+        "ddc0c2a17f0fe7e0cfc900d8ca72be220414a6dc94cb29e80656c89feb2746c7",
+        "d00eeeda8c6bfd23d0868679fcd527174d0459ce81c97362a7d15d45b5428a6e",
+        "e518e39b2f85246ca43b14e01cc87c3cbf21e5096966f319ada32df4336bde99"
+      ],
+      "goldShort": [
+        "2ebb0b60",
+        "ddc0c2a1",
+        "d00eeeda",
+        "e518e39b"
+      ],
+      "goldRefs": [
+        "vega_adopt",
+        "vega_sills",
+        "vega_window",
+        "vega_vet"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "vega",
+        "cable"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Adopted stray, chews cable sleeves, sleeps on the windowsill, vet check passed.",
+      "why": "four cat memories",
+      "informativeTerms": [
+        "cat",
+        "vega"
+      ],
+      "reachableRefs": [
+        "vega_adopt",
+        "vega_sills",
+        "vega_window",
+        "vega_vet"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q17",
+      "ability": "multi-session",
+      "update": null,
+      "query": "Which workshops or classes do I teach?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87",
+        "14f2c3c70fe84eb3e1700374002510e993cb9d3040b553037285c0c8d547ea6e"
+      ],
+      "goldShort": [
+        "8b04f223",
+        "14f2c3c7"
+      ],
+      "goldRefs": [
+        "workshop_ux",
+        "class_sat"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "wednesday",
+        "saturday"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "The Wednesday Intro to UX workshop in Kraków and now a Saturday design class in Wrocław.",
+      "why": "before and after across sessions",
+      "informativeTerms": [
+        "workshops",
+        "classes",
+        "teach"
+      ],
+      "reachableRefs": [
+        "workshop_ux",
+        "class_sat"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q18",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "Which did I take up first, the bouldering gym or the acoustic guitar?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "6c76fac67b316e0528a52e0de750ec68a8861b2303ba6f7c9993a8647ed44acb",
+        "435b12070d2742d1e564bec13d48fb7538a3e598237724d3c9e77c7432ad554f"
+      ],
+      "goldShort": [
+        "6c76fac6",
+        "435b1207"
+      ],
+      "goldRefs": [
+        "bouldering",
+        "guitar"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "bouldering"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Bouldering, about five months before the guitar.",
+      "why": "ordering by age",
+      "informativeTerms": [
+        "first",
+        "bouldering",
+        "gym",
+        "acoustic",
+        "guitar"
+      ],
+      "reachableRefs": [
+        "bouldering",
+        "guitar"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q19",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "Which came first, the move to Wrocław or the new job?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e",
+        "93e76ebcbb495f63ab9b61a555c550ea3fc9f94b99b71687128d9fe1a33f508e"
+      ],
+      "goldShort": [
+        "fb06cb89",
+        "93e76ebc"
+      ],
+      "goldRefs": [
+        "flat_wroclaw",
+        "job_skyward"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "september"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "The September move came first; Skyward started two weeks later.",
+      "why": "ordering by age",
+      "informativeTerms": [
+        "first",
+        "move",
+        "wrocław",
+        "new",
+        "job"
+      ],
+      "reachableRefs": [
+        "flat_wroclaw",
+        "job_skyward"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q20",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "Roughly how many days ago did I adopt Vega?",
+      "answerable": true,
+      "fromAge": true,
+      "absent": [],
+      "gold": [
+        "2ebb0b602002bb9d704f12701fb0066a10c061b3afdf13e7a9b1be2ca60fd6a0"
+      ],
+      "goldShort": [
+        "2ebb0b60"
+      ],
+      "goldRefs": [
+        "vega_adopt"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "120"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "About 120 days ago.",
+      "why": "elapsed time read off the memory age",
+      "informativeTerms": [
+        "adopt",
+        "vega"
+      ],
+      "reachableRefs": [
+        "vega_adopt"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q21",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "Which came earlier, my first freelance client or the research internship?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "be6cdc539643281499e7fd66657a1146ca2522035ba6a0352088ac9101c16bc5",
+        "83b8998aa47a888ff803a299cbbf2dfe4034f1e156fc776dbe7c2fdc781aa6f2"
+      ],
+      "goldShort": [
+        "be6cdc53",
+        "83b8998a"
+      ],
+      "goldRefs": [
+        "freelance_start",
+        "lab_internship"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "freelance"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "The first freelance client, about 50 days earlier.",
+      "why": "ordering by age",
+      "informativeTerms": [
+        "earlier",
+        "first",
+        "freelance",
+        "client",
+        "research",
+        "internship"
+      ],
+      "reachableRefs": [
+        "freelance_start",
+        "lab_internship"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q22",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "How many days ago did I start living alone in Wrocław?",
+      "answerable": true,
+      "fromAge": true,
+      "absent": [],
+      "gold": [
+        "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e"
+      ],
+      "goldShort": [
+        "fb06cb89"
+      ],
+      "goldRefs": [
+        "flat_wroclaw"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "55"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "About 55 days ago.",
+      "why": "elapsed time",
+      "informativeTerms": [
+        "living",
+        "wrocław"
+      ],
+      "reachableRefs": [
+        "flat_wroclaw"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q23",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "Which is older, my Fujifilm camera or the evening UX workshop?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "ba3fcdad6fd641ec8a1e725bd435298c1ecf7e826bf9fb7c5572ad5bd7f5b229",
+        "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87"
+      ],
+      "goldShort": [
+        "ba3fcdad",
+        "8b04f223"
+      ],
+      "goldRefs": [
+        "camera_fuji",
+        "workshop_ux"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "fujifilm"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "The camera — bought 45 days before the workshop started.",
+      "why": "ordering by age",
+      "informativeTerms": [
+        "fujifilm",
+        "camera",
+        "evening",
+        "workshop"
+      ],
+      "reachableRefs": [
+        "camera_fuji",
+        "workshop_ux"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q24",
+      "ability": "temporal-reasoning",
+      "update": null,
+      "query": "My Kraków flat, my Wrocław flat and Piotr — which came first?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "0174dd5e0a80df332f14bf625ac418a12654bcbf41c69806a4db919e38047e0a",
+        "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e",
+        "bb85730f54e5f6a6686e2ba9e0eebaca20885c358c6366e27923e7407d52fb93"
+      ],
+      "goldShort": [
+        "0174dd5e",
+        "fb06cb89",
+        "bb85730f"
+      ],
+      "goldRefs": [
+        "flat_krakow",
+        "flat_wroclaw",
+        "partner_piotr"
+      ],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [
+        "floreńska"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "The Kraków flat on Floreńska, long before Wrocław and before Piotr.",
+      "why": "three-way ordering",
+      "informativeTerms": [
+        "kraków",
+        "flat",
+        "wrocław",
+        "piotr",
+        "first"
+      ],
+      "reachableRefs": [
+        "flat_krakow",
+        "flat_wroclaw",
+        "partner_piotr"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q25",
+      "ability": "knowledge-update",
+      "update": "city",
+      "query": "Which city do I live in now?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e",
+        "0174dd5e0a80df332f14bf625ac418a12654bcbf41c69806a4db919e38047e0a"
+      ],
+      "goldShort": [
+        "fb06cb89",
+        "0174dd5e"
+      ],
+      "goldRefs": [
+        "flat_wroclaw",
+        "flat_krakow"
+      ],
+      "superseded": "flat_krakow",
+      "supersededRef": "flat_krakow",
+      "supersededId": "0174dd5e0a80df332f14bf625ac418a12654bcbf41c69806a4db919e38047e0a",
+      "supersededShort": "0174dd5e",
+      "stale": [
+        "floreńska"
+      ],
+      "mustAll": [
+        "wrocław"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Wrocław — the Kraków flat is superseded.",
+      "why": "city changed",
+      "informativeTerms": [
+        "city",
+        "live"
+      ],
+      "reachableRefs": [
+        "flat_wroclaw"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q26",
+      "ability": "knowledge-update",
+      "update": "job",
+      "query": "What is my current job?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "93e76ebcbb495f63ab9b61a555c550ea3fc9f94b99b71687128d9fe1a33f508e",
+        "83b8998aa47a888ff803a299cbbf2dfe4034f1e156fc776dbe7c2fdc781aa6f2"
+      ],
+      "goldShort": [
+        "93e76ebc",
+        "83b8998a"
+      ],
+      "goldRefs": [
+        "job_skyward",
+        "lab_internship"
+      ],
+      "superseded": "lab_internship",
+      "supersededRef": "lab_internship",
+      "supersededId": "83b8998aa47a888ff803a299cbbf2dfe4034f1e156fc776dbe7c2fdc781aa6f2",
+      "supersededShort": "83b8998a",
+      "stale": [
+        "internship"
+      ],
+      "mustAll": [
+        "skyward"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Full-time product designer at Skyward.",
+      "why": "job changed",
+      "informativeTerms": [
+        "job"
+      ],
+      "reachableRefs": [
+        "job_skyward"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q27",
+      "ability": "knowledge-update",
+      "update": "design-tool",
+      "query": "Which design tool do I use now?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "1797fec99e235d667fd86df5b75f215c7ba7ab68b02021a732aa5e440ae8a9e6",
+        "694d69bad7fd503464bb6b89e037425a6bd9249da971e05c7554bffecea1cb73"
+      ],
+      "goldShort": [
+        "1797fec9",
+        "694d69ba"
+      ],
+      "goldRefs": [
+        "tool_penpot",
+        "tool_figma"
+      ],
+      "superseded": "tool_figma",
+      "supersededRef": "tool_figma",
+      "supersededId": "694d69bad7fd503464bb6b89e037425a6bd9249da971e05c7554bffecea1cb73",
+      "supersededShort": "694d69ba",
+      "stale": [
+        "figma"
+      ],
+      "mustAll": [
+        "penpot"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Penpot, self-hosted for client projects.",
+      "why": "tool preference changed",
+      "informativeTerms": [
+        "design",
+        "tool"
+      ],
+      "reachableRefs": [
+        "tool_penpot"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q28",
+      "ability": "knowledge-update",
+      "update": "teaching",
+      "query": "Which weekday do I teach on?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "14f2c3c70fe84eb3e1700374002510e993cb9d3040b553037285c0c8d547ea6e",
+        "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87"
+      ],
+      "goldShort": [
+        "14f2c3c7",
+        "8b04f223"
+      ],
+      "goldRefs": [
+        "class_sat",
+        "workshop_ux"
+      ],
+      "superseded": "workshop_ux",
+      "supersededRef": "workshop_ux",
+      "supersededId": "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87",
+      "supersededShort": "8b04f223",
+      "stale": [
+        "wednesday"
+      ],
+      "mustAll": [
+        "saturday"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Saturday — the Wrocław design class.",
+      "why": "teaching slot changed",
+      "informativeTerms": [
+        "weekday",
+        "teach"
+      ],
+      "reachableRefs": [
+        "class_sat"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q29",
+      "ability": "knowledge-update",
+      "update": "relationship",
+      "query": "What is my relationship status?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "bb85730f54e5f6a6686e2ba9e0eebaca20885c358c6366e27923e7407d52fb93",
+        "c57cc50af19128d4a1a70503581ddfe8fa30e36509efeaaa8397d801fc66546f"
+      ],
+      "goldShort": [
+        "bb85730f",
+        "c57cc50a"
+      ],
+      "goldRefs": [
+        "partner_piotr",
+        "status_single"
+      ],
+      "superseded": "status_single",
+      "supersededRef": "status_single",
+      "supersededId": "c57cc50af19128d4a1a70503581ddfe8fa30e36509efeaaa8397d801fc66546f",
+      "supersededShort": "c57cc50a",
+      "stale": [
+        "single"
+      ],
+      "mustAll": [
+        "piotr"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "In a relationship with Piotr.",
+      "why": "status changed",
+      "informativeTerms": [
+        "relationship"
+      ],
+      "reachableRefs": [
+        "partner_piotr"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q30",
+      "ability": "knowledge-update",
+      "update": "cat",
+      "query": "What is my cat called?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "2ebb0b602002bb9d704f12701fb0066a10c061b3afdf13e7a9b1be2ca60fd6a0",
+        "73b4f0985c651e700aa8f31bbd5a220bb5189bc49f1e0f4a944500c54b02cc1d"
+      ],
+      "goldShort": [
+        "2ebb0b60",
+        "73b4f098"
+      ],
+      "goldRefs": [
+        "vega_adopt",
+        "stray_cat"
+      ],
+      "superseded": "stray_cat",
+      "supersededRef": "stray_cat",
+      "supersededId": "73b4f0985c651e700aa8f31bbd5a220bb5189bc49f1e0f4a944500c54b02cc1d",
+      "supersededShort": "73b4f098",
+      "stale": [
+        "kalwaryjska"
+      ],
+      "mustAll": [
+        "vega"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "Vega, named after the star in Lyra.",
+      "why": "an unnamed stray became a named cat",
+      "informativeTerms": [
+        "cat"
+      ],
+      "reachableRefs": [
+        "vega_adopt"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q31",
+      "ability": "knowledge-update",
+      "update": "laptop",
+      "query": "Which machine do I write my thesis on?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "0eb9deecd1d9bfd68afd15eea62d6c7920582f2425dbb0e63d8af4009d61aed1",
+        "75f399f9866fd49f394fb8bf5581e29d6a5632e085f797b5f55f7b3bc03001f6"
+      ],
+      "goldShort": [
+        "0eb9deec",
+        "75f399f9"
+      ],
+      "goldRefs": [
+        "macbook",
+        "desktop_windows"
+      ],
+      "superseded": "desktop_windows",
+      "supersededRef": "desktop_windows",
+      "supersededId": "75f399f9866fd49f394fb8bf5581e29d6a5632e085f797b5f55f7b3bc03001f6",
+      "supersededShort": "75f399f9",
+      "stale": [
+        "windows desktop"
+      ],
+      "mustAll": [
+        "macbook"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "A used MacBook Air with Apple silicon.",
+      "why": "machine changed",
+      "informativeTerms": [
+        "machine",
+        "write",
+        "thesis"
+      ],
+      "reachableRefs": [
+        "macbook"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q32",
+      "ability": "knowledge-update",
+      "update": "deadline",
+      "query": "When is my thesis submission deadline now?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "6a8ca55528515b2eebdcf4bc4142dd2896cff55ad9efe8ed799fd97a76c8c1c6",
+        "513b18156a869b260e9b8f1a4dc1c127a950fb3251a87db3648b324cd6e9758f"
+      ],
+      "goldShort": [
+        "6a8ca555",
+        "513b1815"
+      ],
+      "goldRefs": [
+        "deadline_nov",
+        "deadline_may"
+      ],
+      "superseded": "deadline_may",
+      "supersededRef": "deadline_may",
+      "supersededId": "513b18156a869b260e9b8f1a4dc1c127a950fb3251a87db3648b324cd6e9758f",
+      "supersededShort": "513b1815",
+      "stale": [
+        "for may"
+      ],
+      "mustAll": [
+        "18 november"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "18 November — the May plan slipped.",
+      "why": "deadline changed",
+      "informativeTerms": [
+        "thesis",
+        "submission",
+        "deadline"
+      ],
+      "reachableRefs": [
+        "deadline_nov"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q33",
+      "ability": "knowledge-update",
+      "update": "coffee",
+      "query": "How do I drink my coffee now?",
+      "answerable": true,
+      "fromAge": false,
+      "absent": [],
+      "gold": [
+        "ef7b2c55f9efd2f571516489ac72c9eb3ce1f1adcb353e91de6f6f05c6cc146c",
+        "d39b8a6d02f9c89316b672b873a3b92123514eaa691769f5e0cb5ca45ee3de3c"
+      ],
+      "goldShort": [
+        "ef7b2c55",
+        "d39b8a6d"
+      ],
+      "goldRefs": [
+        "coffee_v60",
+        "coffee_flatwhite"
+      ],
+      "superseded": "coffee_flatwhite",
+      "supersededRef": "coffee_flatwhite",
+      "supersededId": "d39b8a6d02f9c89316b672b873a3b92123514eaa691769f5e0cb5ca45ee3de3c",
+      "supersededShort": "d39b8a6d",
+      "stale": [
+        "three flat whites"
+      ],
+      "mustAll": [
+        "v60"
+      ],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "V60 filter at home, two cups at most.",
+      "why": "coffee habit changed",
+      "informativeTerms": [
+        "drink",
+        "coffee"
+      ],
+      "reachableRefs": [
+        "coffee_v60"
+      ],
+      "bestMemoryCoverage": null,
+      "abstainClass": null
+    },
+    {
+      "id": "q34",
+      "ability": "abstention",
+      "update": null,
+      "query": "What kind of vehicle do I own?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "vehicle",
+        "driving licence"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — no vehicle was ever mentioned)",
+      "why": "clean abstention",
+      "informativeTerms": [
+        "vehicle"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 0,
+      "abstainClass": "clean"
+    },
+    {
+      "id": "q35",
+      "ability": "abstention",
+      "update": null,
+      "query": "What is my height in centimetres?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "height",
+        "centimetres"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — no body measurements stored)",
+      "why": "clean abstention",
+      "informativeTerms": [
+        "height",
+        "centimetres"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 0,
+      "abstainClass": "clean"
+    },
+    {
+      "id": "q36",
+      "ability": "abstention",
+      "update": null,
+      "query": "What was the name of my primary school?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "primary school",
+        "grade school"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — schools were never discussed)",
+      "why": "near-miss abstention",
+      "informativeTerms": [
+        "primary",
+        "school"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 1,
+      "abstainClass": "near-miss"
+    },
+    {
+      "id": "q37",
+      "ability": "abstention",
+      "update": null,
+      "query": "Which hotel did you suggest for the conference?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "hotel",
+        "conference"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — no hotel or conference data)",
+      "why": "clean abstention",
+      "informativeTerms": [
+        "hotel",
+        "suggest",
+        "conference"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 0,
+      "abstainClass": "clean"
+    },
+    {
+      "id": "q38",
+      "ability": "abstention",
+      "update": null,
+      "query": "When does Piotr celebrate his birthday?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "piotr was born",
+        "birthday of piotr"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — Piotr is known, his birthday is not)",
+      "why": "near-miss abstention",
+      "informativeTerms": [
+        "piotr",
+        "celebrate",
+        "his",
+        "birthday"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 2,
+      "abstainClass": "near-miss"
+    },
+    {
+      "id": "q39",
+      "ability": "abstention",
+      "update": null,
+      "query": "What is the serial number of my MacBook Air?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "serial"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — the laptop is known, its serial is not)",
+      "why": "near-miss abstention",
+      "informativeTerms": [
+        "serial",
+        "macbook",
+        "air"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 2,
+      "abstainClass": "near-miss"
+    },
+    {
+      "id": "q40",
+      "ability": "abstention",
+      "update": null,
+      "query": "What is my bank account password?",
+      "answerable": false,
+      "fromAge": false,
+      "absent": [
+        "password",
+        "passphrase",
+        "credential"
+      ],
+      "gold": [],
+      "goldShort": [],
+      "goldRefs": [],
+      "superseded": null,
+      "supersededRef": null,
+      "supersededId": null,
+      "supersededShort": null,
+      "stale": [],
+      "mustAll": [],
+      "mustAny": [],
+      "mustNot": [],
+      "goldAnswer": "(unanswerable — credentials are never stored)",
+      "why": "clean abstention",
+      "informativeTerms": [
+        "bank",
+        "account",
+        "password"
+      ],
+      "reachableRefs": [],
+      "bestMemoryCoverage": 0,
+      "abstainClass": "clean"
+    }
+  ],
+  "updates": [
+    {
+      "topic": "city",
+      "oldRef": "flat_krakow",
+      "newRef": "flat_wroclaw",
+      "oldId": "0174dd5e0a80df332f14bf625ac418a12654bcbf41c69806a4db919e38047e0a",
+      "newId": "fb06cb89bdbab5cf799a84f7f3fb36f9bdeb796e92fe15af9e4d47f19e176d2e",
+      "oldDay": 395,
+      "newDay": 55,
+      "stale": [
+        "floreńska"
+      ],
+      "answer": [
+        "wrocław"
+      ]
+    },
+    {
+      "topic": "job",
+      "oldRef": "lab_internship",
+      "newRef": "job_skyward",
+      "oldId": "83b8998aa47a888ff803a299cbbf2dfe4034f1e156fc776dbe7c2fdc781aa6f2",
+      "newId": "93e76ebcbb495f63ab9b61a555c550ea3fc9f94b99b71687128d9fe1a33f508e",
+      "oldDay": 300,
+      "newDay": 40,
+      "stale": [
+        "internship"
+      ],
+      "answer": [
+        "skyward"
+      ]
+    },
+    {
+      "topic": "design-tool",
+      "oldRef": "tool_figma",
+      "newRef": "tool_penpot",
+      "oldId": "694d69bad7fd503464bb6b89e037425a6bd9249da971e05c7554bffecea1cb73",
+      "newId": "1797fec99e235d667fd86df5b75f215c7ba7ab68b02021a732aa5e440ae8a9e6",
+      "oldDay": 340,
+      "newDay": 30,
+      "stale": [
+        "figma"
+      ],
+      "answer": [
+        "penpot"
+      ]
+    },
+    {
+      "topic": "teaching",
+      "oldRef": "workshop_ux",
+      "newRef": "class_sat",
+      "oldId": "8b04f223bf7895b855ea5377a674d5fee282fc704c7cce9aabe29703064e8a87",
+      "newId": "14f2c3c70fe84eb3e1700374002510e993cb9d3040b553037285c0c8d547ea6e",
+      "oldDay": 245,
+      "newDay": 22,
+      "stale": [
+        "wednesday"
+      ],
+      "answer": [
+        "saturday"
+      ]
+    },
+    {
+      "topic": "relationship",
+      "oldRef": "status_single",
+      "newRef": "partner_piotr",
+      "oldId": "c57cc50af19128d4a1a70503581ddfe8fa30e36509efeaaa8397d801fc66546f",
+      "newId": "bb85730f54e5f6a6686e2ba9e0eebaca20885c358c6366e27923e7407d52fb93",
+      "oldDay": 200,
+      "newDay": 90,
+      "stale": [
+        "single"
+      ],
+      "answer": [
+        "piotr"
+      ]
+    },
+    {
+      "topic": "cat",
+      "oldRef": "stray_cat",
+      "newRef": "vega_adopt",
+      "oldId": "73b4f0985c651e700aa8f31bbd5a220bb5189bc49f1e0f4a944500c54b02cc1d",
+      "newId": "2ebb0b602002bb9d704f12701fb0066a10c061b3afdf13e7a9b1be2ca60fd6a0",
+      "oldDay": 180,
+      "newDay": 120,
+      "stale": [
+        "kalwaryjska"
+      ],
+      "answer": [
+        "vega"
+      ]
+    },
+    {
+      "topic": "laptop",
+      "oldRef": "desktop_windows",
+      "newRef": "macbook",
+      "oldId": "75f399f9866fd49f394fb8bf5581e29d6a5632e085f797b5f55f7b3bc03001f6",
+      "newId": "0eb9deecd1d9bfd68afd15eea62d6c7920582f2425dbb0e63d8af4009d61aed1",
+      "oldDay": 175,
+      "newDay": 70,
+      "stale": [
+        "windows desktop"
+      ],
+      "answer": [
+        "macbook"
+      ]
+    },
+    {
+      "topic": "deadline",
+      "oldRef": "deadline_may",
+      "newRef": "deadline_nov",
+      "oldId": "513b18156a869b260e9b8f1a4dc1c127a950fb3251a87db3648b324cd6e9758f",
+      "newId": "6a8ca55528515b2eebdcf4bc4142dd2896cff55ad9efe8ed799fd97a76c8c1c6",
+      "oldDay": 140,
+      "newDay": 20,
+      "stale": [
+        "for may"
+      ],
+      "answer": [
+        "18 november"
+      ]
+    },
+    {
+      "topic": "coffee",
+      "oldRef": "coffee_flatwhite",
+      "newRef": "coffee_v60",
+      "oldId": "d39b8a6d02f9c89316b672b873a3b92123514eaa691769f5e0cb5ca45ee3de3c",
+      "newId": "ef7b2c55f9efd2f571516489ac72c9eb3ce1f1adcb353e91de6f6f05c6cc146c",
+      "oldDay": 330,
+      "newDay": 35,
+      "stale": [
+        "three flat whites"
+      ],
+      "answer": [
+        "v60"
+      ]
+    }
+  ]
+}
