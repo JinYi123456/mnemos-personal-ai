@@ -10,7 +10,7 @@
 [3-minute video](#the-pitch-in-three-minutes) ·
 [Feedback on the platform](FEEDBACK.md)
 
-`Nebius Token Factory` · `NVIDIA Nemotron 3 Nano/Super/Ultra/Super-VL` · `Tavily` · MIT · 25 tests
+`Nebius Token Factory` · `NVIDIA Nemotron 3 Nano/Super/Ultra/Super-VL` · `Tavily` · MIT · 37 tests
 
 ![Mnemos: the memory sky with the live telemetry drawer open](assets/gallery-01-telemetry.png)
 
@@ -205,9 +205,11 @@ degrades politely.
 | `VAULT_TTL_DAYS` | 45 | sandbox vaults expire |
 
 ```bash
-npm test            # 25 tests: store, decay, citations, hybrid recall, agent loop,
+npm test            # 37 tests: store, decay, citations, hybrid recall, agent loop,
                     # SSRF guard, dream engine, nightly catch-up, MCP protocol
-npx tsc -p jsconfig.json --noEmit   # strict JS type-check, zero errors
+npm run typecheck                   # strict JS type-check over src/, public/, eval/, test/
+npm run eval                        # the live benchmark (spends ~$0.01, asks for --yes)
+npm run eval:mock                   # the same harness offline, spends nothing
 npm run doctor                      # vault audit: embedding coverage, dupes, contradictions,
                                     # staleness, secret leakage, red-zone overshoot
 ```
@@ -231,7 +233,7 @@ src/night.js      03:30 nightly dream + catch-up on boot
 public/           galaxy renderer, chat, ablation card, under-the-hood drawer, tour, sound
 eval/             LongMemEval-style benchmark harness + dataset + results
 deploy/           OpenShell policy + Nebius Jobs notes (honest, verified-or-labelled)
-test/             25 tests · tools/vault-doctor.js · .github/workflows/keep-alive.yml
+test/             37 tests · tools/vault-doctor.js · .github/workflows/keep-alive.yml
 ```
 
 ## The pitch in three minutes

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mnemos — the AI that dreams</title>
+<title>Mnemos — memory you can see, question, and own</title>
 <meta name="description" content="A privacy-first personal AI whose memory is a living star galaxy: cited recall, a Dream Engine you can watch consolidate, and a sky you can reshape — with NVIDIA Nemotron on Nebius Token Factory." />
 <meta property="og:title" content="Mnemos — memory you can see, question, and own" />
 <meta property="og:description" content="A private AI whose memory is a living sky. Answers cite the exact memories they used, click a star and watch the answer change without it, and give it an intention before it dreams. NVIDIA Nemotron 3 on Nebius Token Factory." />
@@ -48,17 +48,20 @@
 <section id="onboard" class="overlay hidden">
   <div class="onboard-card">
     <div class="onboard-star">✶</div>
-    <h1>Meet Mnemos</h1>
-    <p>A private AI that <b>remembers you</b> across sessions, shows its memory as a living galaxy,
-       and <b>dreams</b> — replaying your memories at night to distill insights, skills and let go of the rest.
-       Everything lives in a local vault you can read and export.</p>
+    <h1>Your memory, as a sky you can audit</h1>
+    <p>Mnemos is a private AI that <b>remembers you</b> and shows it: every memory is a star —
+       bright while it is used, dimming as it fades. Answers cite the exact memories behind them,
+       so you can click a citation, or <b>delete one memory and watch the answer change</b>.
+       Give it an intention before it sleeps and you wake to a brief with things to do.
+       It runs on NVIDIA Nemotron 3 through Nebius Token Factory, and your vault is a plain
+       JSON file you can export or burn.</p>
     <label for="owner-name">What should Mnemos call you?</label>
     <div class="onboard-row">
-      <input id="owner-name" maxlength="40" placeholder="Your name" autocomplete="off" />
+      <input id="owner-name" maxlength="40" placeholder="Your name" autocomplete="off" aria-label="What should Mnemos call you" />
       <button id="btn-owner" class="btn-primary">Wake Mnemos</button>
       <button id="btn-tour" class="btn-ghost" title="45 seconds: watch it reason, cite, then test a memory">▶ Watch it think first</button>
     </div>
-    <p class="onboard-hint">No key yet? Mnemos runs in <b>demo mode</b> — the galaxy, memory and decay work; generation wakes up once you add a free API key in <code>.env</code>.</p>
+    <p class="onboard-hint" id="onboard-note">Your own sandbox sky: nothing you type here is shared with any other visitor.</p>
   </div>
 </section>
 
@@ -91,7 +94,7 @@
     <div class="composer-row">
       <textarea id="input" rows="1" placeholder="Talk to Mnemos — it will recall, act, and remember…" autocomplete="off"></textarea>
       <button id="btn-attach" class="pill attach-btn" title="Attach a photo or screenshot — an NVIDIA vision model reads it into memory">📎 Photo</button>
-      <input type="file" id="attach-file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" />
+      <input type="file" id="attach-file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" aria-label="Attach a photo or screenshot to remember" />
       <button id="btn-send" class="btn-primary" title="Send">➤</button>
     </div>
     <div id="ticker" class="ticker" aria-live="polite"></div>
@@ -110,7 +113,7 @@
     </div>
   </div>
   <p class="panel-privacy" id="panel-privacy"></p>
-  <input type="file" id="import-file" accept="application/json,.json" class="hidden" />
+  <input type="file" id="import-file" accept="application/json,.json" class="hidden" aria-label="Import a Mnemos vault file" />
   <nav class="tabs">
     <button class="tab active" data-tab="timeline">Timeline</button>
     <button class="tab" data-tab="memories">Memories</button>
@@ -146,7 +149,7 @@
     <h1 id="ask-title" style="font-size:20px">Title</h1>
     <p id="ask-detail" class="onboard-hint" style="white-space:pre-line;text-align:left"></p>
     <div class="onboard-row">
-      <input id="ask-input" style="width:100%" />
+      <input id="ask-input" style="width:100%" aria-label="Answer" />
     </div>
     <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
       <button id="ask-ok" class="btn-primary">OK</button>
@@ -163,7 +166,7 @@
       <button id="arranger-close" class="pill" title="Close">✕</button>
     </div>
     <label class="arranger-row">
-      <input type="checkbox" id="arrange-arm-checkbox" />
+      <input type="checkbox" id="arrange-arm-checkbox" aria-label="Enable dragging individual stars" />
       <button id="arrange-arm" class="pill">✋ Drag stars: off</button>
     </label>
     <p class="arranger-hint">Arm dragging to grab stars directly, or pick a pattern — the whole sky glides there.</p>
@@ -233,7 +236,7 @@
   <div id="hood-models" class="hood-models"></div>
   <div id="hood-calls" class="hood-calls"></div>
   <div class="hood-foot">
-    <label class="hood-sound"><input type="checkbox" id="sound-toggle" /> sound</label>
+    <label class="hood-sound"><input type="checkbox" id="sound-toggle" aria-label="Interface sound effects" /> sound</label>
     <span id="hood-total" class="hood-total"></span>
   </div>
 </aside>

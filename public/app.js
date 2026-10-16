@@ -22,6 +22,11 @@ const els = {
   arrangerClose: $('arranger-close'),
 };
 
+/* Respect the OS setting: a sky that never stops moving is not for everyone, and
+   motion is the one thing a canvas app can get wrong for real users. */
+const REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MOTION = REDUCE ? 0 : 1;
+
 /* ---------- state ---------- */
 const state = {
   owner: null,
@@ -291,6 +296,7 @@ function drawAmbience() {
 }
 
 function drawMeteors(dt) {
+  if (REDUCE) return; // no shooting stars, no drifting: a still, legible sky
   nextMeteor -= dt;
   if (nextMeteor <= 0) {
     nextMeteor = 4 + Math.random() * 9;
@@ -378,14 +384,14 @@ function draw() {
     s.x += (s.homeX - s.x) * 0.12;
     s.y += (s.homeY - s.y) * 0.12;
     // gentle orbital drift: each star circles its home very slowly
-    s.tx = s.x + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio;
-    s.ty = s.y + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio;
+    s.tx = s.x + Math.cos(t * 0.05 * s.speed + s.tw) * 8 * devicePixelRatio * MOTION;
+    s.ty = s.y + Math.sin(t * 0.04 * s.speed + s.tw) * 6 * devicePixelRatio * MOTION;
     const wx = s.tx, wy = s.ty;
     const d = Math.hypot(wx + view.x - mouse.x, wy + view.y - mouse.y) * view.zoom;
     const hover = d < 26 * devicePixelRatio;
     const lit = state.highlighted.has(s.id);
     const flare = flareIds.has(s.id);
-    const tw = 0.72 + 0.28 * Math.sin(t * 2.2 * s.speed + s.tw);
+    const tw = REDUCE ? 0.9 : 0.72 + 0.28 * Math.sin(t * 2.2 * s.speed + s.tw);
     let alpha = s.base * tw;
     let r = s.r;
     if (lit) { alpha = 1; r *= 1.6; }

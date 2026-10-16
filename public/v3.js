@@ -266,6 +266,14 @@ async function renderOwnership() {
     el.innerHTML = s.mode === 'sandbox'
       ? `Your own sandbox vault <code>M${String(s.sid).slice(0, 8)}</code> — no account, no shared index, no telemetry. Only your model calls leave this browser. Export it, or burn it; idle vaults expire on their own.`
       : 'Owner vault on this machine — the same file the MCP server and the nightly dream read.';
+    // The first-run note must not read like a broken install: on the hosted demo
+    // it should say what you get, not how to configure a key.
+    const note = $('onboard-note');
+    if (note) {
+      note.innerHTML = s.mode === 'sandbox'
+        ? 'Nothing here is shared with another visitor — your sky, your vault, one click to burn it. Try: ask a question, click a citation, then <b>forget</b> one memory and watch the answer change.'
+        : 'No key yet? The galaxy, memory, decay and dream replay still work offline; generation wakes up once you add a free API key in <code>.env</code>.';
+    }
   } catch {
     el.textContent = '';
   }

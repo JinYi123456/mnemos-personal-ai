@@ -1,7 +1,7 @@
 {
   "name": "mnemos-personal-ai",
   "version": "1.0.0",
-  "description": "Mnemos — the personal AI that dreams: a privacy-first memory-keeper with a visual memory galaxy, a replayable Dream Engine, and a transparent agentic loop. Built for the Nebius x NVIDIA Global AI Hackathon (Best Apps and Agents track).",
+  "description": "Mnemos — memory you can see, question, and own. A private personal AI whose memories render as a living sky, cites the exact memory behind every answer, lets you ablate one and watch the answer change, and dreams toward the intention you give it. NVIDIA Nemotron 3 on Nebius Token Factory. Nebius x NVIDIA Global AI Hackathon (Personal AI track).",
   "private": true,
   "type": "module",
   "main": "src/server.js",
@@ -9,7 +9,12 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test \"test/*.test.js\"",
-    "doctor": "node tools/vault-doctor.js"
+    "doctor": "node tools/vault-doctor.js",
+    "typecheck": "tsc -p jsconfig.json --noEmit",
+    "mcp": "node src/mcp.js",
+    "eval": "node eval/run.mjs --mode live --yes",
+    "eval:mock": "node eval/run.mjs --mode mock",
+    "eval:report": "node eval/report.mjs"
   },
   "engines": {
     "node": ">=20"
