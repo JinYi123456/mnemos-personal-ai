@@ -31,7 +31,15 @@ if (store.vault.memories.length === 0) {
 
 const env = readEnvFile(ROOT);
 const llm = new LLM(buildProviders(ROOT));
-const brain = new Brain(store, llm, env.TAVILY_API_KEY || process.env.TAVILY_API_KEY || '', env.PUBLIC_BASE_URL || '');
+const brain = new Brain(store, llm, env.TAVILY_API_KEY || process.env.TAVILY_API_KEY || '', env.PUBLIC_BASE_URL || '');// Pin every model ID to what the provider catalog serves *today* before the
+// first call. Catalogs drift (Nano-Omni was deprecated mid-hackathon), and a
+// stale pinned ID would otherwise take the whole public demo down.
+const boot = await llm.syncCatalog();
+if (boot && boot.healed && boot.healed.length) {
+  console.log(`  ✦ catalog self-heal on ${boot.provider}:`);
+  for (const h of boot.healed) console.log(`    ${h}`);
+}
+
 // Dreams extend outward: with a Tavily key, the Dreamer also searches the web
 // (through the same brain API) and dreams about the world, storing web memories.
 const dreamer = new Dreamer(store, llm, {
