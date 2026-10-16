@@ -250,7 +250,7 @@ export class LLM {
 
   /**
    * Fold one metered completion into the spend ledger.
-   * @param {{tier?: string, model?: string, provider?: string, usage?: {promptTokens:number, completionTokens:number, reasoningTokens:number}, ms?: number}} rec
+   * @param {{tier?: string, model?: string, provider?: string, account?: string, usage?: {promptTokens:number, completionTokens:number, reasoningTokens:number, cachedTokens?: number}, ms?: number}} rec
    */
   #meter(rec) {
     const u = rec.usage || { promptTokens: 0, completionTokens: 0, reasoningTokens: 0 };
@@ -337,6 +337,47 @@ export class LLM {
   }
 
   /**
+   * Machine-readable model card from `GET /v1/models?verbose=true` — published
+   * price, context length, rate ceiling, quantization. The under-the-hood drawer
+   * reads real numbers off this instead of quoting a blog post.
+   * @param {string} model
+   */
+  async modelCard(model) {
+    const p = this.active;
+    if (!p || p.kind !== 'openai' || !model) return null;
+    if (this.#cardCache && this.#cardCache.at > Date.now() - 600000) {
+      return this.#cardCache.map[model] || null;
+    }
+    try {
+      const res = await fetch(`${p.baseUrl}/models?verbose=true`, {
+        headers: { Authorization: `Bearer ${p.apiKey}` },
+      });
+      if (!res.ok) return null;
+      const data = /** @type {any} */ (await res.json());
+      /** @type {Record<string, any>} */
+      const map = {};
+      for (const m of /** @type {any[]} */ (data?.data || [])) {
+        if (m?.id) {
+          map[m.id] = {
+            id: m.id,
+            object: m.object,
+            owned_by: m.owned_by,
+            created: m.created,
+            ...m,
+          };
+        }
+      }
+      this.#cardCache = { at: Date.now(), map };
+      return map[model] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** @type {{at:number, map:Record<string,any>}|null} */
+  #cardCache = null;
+
+  /**
    * Back-compatible entry point used by the UI on first load.
    */
   async autodetect() {
@@ -358,7 +399,8 @@ export class LLM {
    * model catalog once when a failure looks like a stale model ID — that keeps
    * the public demo on Nebius instead of silently failing over to a fallback.
    * @param {{messages: any[], json?: boolean, maxTokens?: number, temperature?: number,
-   *          tier?: 'fast'|'reason'|'frontier', tools?: any[], signal?: AbortSignal}} opts
+   *          tier?: 'fast'|'reason'|'frontier', tools?: any[], signal?: AbortSignal,
+   *          account?: string}} opts
    * @returns {Promise<{text: string, provider: string, model: string, tier: string, ms: number,
    *          usage: {promptTokens:number, completionTokens:number, reasoningTokens:number, cachedTokens:number},
    *          toolCalls: any[], cost: {usd:number, known:boolean}}>}
@@ -396,7 +438,7 @@ export class LLM {
             text: raw.text, provider: p.id, model, tier, ms: Date.now() - t0, usage,
             toolCalls: raw.toolCalls || [], cost,
           };
-          this.#meter({ tier, model, provider: p.id, usage, ms: out.ms });
+          this.#meter({ tier, model, provider: p.id, usage, ms: out.ms, account: opts.account });
           return out;
         } catch (e) {
           const err = /** @type {Error} */ (e);
@@ -429,12 +471,10 @@ export class LLM {
    * @returns {Promise<{text: string, model: string, usage: any, toolCalls: any[]}>}
    */
   async #openai(p, opts, tier) {
-    const wantReason = tier === 'frontier'
-      ? false
-      : (tier === 'reason' || opts.reasoning === true);
+    const wantReason = tier === 'frontier' || tier === 'reason' || opts.reasoning === true;
     const model = tier === 'frontier' && p.frontierModel
       ? p.frontierModel
-      : (wantReason && p.reasoningModel ? p.reasoningModel : p.model);
+      : (tier === 'reason' && p.reasoningModel ? p.reasoningModel : p.model);
     const body = /** @type {any} */ ({
       model,
       messages: opts.messages,
@@ -447,11 +487,14 @@ export class LLM {
     if (/nemotron/i.test(model) && !wantReason && process.env.NEBIUS_KEEP_REASONING !== '1') {
       body.messages = [{ role: 'system', content: '/no_think' }, ...opts.messages];
     }
-    // Reasoning models need room to think before the answer.
-    if (wantReason && model === (p.reasoningModel || p.frontierModel)) {
+    // Reasoning tiers need room to think before the answer, and JSON mode is
+    // dropped for them — a thinking model forced to obey a response schema has
+    // historically returned an empty `content` here.
+    if (wantReason) {
       body.max_tokens = Math.max(3000, opts.maxTokens ?? 0);
+    } else if (opts.json) {
+      body.response_format = { type: 'json_object' };
     }
-    if (opts.json && !(wantReason && model === p.reasoningModel)) body.response_format = { type: 'json_object' };
     // Native function calling: every Nemotron 3 model on Token Factory is tagged
     // `function_calling`, so the agent loop uses real tool_calls instead of a
     // hand-rolled JSON protocol. `tool_choice` only accepts "auto" here.
@@ -536,9 +579,10 @@ export class LLM {
    * Embed a batch of texts. Tries providers in order; returns null when no
    * provider supports embeddings — callers must degrade to lexical recall.
    * @param {string[]} texts
-   * @returns {Promise<{vectors: number[][], provider: string, model: string}|null>}
+   * @param {string} [account] who is paying (spend ledger)
+   * @returns {Promise<{vectors: number[][], provider: string, model: string, usd: number}|null>}
    */
-  async embed(texts) {
+  async embed(texts, account) {
     /** @type {Error[]} */
     const errors = [];
     const ordered = [this.active, ...this.providers.filter((p) => p.id !== this.activeId)]
@@ -572,7 +616,10 @@ export class LLM {
           throw new Error(`${p.id}: embedding count/dimension mismatch`);
         }
         this.health[p.id].ok += 1;
-        return { vectors, provider: p.id, model };
+        const promptTokens = Number(data?.usage?.prompt_tokens ?? 0) || Math.ceil(texts.join(' ').length / 4);
+        const cost = LLM.costUSD(model, promptTokens, 0);
+        this.#meter({ tier: 'embed', model, provider: p.id, account, ms: 0, usage: { promptTokens, completionTokens: 0, reasoningTokens: 0, cachedTokens: 0 } });
+        return { vectors, provider: p.id, model, usd: cost.usd };
       } catch (e) {
         const err = /** @type {Error} */ (e);
         this.health[p.id].fail += 1;

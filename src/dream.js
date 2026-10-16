@@ -9,13 +9,14 @@ export class Dreamer {
   /**
    * @param {import('./store.js').Store} store
    * @param {LLM} llm
-   * @param {{searcher?: {search:(q:string)=>Promise<any>}|null}} [opts]
+   * @param {{searcher?: {search:(q:string)=>Promise<any>}|null, account?: string}} [opts]
    */
-  constructor(store, llm, { searcher = null } = {}) {
+  constructor(store, llm, { searcher = null, account = 'owner' } = {}) {
     this.store = store;
     this.llm = llm;
     /** @type {{search:(q:string)=>Promise<any>}|null} external search (Tavily) */
     this.searcher = /** @type {{search:(q:string)=>Promise<any>}|null} */ (searcher);
+    this.account = account;
     this.running = false;
   }
 
@@ -63,6 +64,7 @@ export class Dreamer {
         const { text: qText } = await this.llm.chat({
           json: true,
           maxTokens: 240, // reasoning models need room even for one JSON line
+          account: this.account,
           messages: [
             { role: 'system', content: 'Turn this memory into ONE short web-search query (max 8 words) about a topic the person would love to learn overnight. Reply ONLY JSON: {"query":"…"}' },
             { role: 'user', content: qSeed },
@@ -100,9 +102,11 @@ export class Dreamer {
       try {
         const list = sampled.map((s, i) => `${i}. ${s.text}`).join('\n');
         const { text } = await this.llm.chat({
-          json: true,
-          reasoning: true,
-          maxTokens: 900,
+          // The deep-thought step runs on the flagship open model — Nemotron 3
+          // Ultra 550B with reasoning on. One dream costs cents, not dollars.
+          tier: 'frontier',
+          account: this.account,
+          maxTokens: 1400,
           messages: [
             {
               role: 'system',
@@ -135,6 +139,7 @@ export class Dreamer {
               const { text: nameText } = await this.llm.chat({
                 json: true,
                 maxTokens: 60,
+                account: this.account,
                 messages: [
                   { role: 'system', content: 'Invent a poetic constellation name (1-3 words, mythological or celestial feel) for a link between these memories. Reply ONLY JSON: {"name":"..."}' },
                   { role: 'user', content: link.text.slice(0, 200) },
