@@ -362,5 +362,25 @@ const Photo = (() => {
   return { get dataUrl() { return dataUrl; }, clear };
 })();
 
+/* ---------- the brief a dream left behind, met at the door ---------- */
+async function showBriefIfWaiting() {
+  try {
+    const r = await api('/api/brief');
+    const b = r && r.brief;
+    if (!b || b.read) return;
+    const age = Math.round((Date.now() - b.created) / 60000);
+    bubble('ai', `<div class="brief-card">
+      <b>☀︎ While you slept${b.intention ? ` · about “${esc(b.intention)}”` : ''}</b>
+      <p>${esc(b.text)}</p>
+      ${(b.next || []).length ? `<ul class="brief-next">${b.next.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : ''}
+      <span class="brief-age">${age < 60 ? `${age} min ago` : `${Math.round(age / 60)} h ago`} · written by Nemotron 3 Ultra on Nebius</span>
+    </div>`);
+    await api('/api/brief', { method: 'POST' });
+    toast('☀︎ Mnemos left you a morning brief');
+    if (window.Sound) Sound.wake();
+  } catch { /* offline or owner-mode: no brief to show */ }
+}
+setTimeout(showBriefIfWaiting, 1800);
+
 /* expose for app.js's chat stream hooks (loaded earlier, called later) */
-Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership });
+Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership, showBriefIfWaiting });

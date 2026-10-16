@@ -406,6 +406,17 @@ body.flare #galaxy { animation: flare 1.2s ease; }
   #panel { width: 100%; }
 }
 
+/* ===== morning brief: what the dream decided you should do today ===== */
+.brief-card {
+  display: block; padding: 12px 14px; border-radius: 12px;
+  background: linear-gradient(160deg, rgba(255, 217, 160, 0.13), rgba(143, 123, 255, 0.09));
+  border: 1px solid rgba(255, 217, 160, 0.32);
+}
+.brief-card b { color: var(--gold-hot); font-size: 12px; letter-spacing: 0.05em; }
+.brief-card p { margin: 7px 0 0; font-size: 13.5px; line-height: 1.55; }
+.brief-next { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--ink-dim); line-height: 1.6; }
+.brief-age { display: block; margin-top: 8px; font-size: 10.5px; color: var(--ink-faint); }
+
 /* ===== photo memory: composer attach + what the vision model read ===== */
 .attach-btn { white-space: nowrap; }
 .attach-preview {

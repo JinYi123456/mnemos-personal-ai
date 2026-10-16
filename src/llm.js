@@ -442,11 +442,10 @@ export class LLM {
           headers: { Authorization: `Bearer ${p.apiKey}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: p.visionModel,
-            // Super-VL is a reasoning model: without the toggle it can spend the
-            // whole budget thinking and return content:null.
-            messages: [
-              { role: 'system', content: '/no_think' },
-              { role: 'user', content: [
+            // Super-VL is a reasoning model: without this it can spend the whole
+            // budget thinking and return content:null.
+            chat_template_kwargs: { enable_thinking: false },
+            messages: [{ role: 'user', content: [
                 { type: 'text', text: opts.prompt },
                 { type: 'image_url', image_url: { url: opts.dataUrl } },
               ] },
@@ -590,11 +589,14 @@ export class LLM {
       max_tokens: opts.maxTokens ?? 1200,
       temperature: opts.temperature ?? 0.7,
     });
-    // Nemotron reasoning models spend their budget thinking unless toggled off;
-    // an empty `content` (burned on reasoning) would break the tool loop.
-    // NEBIUS_KEEP_REASONING=1 leaves the toggle out so you can measure reasoning.
+    // Nemotron 3 is a reasoning model: left alone it spends the whole budget
+    // thinking, and `content` comes back either empty or as a chain-of-thought
+    // monologue — which silently breaks every small structured call. The
+    // documented `/no_think` chat-template string does NOT do this on the
+    // serverless endpoints (verified: empty content, or 200 tokens of thinking).
+    // This parameter does. NEBIUS_KEEP_REASONING=1 leaves thinking on for measurement.
     if (/nemotron/i.test(model) && !wantReason && process.env.NEBIUS_KEEP_REASONING !== '1') {
-      body.messages = [{ role: 'system', content: '/no_think' }, ...opts.messages];
+      body.chat_template_kwargs = { enable_thinking: false };
     }
     // Reasoning tiers need room to think before the answer, and JSON mode is
     // dropped for them — a thinking model forced to obey a response schema has

@@ -53,6 +53,8 @@ export const EMBED_DIMS = 256;
  * @property {number} dreamCount
  * @property {number|null} lastDreamAt
  * @property {Record<string, {x:number, y:number}>} [layout]  dragged star positions (0..1 relative)
+ * @property {{text:string, next:string[], intention:string, created:number, read:boolean}|null} [brief]
+ *   the note the dream left for the morning
  */
 
 /**
@@ -111,6 +113,7 @@ export class Store {
       dreamCount: 0,
       lastDreamAt: null,
       layout: {},
+      brief: null,
     };
     /** @type {Map<string, Set<string>>} */
     this.index = new Map();
@@ -140,6 +143,13 @@ export class Store {
           dreamCount: num(raw.dreamCount, 0),
           lastDreamAt: num(raw.lastDreamAt, 0) || null,
           layout: raw.layout && typeof raw.layout === 'object' ? raw.layout : {},
+          brief: raw.brief && typeof raw.brief === 'object' && typeof raw.brief.text === 'string' ? {
+            text: String(raw.brief.text).slice(0, 700),
+            next: Array.isArray(raw.brief.next) ? raw.brief.next.filter((/** @type {any} */ x) => typeof x === 'string').slice(0, 3) : [],
+            intention: typeof raw.brief.intention === 'string' ? raw.brief.intention.slice(0, 120) : '',
+            created: num(raw.brief.created, Date.now()),
+            read: raw.brief.read === true,
+          } : null,
         };
       } catch {
         // corrupted vault: start fresh rather than crash
@@ -505,6 +515,29 @@ export class Store {
   /** Reset all dragged positions → deterministic hash layout returns. */
   clearLayout() {
     this.vault.layout = {};
+  }
+
+  /**
+   * Leave a morning brief behind after a dream — the part of memory work that
+   * turns into something the owner can act on today.
+   * @param {{text: string, next?: string[], intention?: string}} b
+   */
+  setBrief(b) {
+    const text = safeText(b.text, 700);
+    if (text.length < 12) return null;
+    this.vault.brief = {
+      text,
+      next: (Array.isArray(b.next) ? b.next : []).map((t) => safeText(t, 160)).filter(Boolean).slice(0, 3),
+      intention: safeText(b.intention || '', 120),
+      created: Date.now(),
+      read: false,
+    };
+    return this.vault.brief;
+  }
+
+  markBriefRead() {
+    if (this.vault.brief) this.vault.brief.read = true;
+    return this.vault.brief;
   }
 
   countDream() {

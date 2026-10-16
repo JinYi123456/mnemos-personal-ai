@@ -361,7 +361,16 @@ async function api(req, res) {
     return json(res, out);
   }
   if (p === '/api/dream' && req.method === 'POST') {
-    return handleDream(res, { dreamer, sid, ip });
+    const body = await readBody(req);
+    return handleDream(res, { dreamer, sid, ip, intention: safeText(body.intention, 160) });
+  }
+  if (p === '/api/brief') {
+    const b = store.vault.brief;
+    if (req.method === 'POST') {
+      store.markBriefRead();
+      await store.flush();
+    }
+    return json(res, { brief: b });
   }
   if (p === '/api/forget' && req.method === 'POST') {
     const body = await readBody(req);
@@ -522,7 +531,7 @@ async function handleChat(req, res, ctx) {
 
 /**
  * @param {http.ServerResponse} res
- * @param {{dreamer: Dreamer, sid: string, ip: string}} ctx
+ * @param {{dreamer: Dreamer, sid: string, ip: string, intention?: string}} ctx
  */
 async function handleDream(res, ctx) {
   if (ctx.dreamer.running) return json(res, { error: 'already dreaming' }, 409);
@@ -538,7 +547,7 @@ async function handleDream(res, ctx) {
   let ping = null;
   try {
     ping = setInterval(() => res.write(': ping\n\n'), 15000);
-    await ctx.dreamer.run((ev) => res.write(`data: ${JSON.stringify(ev)}\n\n`));
+    await ctx.dreamer.run((ev) => res.write(`data: ${JSON.stringify(ev)}\n\n`), { intention: ctx.intention || '' });
   } catch (e) {
     res.write(`data: ${JSON.stringify({ phase: 'error', error: String(/** @type {any} */ (e).message || e) })}\n\n`);
   } finally {

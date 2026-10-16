@@ -860,17 +860,25 @@ els.messages.addEventListener('click', (e) => {
 });
 
 /* ================= DREAM ================= */
-els.dream.addEventListener('click', () => {
+els.dream.addEventListener('click', async () => {
   if (state.dreaming) return;
+  // An intention turns "dreaming" from a demo gimmick into a task: the replay
+  // leans toward the memories that bear on it and the brief is written for it.
+  const intention = await ask(
+    'Dream about something specific?',
+    'Optional — tonight’s replay leans toward memories that bear on this, and you wake up with a brief written for it.',
+    '',
+  );
+  if (intention === null) return;
   state.dreaming = true;
   els.dream.disabled = true;
   els.dreamOverlay.classList.remove('hidden');
-  els.dreamTitle.textContent = 'Dreaming…';
+  els.dreamTitle.textContent = intention ? `Dreaming about: ${intention}` : 'Dreaming…';
   els.dreamStream.innerHTML = '';
   els.dreamResult.innerHTML = '';
   els.dreamClose.classList.add('hidden');
 
-  SSE('/api/dream', {}, (ev) => {
+  SSE('/api/dream', { intention }, (ev) => {
     const line = document.createElement('div');
     line.className = 'dream-line';
     if (ev.phase === 'replay') {
@@ -889,6 +897,14 @@ els.dream.addEventListener('click', () => {
     } else if (ev.phase === 'skill') {
       line.className += ' skill';
       line.innerHTML = `<span class="ph">skill</span><span>learned “${esc(ev.name)}” — ${esc(ev.description || '')}</span>`;
+    } else if (ev.phase === 'brief') {
+      if (ev.text) {
+        line.className += ' insight';
+        line.innerHTML = `<span class="ph">brief</span><span>☀︎ ${esc(ev.text)}${(ev.next || []).length ? `<br>→ ${ev.next.map(esc).join('  ·  ')}` : ''}</span>`;
+        if (window.Sound) Sound.wake();
+      } else {
+        line.innerHTML = `<span class="ph">brief</span><span>${esc(ev.message || '')}</span>`;
+      }
     } else if (ev.phase === 'decay') {
       line.innerHTML = `<span class="ph">decay</span><span>${esc(ev.message || '')}</span>`;
     } else if (ev.phase === 'done') {
