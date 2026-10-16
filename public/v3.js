@@ -382,5 +382,50 @@ async function showBriefIfWaiting() {
 }
 setTimeout(showBriefIfWaiting, 1800);
 
+/* ---------- Deep links: a judge (or a video frame) can open Mnemos mid-demo ----------
+ * ?demo=1..4    runs one of the preset questions on load
+ * ?hidechat=1   collapses the transcript so the sky is the subject
+ * ?ablate=1     then ablates the first memory the answer cited
+ * ?dream=1      opens the dream overlay (answer the intention prompt)
+ * #telemetry    opens the under-the-hood drawer      #vault opens the vault panel
+ * Nothing here accepts text from the URL: the four prompts are hard-coded, so a
+ * shared link cannot be used to inject a question into someone else's session.
+ */
+const DEMOS = [
+  'What do you remember about me? Tell me what to plan next.',
+  'Search the web for the best week to see cherry blossoms in Kyoto.',
+  'Arrange my sky like Leo.',
+  'Remember this: I want to run a half marathon before my 30th birthday.',
+];
+
+function applyDeepLinks() {
+  const params = new URLSearchParams(location.search);
+  const n = Number.parseInt(params.get('demo') || '', 10);
+  if (params.get('hidechat') === '1') setTimeout(() => els.chatCollapse.click(), 120);
+  if (Number.isInteger(n) && n >= 1 && n <= DEMOS.length) {
+    setTimeout(() => {
+      if (!state.busy) { els.input.value = DEMOS[n - 1]; sendChat(); }
+    }, 1100);
+  }
+  if (location.hash === '#telemetry') setTimeout(() => {
+    if ($('hood').classList.contains('hidden')) Hood.toggle();
+  }, 400);
+  if (location.hash === '#vault') setTimeout(() => { openPanel(); renderOwnership(); }, 400);
+  // ?ablate=1 runs the flagship experiment on whatever the answer cited first.
+  if (params.get('ablate') === '1') {
+    const t = setInterval(() => {
+      if (state.busy) return;
+      const chip = document.querySelector('.cite-chip');
+      if (!chip) return;
+      clearInterval(t);
+      Ablate.run(chip.getAttribute('data-id'), chip.textContent);
+    }, 800);
+    setTimeout(() => clearInterval(t), 45000);
+  }
+  // ?dream=1 sleeps with a fixed intention (no free text from the URL).
+  if (params.get('dream') === '1') setTimeout(() => els.dream.click(), 1400);
+}
+applyDeepLinks();
+
 /* expose for app.js's chat stream hooks (loaded earlier, called later) */
-Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership, showBriefIfWaiting });
+Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership, showBriefIfWaiting, applyDeepLinks });
