@@ -91,7 +91,10 @@ export class Vaults {
     return { sid, store };
   }
 
-  /** Forget everything this session ever told Mnemos. */
+  /**
+   * Forget everything this session ever told Mnemos.
+   * @param {string} sid
+   */
   async destroy(sid) {
     const clean = Vaults.cleanId(sid);
     if (!clean) return false;

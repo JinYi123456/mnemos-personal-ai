@@ -455,6 +455,7 @@ function clientIp(req) {
 
 /** @param {{reason?:string, retryAfterMs?:number}} allowed */
 function budgetReply(allowed) {
+  /** @type {Record<string, string>} */
   const copy = {
     ip_rate: 'That is a lot of questions at once. Mnemos pauses for a minute so the demo stays available to everyone.',
     session_rate: 'You have used this sandbox hour fairly hard. It refills on the hour.',

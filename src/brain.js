@@ -238,7 +238,9 @@ Warm, precise, concise. Default under 120 words unless the user asks for depth. 
 
     // Native function calling first: it is what the platform advertises, and it
     // is far harder for a model to fake a protocol it did not have to invent.
-    // If a provider rejects the schema, remember that and use the prose fallback.
+    // The router reads the catalog's own `supported_features` rather than
+    // discovering tool support by taking a 400 in front of a judge.
+    if (this.native && !this.llm.canTools()) this.native = false;
     if (this.native) {
       try {
         outcome = await this.#loopNative(messages, recalled, emit, toolCalls);

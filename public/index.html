@@ -36,6 +36,7 @@
   <div class="top-actions">
     <span id="provider-badge" class="badge-nvidia hidden" title="NVIDIA open model on the active provider">⬢ NVIDIA open model</span>
     <button id="btn-provider" class="pill" title="Language core: active provider + model"></button>
+    <button id="btn-hood" class="pill" title="Live telemetry: model, tokens, latency, cost per call">⚙ Under the hood</button>
     <button id="btn-redzone" class="pill" title="Red zone — topics Mnemos must never discuss">🛡 Red zone</button>
     <button id="btn-arranger" class="pill" title="Design your sky — drag stars or apply a pattern">✧ Shapes</button>
     <button id="btn-dream" class="btn-dream" title="Let Mnemos sleep and consolidate memories">☾ Dream</button>
@@ -55,6 +56,7 @@
     <div class="onboard-row">
       <input id="owner-name" maxlength="40" placeholder="Your name" autocomplete="off" />
       <button id="btn-owner" class="btn-primary">Wake Mnemos</button>
+      <button id="btn-tour" class="btn-ghost" title="45 seconds: watch it reason, cite, then test a memory">▶ Watch it think first</button>
     </div>
     <p class="onboard-hint">No key yet? Mnemos runs in <b>demo mode</b> — the galaxy, memory and decay work; generation wakes up once you add a free API key in <code>.env</code>.</p>
   </div>
@@ -98,10 +100,14 @@
   <div class="panel-head">
     <h2>Memory vault</h2>
     <div>
-      <button id="btn-export" class="pill" title="Download vault JSON">⇩ Export</button>
+      <button id="btn-export" class="pill" title="Download this vault as readable JSON — take it with you">⇩ Export</button>
+      <button id="btn-import" class="pill" title="Load a vault you exported earlier">⇧ Import</button>
+      <button id="btn-burn" class="pill pill-danger" title="Delete this vault for real">🔥 Burn</button>
       <button id="btn-close-panel" class="pill">✕</button>
     </div>
   </div>
+  <p class="panel-privacy" id="panel-privacy"></p>
+  <input type="file" id="import-file" accept="application/json,.json" class="hidden" />
   <nav class="tabs">
     <button class="tab active" data-tab="timeline">Timeline</button>
     <button class="tab" data-tab="memories">Memories</button>
@@ -201,6 +207,35 @@
     <div style="margin-top:18px"><button id="redzone-close" class="btn-ghost">Done</button></div>
   </div>
 </section>
+<!-- ===== TEST IT: memory ablation — answer with the memory, then without it ===== -->
+<section id="ablate-overlay" class="overlay hidden" aria-live="polite">
+  <div class="ablate-card">
+    <div class="ablate-head">
+      <span class="ablate-kicker">MEMORY ABLATION</span>
+      <h1 id="ablate-title">What if it forgot this?</h1>
+      <p id="ablate-held" class="ablate-held"></p>
+      <button id="ablate-close" class="pill ablate-x" title="Close">✕</button>
+    </div>
+    <div id="ablate-body" class="ablate-body"><div class="thinking">running the experiment…</div></div>
+  </div>
+</section>
+
+<!-- ===== UNDER THE HOOD: live per-call telemetry straight off Token Factory ===== -->
+<aside id="hood" class="hood hidden" aria-label="Under the hood">
+  <div class="hood-bar">
+    <b>Under the hood</b>
+    <span class="hood-sub">every model call, metered live</span>
+    <button id="hood-close" class="pill">✕</button>
+  </div>
+  <div id="hood-models" class="hood-models"></div>
+  <div id="hood-calls" class="hood-calls"></div>
+  <div class="hood-foot">
+    <label class="hood-sound"><input type="checkbox" id="sound-toggle" /> sound</label>
+    <span id="hood-total" class="hood-total"></span>
+  </div>
+</aside>
+
 <script src="/app.js"></script>
+<script src="/v3.js"></script>
 </body>
 </html>

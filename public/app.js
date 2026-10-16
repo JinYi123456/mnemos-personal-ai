@@ -778,17 +778,26 @@ function sendChat() {
   els.chatTools.classList.remove('hidden'); // the transcript is clearable from now on
 
   const b = bubble('ai', '<span class="thinking">✶ thinking…</span>');
+  if (window.Ablate) Ablate.setQuery(text);
+  if (window.Sound) Sound.think();
 
   SSE('/api/chat', { text }, (ev) => {
     if (ev.type === 'recall') {
       state.highlighted.clear();
       for (const s of ev.stars || []) state.highlighted.add(s.id);
+      if (window.tracePulse) tracePulse((ev.stars || []).map((s) => s.id));
       ticker(`✦ recalling ${ev.stars ? ev.stars.length : 0} memories`, true);
+    } else if (ev.type === 'meter') {
+      if (window.Hood) Hood.record(ev);
+      if (ev.cost) ticker(`⚙ ${ev.tier} · ${ev.model.split('/').pop()} · ${Math.round(ev.ms)}ms · $${ev.cost.toFixed(5)}`);
+    } else if (ev.type === 'note') {
+      ticker(`· ${ev.text}`);
     } else if (ev.type === 'tool') {
+      if (window.Sound) Sound.tool();
       ticker(`⊛ ${ev.name} (${ev.ms}ms)`);
       b.innerHTML += `<div style="font-size:11.5px;color:var(--cyan);margin-top:6px">⊛ ${esc(ev.name)}${ev.args && ev.args.query ? `: “${esc(ev.args.query)}”` : ''}</div>`;
       // agent-driven sky reshape: Mnemos can rearrange the stars at its owner's request
-      if (ev.name === 'sky.shape' && ev.args && ev.args.shape) {
+      if ((ev.name === 'sky.shape' || ev.name === 'sky_shape') && ev.args && ev.args.shape) {
         const raw = String(ev.args.shape).toLowerCase().trim();
         flyToShape(raw.startsWith('word:') ? 'letter' : raw, raw.startsWith('word:') ? raw.slice(5) : '');
         // persist the arrangement so it survives reloads
@@ -803,6 +812,7 @@ function sendChat() {
         toast(`✧ Mnemos reshaped your sky: ${raw}`);
       }
     } else if (ev.type === 'learned') {
+      if (window.Sound) Sound.born();
       ticker(`✦ learned ${ev.count} new memor${ev.count === 1 ? 'y' : 'ies'}`);
       // stamp ids that exist now but weren't in the sky before this turn:
       // the next buildStars() (on 'done') will paint them NEWBORN GREEN.
@@ -818,6 +828,7 @@ function sendChat() {
       els.send.disabled = false;
       els.input.focus();
       refreshAll();
+      if (window.Hood) Hood.refresh();
     } else if (ev.type === 'error') {
       b.innerHTML = `<span style="color:var(--rose)">⚠ ${esc(ev.error)}</span>`;
       state.busy = false;
@@ -855,6 +866,7 @@ els.dream.addEventListener('click', () => {
     } else if (ev.phase === 'consolidate') {
       line.innerHTML = `<span class="ph">weave</span><span>${esc(ev.message || '')}</span>`;
     } else if (ev.phase === 'insight') {
+      if (window.Sound) Sound.insight();
       line.className += ' insight';
       line.innerHTML = `<span class="ph">insight</span><span>${esc(ev.text)}</span>`;
       for (const f of ev.from || []) state.highlighted.add(f);

@@ -13,6 +13,8 @@ import path from 'node:path';
  * @property {string} [frontierModel]
  * @property {string} [embeddingModel]
  * @property {boolean} nvidiaModel
+ * @property {boolean} [toolsSupported]
+ * @property {boolean} [reasoningSupported]
  */
 
 /**
@@ -189,8 +191,10 @@ export class LLM {
     /** @type {Record<string, {ok: number, fail: number, lastError?: string}>} */
     this.health = {};
     for (const p of providers) this.health[p.id] = { ok: 0, fail: 0 };
-    /** @type {{size:number, at:number}|null} last catalog sync */
+    /** @type {{size:number, at:number, chat?:any, reasoning?:any, frontier?:any}|null} last catalog sync */
     this.catalog = null;
+    /** @type {Record<string, any>|null} verbose model metadata keyed by id */
+    this.modelMeta = null;
     /**
      * Running spend ledger — every model call is metered so the app can show
      * judges exactly what a turn cost, and stop before burning a credit budget.
@@ -281,8 +285,9 @@ export class LLM {
   async syncCatalog() {
     const p = this.active;
     if (!p || p.kind !== 'openai') return null;
-    const ids = await this.#listModels(p);
-    if (!ids || !ids.length) {
+    const rows = await this.#listModels(p);
+    const ids = (rows || []).map((r) => r.id);
+    if (!ids.length) {
       return { provider: p.id, chat: p.model, reasoning: p.reasoningModel || p.model,
         embedding: p.embeddingModel || '', catalogSize: 0, healed: [], verified: false };
     }
@@ -308,7 +313,21 @@ export class LLM {
     if (p.embeddingModel || p.id === 'nebius') {
       p.embeddingModel = pin(EMBEDDING_PREFERENCE, p.embeddingModel || '', 'embedding');
     }
-    this.catalog = { size: pool.length, at: Date.now() };
+    // Capability map for the three tiers we actually use — the router reads this
+    // instead of discovering tool support by getting a 400 in front of a judge.
+    /** @type {Record<string, any>} */
+    const meta = Object.fromEntries((rows || []).map((r) => [r.id, r]));
+    this.modelMeta = meta;
+    const feats = (/** @type {string} */ id) => /** @type {string[]} */ (meta?.[id]?.supported_features || []);
+    p.toolsSupported = feats(p.model).length ? feats(p.model).some((f) => /tool|function/i.test(f)) : undefined;
+    p.reasoningSupported = feats(p.reasoningModel || p.model).some((f) => /reason/i.test(f));
+    this.catalog = {
+      size: pool.length,
+      at: Date.now(),
+      chat: { id: p.model, features: feats(p.model), context: meta?.[p.model]?.context_length, quantization: meta?.[p.model]?.quantization, pricing: meta?.[p.model]?.pricing, limits: meta?.[p.model]?.per_request_limits, regions: (meta?.[p.model]?.regions || []).map((/** @type {any} */ r) => r.name) },
+      reasoning: { id: p.reasoningModel, features: feats(p.reasoningModel || p.model) },
+      frontier: p.frontierModel ? { id: p.frontierModel, features: feats(p.frontierModel) } : null,
+    };
     return {
       provider: p.id,
       chat: p.model,
@@ -320,20 +339,36 @@ export class LLM {
     };
   }
 
-  /** @param {Provider} p @returns {Promise<string[]|null>} */
+  /**
+   * Model catalog with metadata. `?verbose=true` costs one request and returns
+   * price, context length, quantization, rate ceiling and — the part that matters
+   * — `supported_features`, e.g. ["tools","reasoning"]. If a provider ignores the
+   * flag we still get IDs, so the fallback path is just less informed.
+   * @param {Provider} p @returns {Promise<any[]|null>}
+   */
   async #listModels(p) {
     try {
-      const res = await fetch(`${p.baseUrl}/models`, {
+      const res = await fetch(`${p.baseUrl}/models?verbose=true`, {
         headers: { Authorization: `Bearer ${p.apiKey}` },
         signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,
       });
       if (!res.ok) throw new Error(`models ${res.status}`);
       const data = /** @type {any} */ (await res.json());
-      return /** @type {string[]} */ ((/** @type {any[]} */ (data?.data || [])).map((m) => m.id).filter(Boolean));
+      const rows = /** @type {any[]} */ (data?.data || []);
+      return rows.filter((r) => r && r.id);
     } catch (e) {
       this.health[p.id].lastError = String(/** @type {any} */ (e).message || e);
       return null;
     }
+  }
+
+  /**
+   * Does the active model officially support native tool calls? Unknown (other
+   * providers, no metadata) is treated as "try it", an explicit absence as "no".
+   */
+  canTools() {
+    const p = this.active;
+    return !p || p.toolsSupported === undefined ? true : p.toolsSupported;
   }
 
   /**
@@ -345,6 +380,8 @@ export class LLM {
   async modelCard(model) {
     const p = this.active;
     if (!p || p.kind !== 'openai' || !model) return null;
+    // boot already pulled the verbose catalog — serve it from there
+    if (this.modelMeta && this.modelMeta[model]) return this.modelMeta[model];
     if (this.#cardCache && this.#cardCache.at > Date.now() - 600000) {
       return this.#cardCache.map[model] || null;
     }
