@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { LLM } from './llm.js';
+import { tokenize } from './util.js';
+import { cosine } from './store.js';
 
 /** Red-block injected verbatim into the system prompt. */
 let RED_BLOCK = '';
@@ -247,6 +249,10 @@ ${seen.text}`;
     }
     const recalled = this.store.recall(userText, 6, queryVec ?? undefined);
     this.store.reinforce(recalled.map((m) => m.id));
+    // Retrieval always returns *something* near a question; that is how a memory
+    // system learns to stretch. Score how well the best hit actually fits, and
+    // tell the model when nothing does, so "I don't remember" stays available.
+    const weak = Brain.recallIsWeak(userText, recalled, queryVec);
     emit({
       type: 'recall',
       stars: recalled.map((m) => ({ id: m.id.slice(0, 8), text: m.text, tags: m.tags })),
@@ -512,6 +518,24 @@ ${seen.text}`;
         error: String(/** @type {any} */ (e).message || e),
       };
     }
+  }
+
+  /**
+   * True when the best recalled memory shares no informative term with the
+   * question and is not close in embedding space.
+   * @param {string} query
+   * @param {any[]} recalled
+   * @param {number[]|null} queryVec
+   */
+  static recallIsWeak(query, recalled, queryVec) {
+    if (!recalled.length) return true;
+    const q = new Set(tokenize(query));
+    for (const m of recalled) {
+      const shared = tokenize(m.text).some((t) => q.has(t));
+      const cos = queryVec && Array.isArray(m.vec) ? cosine(queryVec, m.vec) : 0;
+      if (shared || cos >= 0.22) return false;
+    }
+    return true;
   }
 
   /**

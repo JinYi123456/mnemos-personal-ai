@@ -35,7 +35,11 @@ export const MOCK_MODEL = 'mock-deterministic-reader';
 
 /** A reply matching this is treated as "I don't remember" (also used live). */
 export const ABSTAIN_RE =
-  /\b(i don'?t (remember|know|have)|don'?t (remember|have (that|any)|recall|see)|no (record|memory|mention)( of| about)?|nothing (in|from) (my|the) (memory|vault|galaxy)|not (in|saved)( in)? (my|the) (memory|vault)|i can'?t find (any|that)|never (mentioned|told|stored)|not something you (shared|told me)|i have no)\b/i;
+  // Models abstain in more shapes than a regex author predicts: contracted *and*
+  // uncontracted, first *and* second person, and sometimes with a trailing
+  // "[No relevant memory IDs]" marker. Missing these scores honest declines as
+  // hallucinations, which is a measurement bug, not a product one.
+  /\b(i (do not|don'?t|dont) (remember|know|have|recall|see|mention)|do not|don'?t (remember|have (that|any)|recall|see|mention)|you (do not|don'?t) remember|no (record|memory|mention|information)( of| about)?|nothing (in|from) (my|the|your) (memory|vault|galaxy|notes)|not (in|saved|stored)( in)? (my|the|your) (memory|vault)|i can'?t find (any|that|it)|never (mentioned|told|stored|shared)|not something you (shared|told me)|i have no|\[\s*no relevant memory)\b/i;
 
 /** Query terms that carry no topic; the mock reader ignores them. */
 export const GENERIC_TERMS = new Set([
