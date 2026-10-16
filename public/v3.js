@@ -131,7 +131,20 @@ const Ablate = (() => {
    * @param {'with'|'without'} side
    */
   function words(diff, side) {
-    return (diff || []).map((d) => {
+    // Word-level diffing flags every rephrasing, and two fluent answers differ in
+    // wording everywhere — so only contiguous runs of >= 3 changed words are
+    // highlighted. Single-word churn renders as text, and the reader's eye lands
+    // on the passages that actually appeared or disappeared.
+    const items = (diff || []).map((d) => ({ ...d }));
+    let i = 0;
+    while (i < items.length) {
+      if (items[i].op === 'same') { i += 1; continue; }
+      let j = i;
+      while (j < items.length && items[j].op !== 'same') j += 1;
+      if (j - i < 3) for (let k = i; k < j; k += 1) items[k].op = 'same';
+      i = j;
+    }
+    return items.map((d) => {
       if (d.op === 'same') return esc(d.w);
       if (d.op === 'del') return side === 'with' ? `<span class="d-w d-del">${esc(d.w)}</span>` : '';
       return side === 'without' ? `<span class="d-w d-add">${esc(d.w)}</span>` : '';
@@ -166,12 +179,20 @@ const Ablate = (() => {
       return;
     }
     const v = r.verdict || {};
+    // When almost nothing survived the edit, inline strikethrough is noise: it
+    // says "everything changed" by marking everything. Say it in words instead
+    // and let the two answers be read side by side.
+    const wholesale = (r.similarity ?? 1) < 0.45;
+    const paint = (/** @type {'with'|'without'} */ side) => wholesale
+      ? esc(side === 'with' ? r.with.text : r.without.text)
+      : words(r.diff, side);
     body.innerHTML = `
       <div class="ab-metrics"><span>question · <b>${esc(q)}</b></span></div>
       <div class="ab-cols">
-        <div class="ab-col with"><h3>With the memory</h3><p>${words(r.diff, 'with')}</p>
+        ${wholesale ? `<div class="ab-shift">withdrawing this memory rewrote <b>${Math.round(100 - (r.similarity || 0) * 100)}%</b> of the answer — read both versions rather than a diff</div>` : ''}
+        <div class="ab-col with"><h3>With the memory</h3><p>${paint('with')}</p>
           <div class="ab-metrics" style="margin-top:10px"><span>cites <b>${(r.with.cites || []).length}</b></span><span>${Math.round(r.with.ms)}ms</span><span>${esc(String(r.with.model || '').split('/').pop())}</span></div></div>
-        <div class="ab-col without"><h3>Without it</h3><p>${words(r.diff, 'without')}</p>
+        <div class="ab-col without"><h3>Without it</h3><p>${paint('without')}</p>
           <div class="ab-metrics" style="margin-top:10px"><span>cites <b>${(r.without.cites || []).length}</b></span><span>${Math.round(r.without.ms)}ms</span></div></div>
       </div>
       <div class="ab-verdict">

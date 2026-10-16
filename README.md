@@ -83,22 +83,54 @@ Measured on our own account: **a chat turn with a web-search tool call ≈ $0.00
 
 ## Retrieval, measured
 
-`eval/` holds a 40-question benchmark built on the **LongMemEval** ability taxonomy
-(arXiv:2410.10813): single-hop, multi-hop, temporal, knowledge-update (a fact changes and
-the new value must win) and **abstention** (the answer is not in the vault, so the system
-must say so). It compares lexical-only, BM25, vector-only and the shipped hybrid fusion,
-and reports hit@k, recall@k, MRR, citation validity, abstention correctness, latency and spend.
+`eval/` holds a reproducible benchmark: **59 seeded memories across 9 sessions** and
+**40 questions** built on the **LongMemEval** ability taxonomy (arXiv:2410.10813) —
+single-session, multi-hop, temporal, **knowledge-update** (a fact changes and the new
+value must win) and **abstention** (the answer is not in the vault, so the system must
+say so). Every arm is scored for retrieval quality, answer correctness against an oracle,
+citation validity, staleness, latency and spend, using the real provider.
+
+Live run, `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` + `Qwen/Qwen3-Embedding-8B`, k=6:
+
+| Arm | hit@6 | recall@6 | MRR | answer acc | stale answer | citations resolve | abstains | $ / 100 q |
+|---|---|---|---|---|---|---|---|---|
+| lexical only | 97.0% | 94.4% | 0.737 | 75.8% | 22.2% | 88.6% | 71.4% | $0.0025 |
+| embedding only | 100.0% | 94.4% | **0.909** | 78.8% | 44.4% | 91.7% | 57.1% | $0.0028 |
+| **hybrid (shipped)** | 97.0% | 92.9% | 0.824 | 75.8% | **11.1%** | 86.1% | 42.9% | $0.0029 |
+| full agent loop | 97.0% | 92.9% | 0.824 | 78.8% | 11.1% | 35.0% | 0% | $0.0139 |
+
+**What the numbers made us fix.** The first live run said our abstention rate was 14%
+(lexical) and 0% (vector): the assistant answered unanswerable questions almost every
+time, which flatly contradicted the anti-hallucination claim in our own README. Two causes,
+found by reading the model's actual output rather than trusting the metric:
+
+1. `recall()` returned *the six most recent memories* whenever nothing matched — an
+   invitation to confabulate. It now has a relevance floor and returns nothing, and the
+   agent is told when retrieval is weak instead of being handed padding. Abstention went
+   14% → 71% on the lexical arm.
+2. The abstention detector only matched contracted English, so "**I do not remember**"
+   was being scored as a hallucination. Measurement bug, fixed and re-run.
+
+Superseded-fact handling improved the same way: marking a replaced memory `supersededBy`
+and dimming it took the shipped arm's stale-answer rate from 22.2% to **11.1%**.
+
+**What is still weak, stated plainly.** The full agent-loop arm abstains 0% of the time and
+only 35% of its citations resolve against the *initial* recall set — because in a tool loop
+the agent legitimately retrieves more memories mid-turn, which this scorer does not credit,
+and because its conversational system prompt is less strict about declining than the
+direct-answer arms. Both are real: the loop is more useful and less careful than the
+single-shot path. Tightening it is the top item after the hackathon.
 
 ```bash
-node eval/build-vault.mjs          # deterministic vault + questions
-node eval/run.mjs --mode mock      # prove the harness offline, no spend
-node eval/run.mjs --mode live --yes --budget 1.50   # arms: lexical,vector,hybrid,hybrid_cites
+node eval/build-vault.mjs          # deterministic vault + 40 questions
+node eval/run.mjs --mode mock      # prove the harness offline, spends nothing
+node eval/run.mjs --mode live --yes --budget 1.50
 node eval/report.mjs               # eval/results/table.md + chart.html
 ```
 
-Scope, stated honestly: this is a *LongMemEval-style protocol on a 40-question in-house
-set*. It is not score-comparable to published LongMemEval numbers.
-Current results: [`eval/results/table.md`](eval/results/table.md).
+Scope, honestly: this is a *LongMemEval-style protocol on a 40-question in-house set*. It is
+not score-comparable with published LongMemEval numbers. Full definitions in
+[`eval/README.md`](eval/README.md); raw rows in `eval/results/live.json`.
 
 ## Portability: your memory is not trapped in this app
 

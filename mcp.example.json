@@ -1,0 +1,51 @@
+{
+  "_note": "Paste one of these blocks into your agent's MCP config. Valid JSON: comments live in _comment keys so tooling can parse this file. Mnemos speaks MCP over stdio (newline-delimited JSON-RPC), so the agent launches the server itself — use absolute paths if your agent does not run from the repo root. On Windows use backslashes, e.g. C:\\\\Users\\\\you\\\\Mnemos\\\\src\\\\mcp.js.",
+
+  "hermes-agent": {
+    "_comment": "NVIDIA Hermes Agent / NemoClaw: add this to the agent's mcpServers block (or --mcp-config) and it can read and write the user's Mnemos vault, then load Mnemos' learned skills with the skill_export tool, which writes Hermes-style skills/<name>/SKILL.md files.",
+    "mcpServers": {
+      "mnemos": {
+        "command": "node",
+        "args": ["src/mcp.js", "--vault", "./vault"]
+      }
+    }
+  },
+
+  "claude-code": {
+    "_comment": "Claude Code: save as .mcp.json at the repo root (project scope) or run `claude mcp add mnemos -- node src/mcp.js --vault ./vault`; the /mcp command then shows the 8 Mnemos tools and 3 vault resources.",
+    "mcpServers": {
+      "mnemos": {
+        "type": "stdio",
+        "command": "node",
+        "args": ["src/mcp.js", "--vault", "./vault"]
+      }
+    }
+  },
+
+  "with-options": {
+    "_comment": "Any stdio client: point the vault elsewhere and choose where skill_export writes SKILL.md files (default is a skills/ folder next to the vault).",
+    "mcpServers": {
+      "mnemos": {
+        "command": "node",
+        "args": ["src/mcp.js", "--vault", "/absolute/path/to/vault", "--skills", "/absolute/path/to/skills"]
+      }
+    }
+  },
+
+  "offline-demo": {
+    "_comment": "No API key? Set MNEMOS_OFFLINE=1 and dream_run still performs replay + decay, reporting that model consolidation was skipped — the whole memory surface works with zero keys.",
+    "mcpServers": {
+      "mnemos": {
+        "command": "node",
+        "args": ["src/mcp.js", "--vault", "./vault"],
+        "env": { "MNEMOS_OFFLINE": "1" }
+      }
+    }
+  },
+
+  "_exposes": {
+    "tools": ["memory_search", "memory_remember", "memory_forget", "memory_list", "vault_snapshot", "dream_run", "skill_export", "sky_shape"],
+    "resources": ["mnemos://vault/stars", "mnemos://vault/timeline", "mnemos://vault/skills", "mnemos://memory/{id}"],
+    "protocol": "2025-06-18 (echoes back any version the client requests)"
+  }
+}

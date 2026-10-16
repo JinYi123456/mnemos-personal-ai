@@ -13,6 +13,10 @@
   --panel: rgba(10, 14, 34, 0.86);
   --line: rgba(143, 123, 255, 0.22);
   --radius: 14px;
+  --scroll-a: rgba(143, 123, 255, 0.50);
+  --scroll-b: rgba(127, 215, 232, 0.30);
+  --scroll-hot-a: rgba(255, 217, 160, 0.85);
+  --scroll-hot-b: rgba(143, 123, 255, 0.60);
   --font: 'Segoe UI', 'SF Pro Display', system-ui, -apple-system, sans-serif;
 }
 
@@ -157,8 +161,6 @@ input, textarea { font-family: inherit; }
   display: flex; flex-direction: column; gap: 12px;
   padding: 8px 6px;
   pointer-events: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(143, 123, 255, 0.35) transparent;
   /* A 26px fade read as "text is being cut off by the toolbar" — crisper is
      calmer, and the transcript already has its own tools row above it. */
   mask-image: linear-gradient(180deg, transparent 0, #000 11px);
@@ -326,7 +328,7 @@ input, textarea { font-family: inherit; }
   border-bottom: 2px solid transparent;
 }
 .tab.active { color: var(--gold-hot); border-bottom-color: var(--gold); }
-.tab-body { flex: 1; overflow-y: auto; padding: 14px 20px 24px; scrollbar-width: thin; }
+.tab-body { flex: 1; overflow-y: auto; padding: 14px 20px 24px; }
 .mem-item, .insight-item, .skill-item {
   background: rgba(14, 18, 42, 0.7);
   border: 1px solid rgba(143, 123, 255, 0.14);
@@ -417,6 +419,12 @@ body.flare #galaxy { animation: flare 1.2s ease; }
   #panel { width: 100%; }
 }
 
+.cite-warn {
+  display: block; font-size: 11.5px; color: var(--gold-hot);
+  background: rgba(255, 217, 160, 0.1); border: 1px dashed rgba(255, 217, 160, 0.42);
+  border-radius: 9px; padding: 6px 9px; margin-top: 6px;
+}
+
 /* ===== morning brief: what the dream decided you should do today ===== */
 .brief-card {
   display: block; padding: 12px 14px; border-radius: 12px;
@@ -427,6 +435,39 @@ body.flare #galaxy { animation: flare 1.2s ease; }
 .brief-card p { margin: 7px 0 0; font-size: 13.5px; line-height: 1.55; }
 .brief-next { margin: 8px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--ink-dim); line-height: 1.6; }
 .brief-age { display: block; margin-top: 8px; font-size: 10.5px; color: var(--ink-faint); }
+
+/* ===== scrollbars: the night sky continues into the chrome =====
+   Every scroll surface in Mnemos is a window onto the same dark, so the thumb is
+   a sliver of the aurora itself: violet into cyan at rest, warming to gold when
+   you grab it. Thin, borderless, and identical in Chrome, Edge and Safari;
+   Firefox gets the equivalent through scrollbar-color. */
+* { scrollbar-width: thin; scrollbar-color: var(--scroll-a) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; border: none; }
+::-webkit-scrollbar-thumb {
+  min-height: 34px;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--scroll-a), var(--scroll-b));
+  background-clip: padding-box;
+  transition: background 0.18s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--scroll-hot-a), var(--scroll-hot-b));
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, var(--gold-hot), var(--violet));
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner, ::-webkit-resizer { background: transparent; }
+/* scroll where you mean to, and never drag the sky behind a panel */
+#messages, .ablate-card, .hood-calls, .dream-stream, #panel, .tab-body,
+.arranger-card, .rz-list, #rz-list, .onboard-card { overscroll-behavior: contain; }
+.ablate-card, #panel, .tab-body { scrollbar-gutter: stable; }
+/* horizontal rails (chips, shape picker) get the same language, flatter */
+#chips::-webkit-scrollbar { height: 4px; }
+#chips::-webkit-scrollbar-thumb { border-width: 0; background: var(--scroll-b); }
 
 /* ===== photo memory: composer attach + what the vision model read ===== */
 .attach-btn { white-space: nowrap; }
@@ -510,6 +551,10 @@ body.flare #galaxy { animation: flare 1.2s ease; }
 .d-w { border-radius: 3px; padding: 0 2px; }
 .d-del { background: rgba(255, 157, 176, 0.26); color: #ffd8e0; text-decoration: line-through; }
 .d-add { background: rgba(127, 232, 179, 0.24); color: #d7ffe9; }
+.ab-shift {
+  font-size: 12px; color: var(--gold-hot); padding: 7px 11px; border-radius: 9px;
+  background: rgba(255, 217, 160, 0.09); border-left: 2px solid var(--gold);
+}
 .ab-verdict { display: flex; gap: 10px; align-items: center; font-size: 13.5px; }
 .ab-badge { padding: 4px 11px; border-radius: 999px; font-size: 11.5px; letter-spacing: 0.06em; white-space: nowrap; }
 .ab-badge.load { background: rgba(255, 217, 160, 0.16); color: var(--gold-hot); border: 1px solid rgba(255, 217, 160, 0.42); }

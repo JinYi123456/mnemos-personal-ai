@@ -836,6 +836,11 @@ function sendChat() {
       }).catch(() => { /* cosmetic only */ });
     } else if (ev.type === 'done') {
       b.innerHTML = renderReplyHtml(ev.reply, ev.cites);
+      // Receipts or a warning — never silent confidence. A model that used six
+      // memories and named none is exactly the case a reader should be told about.
+      if ((ev.recalled || []).length && !(ev.cites || []).length) {
+        b.innerHTML += `<div class="cite-bar"><span class="cite-warn">⚠ drew on ${ev.recalled.length} memories but cited none — treat this answer as unverified</span></div>`;
+      }
       state.busy = false;
       els.send.disabled = false;
       els.input.focus();
