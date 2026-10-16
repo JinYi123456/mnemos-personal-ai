@@ -619,7 +619,7 @@ export class LLM {
         Authorization: `Bearer ${p.apiKey}`,
         'Content-Type': 'application/json',
         ...(p.id === 'openrouter'
-          ? { 'HTTP-Referer': 'https://github.com/softmatter-labs/mnemos', 'X-Title': 'Mnemos' }
+          ? { 'HTTP-Referer': 'https://github.com/JinYi123456/mnemos-personal-ai', 'X-Title': 'Mnemos' }
           : {}),
       },
       body: JSON.stringify(body),
