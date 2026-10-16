@@ -838,7 +838,13 @@ function sendChat() {
       b.innerHTML = renderReplyHtml(ev.reply, ev.cites);
       // Receipts or a warning — never silent confidence. A model that used six
       // memories and named none is exactly the case a reader should be told about.
-      if ((ev.recalled || []).length && !(ev.cites || []).length) {
+      if ((ev.matchedUncited || []).length) {
+        // The app checks the model's own bookkeeping: these memories overlap the
+        // answer but were never cited. Shown as a distinct, honest signal.
+        const chips = ev.matchedUncited.map((m) => `<button class="cite-chip uncited" data-id="${m.id}" title="used in the wording, not cited by the model">◌ ${esc(m.text)}</button>`).join('');
+        b.innerHTML += `<div class="cite-bar"><span style="font-size:11px;color:var(--ink-faint);width:100%">matched but not cited ↓ the model leaned on these without saying so</span>${chips}</div>`;
+      }
+      if ((ev.recalled || []).length && !(ev.cites || []).length && !(ev.matchedUncited || []).length) {
         b.innerHTML += `<div class="cite-bar"><span class="cite-warn">⚠ drew on ${ev.recalled.length} memories but cited none — treat this answer as unverified</span></div>`;
       }
       state.busy = false;

@@ -247,12 +247,17 @@ ${seen.text}`;
       const norm = Math.sqrt(cut.reduce((s, v) => s + v * v, 0)) || 1;
       queryVec = cut.map((v) => v / norm);
     }
-    const recalled = this.store.recall(userText, 6, queryVec ?? undefined);
+    let recalled = this.store.recall(userText, 6, queryVec ?? undefined);
+    // An open question has nothing to match, so abstaining would be a bug, not
+    // honesty: show what the sky actually holds. A *specific* question that
+    // nothing clears still abstains — that is the case the floor exists for.
+    const openEnded = recalled.length === 0 && tokenize(userText).length < 2;
+    if (openEnded) recalled = this.store.strongest(6);
     this.store.reinforce(recalled.map((m) => m.id));
     // Retrieval always returns *something* near a question; that is how a memory
     // system learns to stretch. Score how well the best hit actually fits, and
     // tell the model when nothing does, so "I don't remember" stays available.
-    const weak = Brain.recallIsWeak(userText, recalled, queryVec);
+    const weak = !openEnded && Brain.recallIsWeak(userText, recalled, queryVec);
     emit({
       type: 'recall',
       stars: recalled.map((m) => ({ id: m.id.slice(0, 8), text: m.text, tags: m.tags })),
@@ -313,9 +318,13 @@ ${seen.text}`;
     // 3. Quietly embed any memories that lack vectors (lazy backfill, batch 12).
     await this.backfillEmbeddings(12);
 
+    const matchedUncited = Brain.matchedUncited(
+      reply, recalled, new Set(cites.map((c) => c.id)),
+    );
     return {
       reply,
       cites,
+      matchedUncited,
       toolCalls,
       recalled: recalled.map((m) => m.id.slice(0, 8)),
       learned,
@@ -346,6 +355,10 @@ ${seen.text}`;
         r = await this.llm.chat({
           messages,
           maxTokens: 1100,
+          // The answer must carry receipts, and citation discipline is a
+          // formatting job: a cooler temperature follows it far more reliably
+          // than 0.7, without flattening the voice.
+          temperature: 0.45,
           tier: 'fast',
           tools: toolSchemas(),
           account: this.account,
@@ -505,7 +518,7 @@ ${seen.text}`;
       { role: 'user', content: query },
     ];
     try {
-      const r = await this.llm.chat({ messages, maxTokens: 700, account: this.account });
+      const r = await this.llm.chat({ messages, maxTokens: 700, temperature: 0.45, account: this.account });
       return {
         text: String(r.text || '').trim(),
         cites: Brain.extractCites(String(r.text || ''), mems),
@@ -739,6 +752,26 @@ ${seen.text}`;
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Receipts the model did not write: memories that overlap the answer strongly
+   * enough that it almost certainly used them, without citing them. Surfaced as a
+   * separate, clearly-labelled signal — we never present a guess as a citation.
+   * @param {string} reply
+   * @param {any[]} recalled
+   * @param {Set<string>} citedIds
+   */
+  static matchedUncited(reply, recalled, citedIds) {
+    const answer = new Set(tokenize(reply));
+    /** @type {Array<{id: string, text: string, overlap: number}>} */
+    const out = [];
+    for (const m of recalled) {
+      if (citedIds.has(m.id)) continue;
+      const overlap = tokenize(m.text).filter((t) => answer.has(t)).length;
+      if (overlap >= 2) out.push({ id: m.id.slice(0, 8), text: m.text, overlap });
+    }
+    return out.sort((a, b) => b.overlap - a.overlap).slice(0, 3);
   }
 
   /**

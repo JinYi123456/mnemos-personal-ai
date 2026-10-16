@@ -369,6 +369,21 @@ export class Store {
   }
 
   /**
+   * The memories that define the sky right now, strongest-retained first. Used
+   * for genuinely open questions ("what do you remember about me?"), where there
+   * is nothing to match against and recency-plus-strength *is* the right answer —
+   * as opposed to a specific question that nothing clears, which must abstain.
+   * @param {number} k
+   * @returns {Memory[]}
+   */
+  strongest(k = 6) {
+    return [...this.vault.memories]
+      .filter((m) => !m.supersededBy)
+      .sort((a, b) => decayedScore(b.strength, b.lastUsed) - decayedScore(a.strength, a.lastUsed))
+      .slice(0, k);
+  }
+
+  /**
    * Store vectors for memories that don't have one yet (lazy backfill).
    * Vectors are truncated to EMBED_DIMS and re-normalized (Matryoshka-style).
    * @param {Map<string, number[]>} vecById full-id → raw embedding

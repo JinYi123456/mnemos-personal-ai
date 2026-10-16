@@ -29,7 +29,7 @@ Three beats, in the order you should try them:
 
 | | | |
 |---|---|---|
-| **Watch it think** | Ask a question and see the retrieval happen: the stars it reads pulse, the tool calls stream by (`memory_search`, `web_search`, `sky_shape`…), and the answer arrives with `[M…]` citation chips. Click one and that exact star flares. A citation that cannot be resolved renders **red** — you see the model overreach instead of trusting it. The **⚙ Telemetry** drawer shows the model, tier, tokens, KV-cache hits, latency and USD of every call, with prices read live from the platform. |
+| **Watch it think** | Ask a question and see the retrieval happen: the stars it reads pulse, the tool calls stream by (`memory_search`, `web_search`, `sky_shape`…), and the answer arrives with `[M…]` citation chips. Click one and that exact star flares. A citation that cannot be resolved renders **red** — you see the model overreach instead of trusting it. And because models are not perfectly disciplined about receipts, the app audits its own: a memory that overlaps the answer but was never cited appears as a dashed amber *matched but not cited* chip, so an uncited claim is still traceable. The **⚙ Telemetry** drawer shows the model, tier, tokens, KV-cache hits, latency and USD of every call, with prices read live from the platform. |
 | **Test it** | Click any star → **"🧪 What if it forgot this?"** Mnemos answers the same question twice, once with that memory and once without, diffs the two sentences, counts the citations it lost, and scores whether the memory was load-bearing. Trust is not a claim here; it is an experiment you can run in four seconds. |
 | **Own it** | Export your vault, import it into a local install, or burn it. Attach a whiteboard photo and an NVIDIA vision model reads it into new stars. Ask for a dream with an intention — *"10K race in six weeks, portfolio review Friday"* — and you wake up to a brief with three concrete actions, written from insights your own notes never stated out loud. |
 
@@ -159,6 +159,9 @@ testable: `node --test test/mcp.test.js` drives the server as a real subprocess.
   [OpenShell](deploy/openshell/README.md) sandbox that becomes kernel-enforced default-deny.
 * **Red zone**: name topics the assistant must never discuss; the list is injected
   server-side, so it is not something a user can prompt out of it.
+* **Receipts, audited**: cited chips, dashed *matched but not cited* chips, and red
+  unresolvable chips are three different states on purpose. The system never upgrades a
+  guess into a citation.
 * **Anti-injection plumbing**: input wrapping, secret protocol in a separate system block,
   SSRF guard on `web.fetch`, 100 KB body cap, images accepted only as data URLs.
 * **No accounts, no telemetry, no analytics script.** The drawer's numbers come from the
