@@ -90,29 +90,32 @@ value must win) and **abstention** (the answer is not in the vault, so the syste
 say so). Every arm is scored for retrieval quality, answer correctness against an oracle,
 citation validity, staleness, latency and spend, using the real provider.
 
-Live run, `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` + `Qwen/Qwen3-Embedding-8B`, k=6:
+Two independent live runs of the same shipped code, `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`
++ `Qwen/Qwen3-Embedding-8B`, k=6. Retrieval metrics are deterministic and identical across
+runs; answer-side metrics are shown as the range the two runs produced, because the model is
+sampled and pretending otherwise would be fake precision:
 
 | Arm | hit@6 | recall@6 | MRR | answer acc | stale answer | citations resolve | abstains | $ / 100 q |
 |---|---|---|---|---|---|---|---|---|
-| lexical only | 97.0% | 94.4% | 0.737 | 75.8% | 22.2% | 88.6% | 71.4% | $0.0025 |
-| embedding only | 100.0% | 94.4% | **0.909** | 78.8% | 44.4% | 91.7% | 57.1% | $0.0028 |
-| **hybrid (shipped)** | 97.0% | 92.9% | 0.824 | 75.8% | **11.1%** | 86.1% | 42.9% | $0.0029 |
-| full agent loop | 97.0% | 92.9% | 0.824 | 78.8% | 11.1% | 35.0% | 0% | $0.0139 |
+| lexical only | 97.0% | 94.4% | 0.737 | 75.8–81.8% | 0.0–22.2% | 80.0–88.6% | 57.1–71.4% | $0.0024 |
+| embedding only | 100.0% | 94.4% | **0.909** | 78.8–81.8% | 33.3–44.4% | 91.7–91.9% | 42.9–57.1% | $0.0028 |
+| **hybrid (shipped)** | 97.0% | 92.9% | 0.824 | 69.7–75.8% | 11.1–22.2% | 83.3–86.1% | 42.9–57.1% | $0.0028 |
+| full agent loop | 97.0% | 92.9% | 0.824 | 69.7–78.8% | 11.1% | 17.5–35.0% | 0% | $0.0137 |
 
-**What the numbers made us fix.** The first live run said our abstention rate was 14%
-(lexical) and 0% (vector): the assistant answered unanswerable questions almost every
-time, which flatly contradicted the anti-hallucination claim in our own README. Two causes,
-found by reading the model's actual output rather than trusting the metric:
+**What the numbers made us fix.** The first live run reported that the system answered
+unanswerable questions almost every time, which flatly contradicted our own
+anti-hallucination claim. Reading the model's actual output instead of trusting the metric
+found two separate causes:
 
 1. `recall()` returned *the six most recent memories* whenever nothing matched — an
-   invitation to confabulate. It now has a relevance floor and returns nothing, and the
-   agent is told when retrieval is weak instead of being handed padding. Abstention went
-   14% → 71% on the lexical arm.
-2. The abstention detector only matched contracted English, so "**I do not remember**"
-   was being scored as a hallucination. Measurement bug, fixed and re-run.
+   invitation to confabulate. It now has a relevance floor and returns nothing, and the agent
+   is told when retrieval is weak instead of being handed padding.
+2. The abstention detector only matched contracted English, so "**I do not remember**" was
+   being scored as a hallucination. A measurement bug, fixed and re-run.
 
-Superseded-fact handling improved the same way: marking a replaced memory `supersededBy`
-and dimming it took the shipped arm's stale-answer rate from 22.2% to **11.1%**.
+After both, the shipped arm abstains on 43–57% of unanswerable questions (up from 0–43%
+before, where part of that gap was the detector itself), and marking a replaced memory
+`supersededBy` and dimming it holds stale-fact assertions to 11–22%.
 
 **What is still weak, stated plainly.** The full agent-loop arm abstains 0% of the time and
 only 35% of its citations resolve against the *initial* recall set — because in a tool loop
