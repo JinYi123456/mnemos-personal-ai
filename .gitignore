@@ -24,3 +24,4 @@ PRIVATE-HANDOFF.md
 
 # video build artifacts (frames, segments, mp4) — reproducible via tools/*.mjs + tools/build-video.py
 assets/video/
+__pycache__/
