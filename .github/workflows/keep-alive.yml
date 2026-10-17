@@ -1,7 +1,8 @@
 # Keep-alive: pings the Render demo every 14 minutes so the free instance
-# never sleeps — judges get instant load, no 50-second cold start.
-# GitHub Actions gives public repos free scheduled workflows.
-# First time: repo → Actions tab → enable the workflow if prompted.
+# never sleeps (judges get instant load, no 50-second cold start), AND commits
+# a weekly heartbeat so GitHub never disables this schedule for repo inactivity
+# (GitHub stops `schedule` triggers after 60 days with no commits — this keeps
+# the demo alive through judging with zero manual action).
 name: keep-alive
 
 on:
@@ -10,7 +11,7 @@ on:
   workflow_dispatch: {}       # manual run button
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   ping:
@@ -21,3 +22,29 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 https://mnemos-personal-ai.onrender.com/api/health)
           echo "health=$code"
           test "$code" = "200"
+
+      - name: Weekly heartbeat commit (keeps the schedule from lapsing)
+        if: always()
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Commit heartbeat if stale
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "JinYi123456"
+          git config user.email "boonjy2725@gmail.com"
+          last=$(git log -1 --format=%ct -- docs/heartbeat.json 2>/dev/null || echo 0)
+          [ -z "$last" ] && last=0
+          now=$(date +%s)
+          if [ $(( now - last )) -gt 604800 ]; then
+            mkdir -p docs
+            date -u +%Y-%m-%dT%H:%M:%SZ > docs/heartbeat.json
+            git add docs/heartbeat.json
+            git commit -m "chore(keepalive): heartbeat" || echo "nothing to commit"
+            git push
+          else
+            echo "heartbeat is fresh; skipping"
+          fi
