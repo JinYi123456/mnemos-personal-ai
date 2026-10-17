@@ -7,7 +7,7 @@
 **Nebius × NVIDIA Global AI Hackathon · Personal AI track · Team Softmatter Labs**
 
 ▶ [Live demo](https://mnemos-personal-ai.onrender.com) ·
-[3-minute video](#the-pitch-in-three-minutes) ·
+[3-minute video](https://youtu.be/7Cq7HQzpTZQ) ·
 [Feedback on the platform](FEEDBACK.md)
 
 `Nebius Token Factory` · `NVIDIA Nemotron 3 Nano/Super/Ultra/Super-VL` · `Tavily` · MIT · 37 tests
