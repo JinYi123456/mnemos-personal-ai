@@ -71,3 +71,74 @@ skip learning from question turns, and require the date claim to carry its own c
 (`Me5c828b` was matched and left uncited). Also worth noting for honesty: 3 of the 6
 recalled stars were seed-persona noise, so retrieval precision on a fresh sandbox vault
 is ~50%, not 100%.
+
+## Day 2 — 2026-10-18 · scheduled dogfood session #2
+
+**Session #** 3 turns against the live demo (`POST /api/chat`, SSE), one cookie-scoped
+sandbox vault (`mnemos_sid=27feee81…`), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`.
+Metered cost: $0.0001422 + $0.00019968 + $0.00011706 ≈ **$0.00046 total**.
+
+**Cold start, recorded honestly.** The first four probes (`/api/status` at 60s and 150s,
+a HEAD on `/` at 45s, `/api/health` at 120s) all returned **curl exit 28, 0 bytes, HTTP 000**
+against a resolved origin IP — about 7 minutes of dead demo. A patient retry at 21:07:28
+then returned 200 in **0.76s**. The instance was fully asleep, not slow: the keep-alive
+workflow pings `/api/health` with `--max-time 60`, so the schedule was firing and still
+did not keep the free instance up. That contradicts the workflow's own comment
+("never sleeps… no 50-second cold start") and matters directly for judging.
+
+**What I told it** (turn 1, 21:08:55, verbatim): three facts I had just verified in this
+repo — (1) "judging for the Nebius x NVIDIA Global AI Hackathon runs Dec 1-15, 2026";
+(2) "idle sandbox vaults on the live Mnemos demo expire after 45 days and the vault
+sweeper runs every 6 hours" (`src/server.js:43`, `src/server.js:112`, `src/sessions.js:166`);
+(3) "a GitHub Actions keep-alive workflow pings /api/health every 14 minutes and commits
+a weekly heartbeat to docs/heartbeat.json" (`.github/workflows/keep-alive.yml`).
+Stored as `Mc610aa09`, `M25d04653`, `Ma64967c1`. `learned: 3`, `cites: []` — correct.
+
+**What I asked it** (turn 2): "A judge opens the demo on Dec 8, 2026. Suppose a visitor
+first created their sandbox vault today, Oct 18, 2026, and never came back. Would their
+memories still be there on Dec 8? Give the date they stop being there. Second: what keeps
+the Render instance awake through the judging window? Cite the memory ids you used."
+
+**What it recalled + the `[M…]` receipts** — 6 stars surfaced, my 3 real ones were the
+**top 3** (better precision than Day 1's 50%):
+- `M25d04653` (45-day expiry) — cited
+- `Ma64967c1` (keep-alive workflow) — cited
+- `Mc610aa09` (judging Dec 1-15) — recalled, used in the phrase "while the hackathon
+  judging is active", `matchedUncited` at overlap 5, **not cited**
+- `Mb5bf8012`, `M5b521587`, `M71438a23` — seed-persona noise (Voicememos, late-night
+  screen time, deep-work interruptions)
+
+The answer, verbatim (excerpt):
+
+> 1. **Yes.** The sandbox vault will still exist on Dec 8, 2026.
+>    – Created = Oct 18, 2026 → expiration = Oct 18 + 45 days = **Dec 2, 2026**.
+>    – Since Dec 8 is after Dec 2, the vault (and its memories) are already gone.
+>    **Date they stop being there:** Dec 2, 2026.
+
+**The headline verdict was wrong and the reasoning was right.** It computed the correct
+expiry (Dec 2 — I re-derived it: Oct 18 + 45d = Dec 2, and `sweep()` deletes on
+`vault.json` mtime past a 45-day cutoff, so a truly idle visitor really does lose the
+sky ~Dec 2) and then led with "Yes". Turn 3, a one-line challenge, got an immediate
+self-correction: **"Dec 2, 2026"** in 1.4s, `cites: []`, `learned: 0`. So the failure is
+a verdict-consistency slip, not a retrieval or arithmetic failure.
+
+Two other real defects:
+- The question turn again returned `learned: 2`, re-storing content with no new facts:
+  `M9dbfc4ba` and `M313c58da`. Day 1 flagged this; it is **still unfixed**, and turn 3's
+  recall now leads with the duplicate `M9dbfc4ba` — the duplicates are already competing
+  with the originals for retrieval slots.
+- `M313c58da`'s stored **text begins with a citation chip, `[Ma6490a50]`, which does not
+  exist** in this vault (the real id is `Ma64967c1`). The extractor is copying the model's
+  inline chips into memory text and inventing ids, so a future turn can cite a phantom.
+
+**Did it change what I do?** Yes, three concrete things — which is the point of this
+exercise. (1) A 45-day TTL expires Oct/Nov sandbox users around **Dec 2, inside the
+judging window**, and the diary vault itself would die mid-judging: I will raise
+`VAULT_TTL_DAYS` on the Render service (or exclude active vaults from the sweep) before
+Dec 1. (2) The keep-alive cron is not actually preventing cold starts — 7 minutes of
+000/exit-28 today — so the demo is *not* "instant for judges" as the workflow claims;
+needs a shorter idle threshold or a warm-up that survives, and the README shouldn't
+promise otherwise. (3) Two code fixes queued: skip memory extraction on question-only
+turns (or dedupe), and strip `[…]` chips from extracted memory text. What it did *not*
+change: nothing about the hackathon facts — the recall was accurate but told me nothing I
+hadn't written into the code five minutes earlier.
