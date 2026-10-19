@@ -142,3 +142,96 @@ promise otherwise. (3) Two code fixes queued: skip memory extraction on question
 turns (or dedupe), and strip `[…]` chips from extracted memory text. What it did *not*
 change: nothing about the hackathon facts — the recall was accurate but told me nothing I
 hadn't written into the code five minutes earlier.
+
+## Day 3 — 2026-10-19 · scheduled dogfood session #3
+
+**Session #** 3 turns against the live demo (`POST /api/chat`, SSE), same cookie-scoped
+sandbox vault as Day 2 (`mnemos_sid` 27feee…). `/api/status` returned **200 but took
+22.8 s** — another cold start, so the keep-alive cron failed again. Model
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`. Metered: 0.00016218 + 0.00024768 + 0.00012126 ≈
+**$0.00053 total**, 393k→391k tokens left. All three turns HTTP 200; no errors.
+
+**First, a finding before I said anything:** the vault I woke up in held 18 memories —
+the seeded demo sky — and **none of Day 2's five**. My `Mc610aa09` / `M25d04653` /
+`Ma64967c1` were gone. Not a bug hunt needed: [`render.yaml`:24](../render.yaml) already
+documents that Render's free tier has no persistent disk, so a restart wipes the ephemeral
+filesystem and re-seeds. So the "self-use diary" cannot actually accumulate history inside
+the product on the plan the hackathon demo runs on. That is the honest headline for this
+project's impact claim, and it is a deployment-tier fact, not a Mnemos defect.
+
+**What I told it** (turn 1, 21:02:05, three facts I had verified that day, not guesses):
+(1) "I measured a cold start just now, /api/status took 22.8 seconds to answer even though
+a GitHub Actions keep-alive pings /api/health every 14 minutes"; (2) "the sandbox vault TTL
+is still 45 days in the code, `src/server.js` line 43 defaults `VAULT_TTL_DAYS` to 45, so
+the plan from yesterday to raise it before Dec 1 has not been done yet" — true, re-checked
+at [src/server.js:43](../src/server.js) and [src/sessions.js:28](../src/sessions.js), the
+Day-2 fix was **not** applied; (3) "the live demo answers with
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` and embeds with `Qwen/Qwen3-Embedding-8B`, both
+served through Nebius Token Factory" (read off `/api/status`). Stored as `M2134c50f`,
+`M79ae62ec`, `M98118c70`. `learned: 3`, `cites: []` — correct.
+
+**What I asked it** (turn 2): "A visitor stored memories in their sandbox vault on the same
+day I measured that cold start. Two questions: (1) if their instance then restarts, would
+those memories still be there for a judge to read? (2) if instead the visitor simply never
+came back, on what date would the TTL delete their vault? Also, which model answers the
+chat and which model does the embedding? Please cite the memory ids you used."
+
+**What it recalled + the `[M…]` receipts** — 6 stars, my 3 real facts were among them
+(50% precision, same as Day 1, worse than Day 2's top-3):
+- `M79ae62ec` (TTL still 45 days) — **cited**
+- `M98118c70` (chat + embedding models) — **cited**
+- `M2134c50f` (cold start 22.8 s) — recalled, used for the date, `matchedUncited` at
+  overlap 2, **not cited**
+- `Mb5bf8012`, `M5b521587`, `M71438a23` — seed-persona noise again (Voicememos, late-night
+  screen time, deep-work interruptions). These three have survived every vault reset and
+  still out-rank real project facts.
+
+**Q2 and Q3 were right. Q1 was confidently wrong, and the wrongness is the interesting
+part.** It computed Oct 19 + 45 d = **2026-12-03** (I re-derived it: correct, and Dec 8
+is 5 days past it) and named both models correctly from `M98118c70`. But for the restart it
+invented a mechanism and asserted the opposite of the truth:
+
+> **1. Persistence after a restart** — When a user's sandbox vault is **created**, all
+> memories are stored with a **Time-To-Live (TTL) of 45 days** (see [M79ae62ec]…).
+> – The TTL is reset **each time the vault is accessed**…
+> – Therefore, if the visitor's instance **restarts** but they **re-open the vault before
+> the 45-day window expires**, the existing memories remain visible to anyone (including a
+> judge) who inspects the vault.
+
+Nothing in the vault mentioned restart behaviour or storage tier, and it had no tool call
+(`toolCalls: []`) — it filled the gap with a plausible rule instead of saying it didn't
+know. The rule is also wrong on its own terms: [`sweep()`](../src/sessions.js) compares
+`vault.json`'s **mtime** to a 45-day cutoff, and mtime only advances when the vault is
+*written* (`store.flush()`), so a visitor who merely reads their sky does **not** push the
+expiry out. Day 2's warning that a truly idle visitor loses everything ~Dec 2 stands, and
+a judge arriving Dec 8 is already 5 days late.
+
+**Turn 3**, a one-line correction handing it the real facts, got the right verdict in
+**1.4 s** (421 ms model time): `No.` — with `cites: []`, `learned: 0`. Self-correction is
+fast and clean when challenged. But note *which* stars it retrieved to do it: `Mbfb4d6e7`,
+`M92c0fd9d`, `M02e9cb02` — three memories that **turn 2 had just fabricated from its own
+answer**, and `M98118c70` dropped out of the top 6 entirely.
+
+**The regression from Day 1/2 is now a correctness bug, not cosmetics.** Question-only
+turns still re-learn (`learned: 3` on a turn that asked and stored nothing new), and the
+extractor is copying the model's inline chips into memory *text*. Today that produced three
+stored memories whose cited ids **do not exist** — verified against `/api/memories`:
+`M5d4e7b1` and `M3c8f5a2` are phantoms (only `M79ae62ec` is real). So the vault now
+permanently contains `"Memories persist until TTL expires without access (see M5d4e7b1)"`
+and `"TTL resets on each vault access (see M3c8f5a2)"` — **false claims, ranking above the
+real facts on the next turn**. Yesterday the bug could cite a phantom; today it *believes*
+one.
+
+**Did it change what I do?** Yes, three concrete things. (1) The extraction path gets
+fixed before Dec 1, and its priority went up: don't run memory extraction over answer text
+on question-only turns, and strip `(see M…)` / `[M…]` chips from anything stored — a
+self-generated false memory outranking ground truth is worse than no memory. (2) Two
+durability commitments have to be walked back in README/DEVPOST copy: the free-tier demo
+**cannot** promise a returning visitor their memories (restart re-seeds), and "45-day
+expiry" is measured from the last *write*, so I will refresh mtime on read or switch the
+sweep to `lastSeen`. (3) The diary-as-impact-evidence needs a real persistence story:
+`/api/export` + `/api/import` round-trip is the only way this vault survives a deploy, so
+the dogfood job should export after each session instead of implying the sky remembers.
+What it did *not* change: the recall surfaced nothing I hadn't verified in the repo minutes
+earlier — its genuine value today was as a **lying-mirror**, catching a wrong answer I can
+now test for, rather than as a memory that taught me something.
