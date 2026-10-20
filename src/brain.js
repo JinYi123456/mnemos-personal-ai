@@ -309,11 +309,18 @@ ${seen.text}`;
       reply = FALLDOWN;
     }
 
-    // 2. Memory extraction (separate cheap JSON call).
+    // 2. Memory extraction. Only the owner's own words are a source: copying the
+    // assistant's reply into the sky is how one bad answer becomes a permanent
+    // "memory" that outranks the truth on the next turn.
     let learned = 0;
-    if (reply.length > 30 && (userText.length > 3 || photoNote)) {
-      const whatHappened = photoNote ? `${userText}\n[photo] ${photoNote.slice(0, 900)}` : userText;
-      learned = await this.extractMemories(whatHappened, reply, emit);
+    let skipped = 0;
+    const asserted = assertedClaims(userText, photoNote);
+    if (asserted) {
+      const out = await this.extractMemories(asserted, emit);
+      learned = out.learned;
+      skipped = out.skipped;
+    } else if (userText.length > 3 || photoNote) {
+      emit({ type: 'learned', count: 0, skipped: 0, asked: true });
     }
     // 3. Quietly embed any memories that lack vectors (lazy backfill, batch 12).
     await this.backfillEmbeddings(12);
@@ -328,6 +335,7 @@ ${seen.text}`;
       toolCalls,
       recalled: recalled.map((m) => m.id.slice(0, 8)),
       learned,
+      skipped,
       toolMode: outcome.mode,
       model: outcome.model || this.llm.active?.model,
     };
@@ -805,31 +813,67 @@ ${seen.text}`;
    * @param {string} reply
    * @param {(ev: any) => void} emit
    */
-  async extractMemories(userText, reply, emit) {
+  /**
+   * Cheap JSON call: turns the owner's own statements into memories.
+   * @param {string} asserted only what the user stated this turn
+   * @param {(ev: any) => void} emit
+   * @returns {Promise<{learned: number, skipped: number}>}
+   */
+  async extractMemories(asserted, emit) {
     try {
       const { text } = await this.llm.chat({
         json: true,
-        maxTokens: 300,
+        maxTokens: 500,
         account: this.account,
         messages: [
           {
             role: 'system',
             content:
-              'Extract 0-3 durable memories from this exchange. Durable = useful in a future conversation (preferences, plans, people, facts, decisions, emotional context). Skip small talk and anything transient. Reply ONLY JSON: {"memories":["sentence","…"]}. Sentences: third person, <= 120 chars, self-contained.',
+              'Extract up to 6 durable memories from what the USER stated. Durable = useful in a future conversation (preferences, plans, people, facts, numbers, dates, decisions, emotional context). One memory per distinct claim: do not merge separate facts, do not invent details, do not summarize the whole message into a single line. Never copy a citation such as [M…] or "(see M…)" into a memory. Questions, instructions and requests addressed to you are not memories. Reply ONLY JSON: {"memories":["sentence","…"]} Sentences: third person, <= 160 chars, self-contained.',
           },
-          { role: 'user', content: `USER: ${userText.slice(0, 800)}\nASSISTANT: ${reply.slice(0, 800)}` },
+          { role: 'user', content: `USER: ${asserted.slice(0, 4000)}` },
         ],
       });
       const obj = LLM.parseJSON(text);
       const list = Array.isArray(obj?.memories) ? obj.memories : [];
-      let n = 0;
-      for (const t of list.slice(0, 3)) {
-        if (typeof t === 'string' && this.store.addMemory(t, 'chat')) n += 1;
+      let learned = 0;
+      let skipped = 0;
+      for (const t of list.slice(0, 6)) {
+        if (typeof t !== 'string') continue;
+        if (this.store.tryAddMemory(t, 'chat').ok) learned += 1;
+        else skipped += 1;
       }
-      if (n > 0) emit({ type: 'learned', count: n });
-      return n;
+      emit({ type: 'learned', count: learned, skipped });
+      return { learned, skipped };
     } catch {
-      return 0;
+      return { learned: 0, skipped: 0 };
     }
   }
+}
+
+const IMPERATIVE_OPENERS = new Set([
+  'please', 'cite', 'tell', 'show', 'list', 'give', 'explain', 'answer', 'check',
+  'what', 'how', 'why', 'when', 'where', 'who', 'can', 'could', 'would', 'do', 'does',
+  'did', 'is', 'are', 'was', 'were', 'have', 'has',
+]);
+
+/**
+ * The owner's claims for this turn: interrogative and request sentences are dropped,
+ * everything else passes through whole (no truncation — the old 800-char slice silently
+ * cut facts in half). Heuristic by design: a statement can be lost here, but an answer of
+ * the model's own can never become a memory.
+ * @param {string} userText
+ * @param {string} photoNote
+ * @returns {string}
+ */
+export function assertedClaims(userText, photoNote) {
+  const kept = String(userText || '')
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => s && !/\?$/.test(s))
+    .filter((s) => !IMPERATIVE_OPENERS.has(s.toLowerCase().split(/[^a-z0-9']+/)[0]))
+    .join(' ')
+    .trim();
+  if (kept) return photoNote ? `${kept}\n${photoNote}` : kept;
+  return photoNote || '';
 }

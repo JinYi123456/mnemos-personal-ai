@@ -830,8 +830,16 @@ function sendChat() {
         toast(`✧ Mnemos reshaped your sky: ${raw}`);
       }
     } else if (ev.type === 'learned') {
-      if (window.Sound) Sound.born();
-      ticker(`✦ learned ${ev.count} new memor${ev.count === 1 ? 'y' : 'ies'}`);
+      // Say what actually landed. A confident answer plus a silent no-op write is how
+      // an owner ends up trusting a memory that does not exist.
+      if (ev.count > 0) {
+        if (window.Sound) Sound.born();
+        ticker(`✦ learned ${ev.count} new memor${ev.count === 1 ? 'y' : 'ies'}${ev.skipped ? ` · ${ev.skipped} refused` : ''}`);
+      } else if (ev.skipped) {
+        ticker(`✦ nothing new stored — ${ev.skipped} candidate${ev.skipped === 1 ? '' : 's'} already there or not a claim`);
+      } else if (ev.asked) {
+        ticker('✦ that was a question: nothing added to your sky');
+      }
       // stamp ids that exist now but weren't in the sky before this turn:
       // the next buildStars() (on 'done') will paint them NEWBORN GREEN.
       api('/api/galaxy').then((r) => {
