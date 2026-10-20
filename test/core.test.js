@@ -44,6 +44,36 @@ test('store: short and junk memories rejected', async () => {
   assert.equal(s.addMemory(/** @type {any} */ (123), 'chat'), null);
 });
 
+// Every string below is a verbatim memory the live demo wrote during the Day-4 session.
+test('store: chat memories keep only the claim, not the answer', async () => {
+  const s = tmpStore();
+  await s.load();
+
+  const real = s.addMemory('Judging for the Nebius x NVIDIA Global AI Hackathon runs Dec 1-15, 2026.', 'chat');
+  assert.ok(real, 'the fact the owner stated is stored');
+
+  const restated = s.tryAddMemory('Judging runs Dec 1-15 2026', 'chat');
+  assert.equal(restated.ok, false, 'a shorter restatement of a live memory is refused');
+  assert.equal(restated.reason, 'duplicate');
+  assert.equal(s.vault.memories.length, 1, 'and it does not enter the sky');
+
+  const echo = s.tryAddMemory('What exactly were the health ping times on 2026-10-19 and 2026-10-20?', 'chat');
+  assert.equal(echo.reason, 'question');
+  assert.equal(s.tryAddMemory('How is the Render instance kept alive', 'chat').reason, 'question');
+
+  const laundered = s.tryAddMemory(
+    'Health ping on 2026-10-19 recorded at 2026-10-19 00:00 UTC, cited from memory [Mb4dfd276] (0 days old).',
+    'chat',
+  );
+  assert.ok(laundered.ok, 'a claim of its own is still admissible');
+  const kept = /** @type {import('../src/store.js').Memory} */ (laundered.memory);
+  assert.ok(!/M[0-9a-f]{4,}/.test(kept.text), 'no citation chip survives');
+  assert.ok(!/cited from memory/i.test(kept.text), 'no prose provenance survives');
+  assert.match(kept.text, /recorded at 2026-10-19/, 'the claim itself is kept');
+
+  assert.ok(s.addMemory('Kyoto trip, spring', 'user'), 'owner-written notes are never shape-gated');
+});
+
 test('seed: demo vault populates memories, insights, skills; snapshot valid', async () => {
   const s = tmpStore();
   await s.load();

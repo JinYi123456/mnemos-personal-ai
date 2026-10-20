@@ -79,6 +79,58 @@ function deriveTags(text) {
   return Array.from(new Set(tokenize(text))).slice(0, 6);
 }
 
+// A stored `[M…]` chip is a copy of an answer, not a fact: on Day 4 it made a
+// fabricated timestamp look sourced. Chip text is stripped before hashing.
+const CHIP_RE = /[\[(]\s*(?:see\s+|cited\s+from\s+)?M[0-9a-f]{4,}\b[^)\]]{0,40}[)\]]/gi;
+// What the chip leaves behind once the id itself is gone: "…recorded at 00:00 UTC,
+// cited from memory  (0 days old)".
+const CHIP_TAIL_RE = /\b(?:cited\s+from|see)\s+memor(?:y|ies)\b\s*/gi;
+
+const QUESTION_FIRST = new Set([
+  'who', 'whom', 'whose', 'what', 'when', 'where', 'why', 'how', 'which', 'whether',
+]);
+
+/**
+ * Shape gate for memories the model writes itself. A restatement of the owner's own
+ * question is not a memory: it holds no claim, yet on overlap alone it can outrank the
+ * real facts and dissolve the abstention the next turn. Morphology-based predicate tests
+ * were tried and rejected here — they refuse valid sentences like "the capacitor hums at
+ * midnight". Answer-derived text is blocked upstream, at the extraction source.
+ * @param {string} text
+ * @returns {{ok: boolean, reason: string}}
+ */
+export function claimShape(text) {
+  const s = String(text || '').trim();
+  if (/\?$/.test(s)) return { ok: false, reason: 'question' };
+  const first = s.toLowerCase().split(/[^a-z0-9']+/)[0];
+  if (QUESTION_FIRST.has(first)) return { ok: false, reason: 'question' };
+  if (shapeTokens(s).length < 3) return { ok: false, reason: 'too-few-words' };
+  return { ok: true, reason: '' };
+}
+
+/** @param {string} text @returns {string[]} */
+function shapeTokens(text) {
+  return String(text).toLowerCase().split(/[^a-z0-9']+/g).filter(Boolean);
+}
+
+/**
+ * True when `cand` says nothing an existing memory does not already say: at least
+ * 80% of its content tokens are contained in one live memory.
+ * @param {string[][]} existing token lists
+ * @param {string[]} cand
+ */
+function addsNothing(existing, cand) {
+  if (cand.length < 3) return false;
+  for (const mine of existing) {
+    if (mine.length < 3) continue;
+    const set = new Set(mine);
+    let shared = 0;
+    for (const t of cand) if (set.has(t)) shared += 1;
+    if (shared / cand.length >= 0.8) return true;
+  }
+  return false;
+}
+
 /**
  * Cosine similarity between two equal-length vectors.
  * @param {number[]} a
@@ -227,11 +279,35 @@ export class Store {
    * @returns {Memory|null} null when a near-duplicate exists
    */
   addMemory(text, source = 'chat', seed = false) {
-    const clean = safeText(text, 600);
-    if (clean.length < 8) return null;
+    const r = this.tryAddMemory(text, source, seed);
+    return r.ok ? r.memory : null;
+  }
+
+  /**
+   * The one write path for memories. Returns why a candidate was refused so the
+   * chat layer can report "learned 1, skipped 2" instead of echoing confidence the
+   * vault does not support.
+   * @param {string} text
+   * @param {string} [source]
+   * @param {boolean} [seed]
+   * @returns {{ok: boolean, reason: string, memory: Memory|null}}
+   */
+  tryAddMemory(text, source = 'chat', seed = false) {
+    const refuse = (/** @type {string} */ reason) => ({ ok: false, reason, memory: null });
+    const raw = safeText(text, 600);
+    const stripped = raw.replace(CHIP_RE, '').replace(CHIP_TAIL_RE, '');
+    const clean = stripped.length === raw.length ? raw : safeText(stripped.replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').trim(), 600);
+    if (clean.length < 8) return refuse('too-short');
+    if (source === 'chat' && !seed) {
+      const shape = claimShape(clean);
+      if (!shape.ok) return refuse(shape.reason);
+      if (addsNothing(this.vault.memories.filter((m) => !m.supersededBy).map((m) => tokenize(m.text)), tokenize(clean))) {
+        return refuse('duplicate');
+      }
+    }
+
     const hash = sha256(clean.toLowerCase().replace(/\s+/g, ' '));
-    const dup = this.vault.memories.find((m) => m.id === hash);
-    if (dup) return null;
+    if (this.vault.memories.some((m) => m.id === hash)) return refuse('duplicate');
 
     const mem = {
       id: hash,
@@ -251,7 +327,7 @@ export class Store {
       if (!set) this.index.set(t, (set = new Set()));
       set.add(mem.id);
     }
-    return mem;
+    return { ok: true, reason: '', memory: mem };
   }
 
   /**
