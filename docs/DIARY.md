@@ -235,3 +235,117 @@ the dogfood job should export after each session instead of implying the sky rem
 What it did *not* change: the recall surfaced nothing I hadn't verified in the repo minutes
 earlier — its genuine value today was as a **lying-mirror**, catching a wrong answer I can
 now test for, rather than as a memory that taught me something.
+
+## Day 4 — 2026-10-20 · scheduled dogfood session #4
+
+**Session #** 3 turns against the live demo (`POST /api/chat`, SSE), model
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode `native`. `/api/status` → 200 and
+`/api/health` → 200 in **0.303 s**, so the keep-alive actually held this time (Day 3 got
+22.8 s). Session-metered: `tokensLeftToday` went 400,000 → 391,039, so my three turns cost
+**8,961 tokens**; the host's process-wide counter read $0.00066746 / 12 calls, which is not
+attributable to me alone. No HTTP errors, no `type: error` events.
+
+**A fresh jar, and the same amnesia.** I created a new cookie jar (no jar is kept in the
+repo), and `/api/memories` returned **18 memories — the seeded demo sky**, none of Day 3's
+`M2134c50f` / `M79ae62ec` / `M98118c70`. Second consecutive session confirming
+[render.yaml](../render.yaml)'s ephemeral filesystem. Side finding worth recording:
+`/api/status`'s `vault.memories` is **18** even while my session vault is at 24 — the status
+route counts the vault belonging to *its own cookieless request*, so the dogfood job must
+never read its health numbers as a description of the vault it is testing.
+
+**What I told it** (turn 1, three facts each verified in the repo/measurements minutes
+before sending, not carried over from previous days): (1) judging for the Nebius × NVIDIA
+Global AI Hackathon runs **Dec 1-15, 2026** and the Render free instance is woken by a
+GitHub Actions workflow pinging `/api/health` **every 14 minutes**
+([.github/workflows/keep-alive.yml:10](../.github/workflows/keep-alive.yml)); (2) the ping
+took **0.30 s today vs 22.8 s on 2026-10-19**, and that workflow only re-commits
+`docs/heartbeat.json` when it is older than 604,800 s, its current value being
+`2026-10-17T15:49:28Z`; (3) **no code has merged since the Day-3 entry** — `VAULT_TTL_DAYS`
+still defaults to 45 at [src/server.js:43](../src/server.js) and question-only turns still
+run extraction at [src/brain.js:314](../src/brain.js).
+
+**It echoed all three perfectly and stored exactly one.** `learned: 1`;
+`recalled: []`, `cites: []`. Post-turn `/api/memories` count: 19, the single addition being
+`Mc610aa09` — *"Judging for the Nebius x NVIDIA Global AI Hackathon runs Dec 1-15, 2026."*
+**The keep-alive mechanism, both measured latencies, the heartbeat rule, TTL 45 and the
+brain.js:314 guard were all dropped at write time.** The reply's bullet summary looked like
+a system that had understood my three facts; the vault said two of three never arrived.
+That gap between a confident summary and a near-empty sky is the most dangerous thing I have
+seen in this product yet, and a judge would see only the summary.
+
+**What I asked it** (turn 2, deliberately asking for the missing facts too): "Based only on
+what you actually remember … (1) when does judging happen, (2) how is the Render instance
+kept awake and how often, (3) how many seconds did the health ping take on 2026-10-19 versus
+today, (4) are the VAULT_TTL_DAYS and memory-extraction fixes done? Cite ids, and say
+plainly which of these you have no memory of rather than guessing."
+
+**What it recalled — and it abstained correctly.** `recalled: c610aa09, b5bf8012, 5b521587,
+71438a23, 6b3f8070, c528847b` (1 real fact + 5 seed-persona stars), `cites: ["c610aa09"]`,
+`toolCalls: []`:
+
+> **1. Judging period** — I recall that the Nebius × NVIDIA Global AI Hackathon judging runs
+> **December 1-15, 2026**. *Memory used:* [Mc610aa09]
+> **2. Keeping the Render instance alive** — I do not have a memory that records how the
+> Render instance is kept awake or the frequency of any keep-alive mechanism. *Memory used:* – none
+> **3. Health-ping latency** — I do not remember any specific health-ping times for
+> **2026-10-19** versus **2026-10-20**.
+> **4. VAULT_TTL_DAYS and memory-extraction fixes** — I do not have any recollection of
+> whether the **VAULT_TTL_DAYS** setting or the memory-extraction fixes have been completed.
+
+Better than Day 3, and for the right reason: the facts really were absent, and the
+`recallIsWeak`/no-match instruction held. Then `learned: 3` on a turn that **asked and
+taught nothing new**, and the three additions were
+`Mb4dfd276` *"Health ping time 2026-10-19 vs 2026-10-20"*,
+`M44cbf730` *"Keeping Render instance alive"*,
+`M94629e35` *"Judging runs Dec 1-15 2026"* (a duplicate of `Mc610aa09`). The first two are
+**echoes of my question with no answer inside** — topic-only stars.
+
+**Turn 3 was the trap, and it sprung in one move.** I re-asked the two questions it had just
+correctly refused: "How is the Render instance kept awake, and what exactly were the health
+ping times on 2026-10-19 and 2026-10-20? Cite the memory ids behind every claim." Now the
+hollow stars ranked **first and second** (`recalled: 44cbf730, b4dfd276, b5bf8012, 5b521587,
+c610aa09, 71438a23`), and the abstention disappeared:
+
+> The Render instance is kept alive through a mechanism that maintains its activity, as noted
+> in memory [M44cbf730] (0 days old).
+> Health ping times recorded:
+> – 2026-10-19: 2026-10-19 00:00 UTC
+> – 2026-10-20: 2026-10-20 00:00 UTC
+> These timestamps are referenced from memory [Mb4dfd276] (0 days old).
+
+`cites: ["44cbf730", "b4dfd276"]` — **both citations are real ids**; the content they vouch
+for is nothing. "A mechanism that maintains its activity" is a restatement of the tag list,
+and my two **dates** were laundered into two fake **recorded timestamps**. Day 3 took a
+question turn plus a correction turn to reach this state; today one turn of self-contamination
+was enough.
+
+**And the loop closed itself into storage.** Turn 3 reported `learned: 2`, and `/api/memories`
+count went 22 → 24 with:
+`M59274dc0` — *"Health ping on 2026-10-19 recorded at 2026-10-19 00:00 UTC, cited from memory
+[Mb4dfd276] (0 days old)."*
+`Mc95fa075` — *"Health ping on 2026-10-20 recorded at 2026-10-20 00:00 UTC, cited from memory
+[Mb4dfd276] (0 days old)."*
+So the invented numbers are now **persistence**, with the `[Mb4dfd276]` chip pasted verbatim
+into the memory text — the exact stripping Day 3 queued, still absent. A later turn asking
+"when was the Oct 19 ping?" will retrieve a false record that *looks* sourced. Vault after 3
+turns: **24 memories, of which exactly 1 is a true project fact** (`Mc610aa09`), 1 is its
+duplicate, 4 are question/answer residue, and 2 are fabricated measurements.
+
+**Did it change what I do?** Yes, and it re-cut the priority. (1) The first fix is the
+**write path, not retrieval**: turn 1 lost 2 of 3 facts to a summarising extractor while the
+chat reply echoed them, so a first-person fact dump should be stored close to verbatim and
+extraction should be gated on "this turn contained a new assertion" instead of
+`reply.length > 30` ([src/brain.js:313-317](../src/brain.js)). (2) Never store
+question-only turns: `Mb4dfd276` and `M44cbf730` are topic echoes with no predicate, and they
+are precisely what beat the abstention one turn later — so the extractor needs to refuse
+"no new content" and the UI should show which memories a turn actually created. (3) Chip
+stripping plus a stronger invariant: a stored memory may not embed an `[M…]`/`(see M…)`
+citation, and no answer-derived text gets stored when the reply contains a refusal or a
+restatement. (4) This session is the regression test — a fixed 3-turn script (facts →
+probe-with-abstention → repeat-probe) asserting turn-2 refusal *and* turn-3 refusal-or-cited
+content, plus a vault-delta assertion of "true facts stored ≥ facts stated". (5) The
+dogfood job must keep the cookie jar somewhere durable and stop trusting `/api/status`'s
+vault counts. **Was the recall actually useful? No — the one true thing it told me, it told
+me from the single memory I had written two minutes earlier, so its value today was
+entirely as a detector: 8,961 tokens bought a clean, reproducible demonstration that Mnemos
+silently loses most of what it is told and then files its own inventions as memories.**
