@@ -1,0 +1,342 @@
+I find a question that makes sense to answer.
+live. What's the minimum number of
+Stacks do you expect a product to happen the base layer?
+the nimatron or the other stuff up from token factory.
+And can you give us a few examples,
+are one of the right narrow parts?
+one could build that satisfy the requirements of the hack about.
+So probably more that first question,
+like the minimum number.
+of stacks to expect a product to have.
+in terms of implementation.
+Anyone else, anyone can answer them.
+Yeah.
+For me, I don't necessarily--
+Think that I am looking for a minimum.
+requirement or anything.
+I think that
+that elegant solutions are really important.
+So,
+You don't want to have a super complex tech.
+side for very simple implementations and things.
+like that. It just gets really messy so I must
+or see, you know, maybe just use one thing.
+but it's implemented really well and really simply.
+I prefer that versus seeing, you know, a lot.
+a very large tech stack that doesn't necessarily
+necessarily need to be that complicated.
+But that's the-
+me personally, the other judges might feel different.
+Certainly.
+thoughts.
+Definitely, I agree. I was just answering one of the questions.
+like do you have any advice about striking the
+between a single legible use case and meaning.
+integration of many technologies and I think it's
+history, Riki's answer on that as well.
+In the use case, solving a clear goal is...
+usually better than trying to implement multiple integration
+and when we lose focus on that.
+that would be my answer.
+But yeah.
+Jackie, do you see any thoughts on that?
+I think you will.
+There's a consensus there.
+>> Did you hear the question?
+I was typing.
+(laughing)
+- You're working.
+more so and Shireen has a similar question.
+So I guess I'll ask that for you, but
+basically she read it starting it started off with a super narrow
+scoped and tight topic but after experience
+Obviously with this really interesting technology.
+have grown especially since their courage to use top
+any more clots, okay, factory. So, um, what...
+I'm wondering any advice about striking the balance between
+a single legible use case versus end meaningful integration.
+of many technology essentially.
+It's like, what's the best?
+Allowing's here.
+I think for something like that.
+like that, the balance is basically, is it doing...
+doing a specific job.
+When I'm looking at--
+So I'm a platform engineering background.
+So when I'm looking at--
+creating a cluster or different types of services
+would use internally, you want to make sure that you're splitting it out kind of by
+so.
+Each thing has a defined job and that makes it easier to
+do things like restarts or scale it out and stuff like that.
+that right? So I think it's a little different of course but...
+when you're looking at these different types of tools and integrations that you can pull.
+It's really easy. I think I said this earlier. It's really easy to pull
+tons of things in and make this mega monolith of
+stuff that could theoretically do a lot of cool things.
+but I think it's more important to kind of look at it and be like...
+Okay, I have you, you're getting your this one object or...
+integration that brings me joy and what is that joy shaped like.
+like what task does it do?
+How does it contribute to the big picture?
+and does it take away
+from the main story that I'm trying to tell. If it doesn't contribute to the
+that like 30 seconds to wow then maybe we should
+if it needs to be there.
+Great point. I'm right we have a question from
+I'm going to ask you two a detail because you both have a
+have the same first name.
+All right.
+those publishing your own failure cases and limitations.
+help or hurt. I documented where my project falls.
+short and I want to know whether judges read that as rigor.
+or as a weakness.
+I think so definitely a rigor.
+Because then you know that.
+where your project lives and there is always COVID.
+for improvement and this time of the time of the time is not like that.
+a year with Project Kuchia Building.
+that actually a good point that you already need.
+know in future what you can do to improve your process.
+Bye.
+Ricky any thoughts on that?
+Sorry, you also caught me, target. (laughs)
+I'm catching everybody. I'm gonna miss the question, sir.
+(laughing)
+- What did you do?
+Yeah, I'll re-ask the question and I'll let you talk.
+but would you consider publishing?
+one's own failure cases and limitations as
+rager or weakness.
+those are always great learning experiences.
+and it proves that you really
+like battle testing your product.
+I love seeing the failures work well.
+worked well, what didn't work well as well.
+Because like I said it just shows that you're really
+focusing on quality.
+And so you can kind of point to your valus cars and
+like that and show that your product is really robust.
+I love seeing the failures that kind of speaks.
+higher to me than.
+a super polished product that looks good on the surface.
+versus once you dive into it you see that
+starting to fail and things like that. You can see that it wasn't really
+man through his paces so I love seeing stuff like that.
+Amazing, thank you.
+Okay, before I ask...
+this question, who is not typing right now?
+that I can ask a question to someone.
+I'm listening this time.
+time to all right we have a question from
+Matt
+I'm Tlaene. I'm Tlaene Maria.
+terminal UI on purpose because they need the user.
+Another is a developer who is already in the terminal patch.
+the system. Is there anything you'd want to see in it? Like
+a clear model attribution on screen to judge it fairly.
+against web front ends essentially.
+Oh, that's such a good question as an ops person.
+I love a terminal app. I love them.
+I think. Okay.
+if I was trying to judge a terminal app, an example.
+of like what I think is like a really beautifully done one is cana.
+There's a lot of complexity in it.
+You're seeing a lot of--
+of different information about the different nodes and pods and information about
+like, you know, see if you use usage and help charts and all these
+things and I think they do a really good job of even
+know it's just a terminal making that like an interactive table.
+that you can kind of go through. I'm obviously not expecting.
+you to build something like canines and hackathon.
+that's been built over many years with many people.
+But I--
+think when you're looking at something like that, trying to keep
+in mind as if I'm an ops person.
+What are the things that--
+I care about the most. Maybe having like a seat.
+usage integration in it and like showing you which model you're using.
+using or other ways of showing how fast.
+I would ask that came back or different performance metrics or things that I would look like.
+for in like a terminal app.
+Like what is that main information?
+and how do you surface it in a way that's intuitive and easy to understand.
+but not cluttered.
+I'm sorry. Thank you for that. Alright Selena, I see you.
+here don't worry girl I got you and have a question
+We have a question around design and accessibility.
+ability so from Cheyenne would
+Implementing accessibility features be a good idea and make a
+project stand out or does it not matter as much?
+compared to other aspects.
+I would answer this in...
+two parts. So first of all accessibility.
+always matters and this is a happy
+So by no means are we expecting like
+production grade quality, nor at least
+On my end, do I believe there's an expectation for every accessibility feature?
+to be implemented. Of course, if you want to take
+your project in a more accessibility-focused way than.
+that is valued and appreciated, but it's not
+the central focus of the hackathon. So I think you could always
+always, you know, sharing next steps how you would.
+plan to make the project more accessible since this is kind of
+like an initial prototype.
+Anyway, I'll just thoughts on that before.
+and on and we have three minutes left.
+Accessibility of pay great. Oh Ricky
+Yes.
+Yeah, it's just going to say for accessibility.
+Sometimes it's easy for that stuff to get over the...
+So if you do put in a lot of time and effort into
+making your project as accessible as possible.
+just try to make that as obvious as you can.
+whether that's in your project submission.
+or just figure out a way to call it out.
+because it's something I can get easily glazed on.
+So if that's important to you, make sure it's.
+front and center if you can.
+Alright, two minutes left on a clock.
+I'm going to ask one question that all of you
+you I think can answer.
+And before I ask this question, I'm--
+I'm going to ask Preface with another question.
+Where can they ask?
+continuous questions. Yeah, where's the
+We have a Discord link for Nebius 4.
+this hackathon if they have additional questions because I know we probably
+would be
+get through all of them. There are a ton here but...
+I want to make sure that if anyone has
+additional questions, we were pointing them to the right place and I would say
+probably been at business core, but Jackie let me know.
+Yeah, yeah, yeah.
+I'm gonna drop the discord link in chat right now.
+And you can join the Discord here to talk directly.
+to the team and we specifically have a channel called DevPilot.
+global AI hackathon. So do bring your questions there.
+there for the hackathon itself.
+If you have other questions.
+questions about like how to use token factory and stuff like that we do have separate.
+channels for those two. Yeah.
+Thank you so much. All right, so last question and we'll go
+Go down the line because I'm curious everyone else's thoughts.
+All right.
+10 days left in this hackathon, right?
+What's your editing?
+to a builder who's like, okay, I'm almost...
+done and I'm nervous to submit.
+You know what I mean?
+Like, these are really cool, amazing.
+judges and some really cool technology. I want to stand out.
+want to make sure I do a good job, like what's your advice?
+I think one of the biggest things...
+is getting out and talking to customers.
+that would actually use your product.
+In the engineering space it's really easy to...
+up or down and won't spill but it's oh
+We're a lot more difficult to get out and we talk to people.
+see if the implementation makes sense.
+It flows well and things like that.
+So within your--
+last few days of this.
+First 90% is not necessarily easy to do.
+get to but it's easier to get to but that would
+didn't
+10% that final polish that.
+really sets you apart and makes it very
+usable for your user base and audience.
+I think is really important. So definitely get out and talk to people.
+have people try it out that, you know,
+are starting from zero, they have no information about it.
+Get them--
+to try and see what they think and make adjustments based on.
+- So, man.
+I did hear.
+There's only 10 days on that.
+better focus on the main features which you have.
+And, define.
+those features so that it really stands out.
+and also make sure that
+I think that working is good.
+production, whatever you are applying all.
+try to make clear the holes and...
+That's not possible.
+Let me be a little bit.
+Selena.
+I would say budget more time.
+than you would expect for the final deliverables.
+I know it's easy to want to intimate more and more features, but...
+the packaging and kind of narrative.
+that you build around your project always takes longer than expected.
+budget extra time for that if you need to.
+really like zero in on scope.
+rather than trying to have additional things.
+And then also just--
+I like it's so cool getting to be part of this hackathon
+I hope that y'all can enjoy the experience as well.
+Thank you. Shushmita.
+This plus one.
+one on everyone's thoughts and just it
+enjoy the process as well.
+I think
+It's really fun to build these amazing projects.
+and just focus on the learnings.
+And--
+you can build on top of it afterwards as well because the
+just you know, start a project. Thank you.
+like that. So really excited to see everyone's delivery.
+[laughter]
+Jackie?
+Yeah.
+So I know I'm like kind of crashing in through the internet like...
+feeling really excited and enthusiastic.
+I've probably come across as like really confident.
+it right now. But when it comes to like building hack-a-th-
+on projects and stuff. I'm actually pretty nervous and shy to share things.
+I still get shy with all of my demos.
+And so from that level...
+the advice that I would give is just
+push through it. I know it sounds obvious but...
+It's really easy to stop yourself and hold yourself back.
+But the more that you keep trying and the more you keep building and
+And of course, the more that you fail and learn along the way,
+stronger you'll become later and it'll set you up for success then.
+So take like the lessons that you've learned from us today.
+and keep your enthusiasm, your curiosity, and just keep.
+Keep building, just keep going.
+Yeah.
+Amazing. Thank you all so much. Thank you judges.
+This has been amazing. I'm so glad we did this.
+I'm so glad you all agreed to do this.
+Yes, give us thumbs up.
+give us hearts, give us claps, and also
+two minutes tell us how it went. So I did drop.
+the survey link in the chat, but I'm also
+the QR code on the screen as well.
+Just let us know.
+you know how you like this session, what you want to see out of this kind of...
+session in the future. We haven't done these conversations.
+the session while also putting you in the mindset of
+giving feedback as well to your fellow Bill.
+So let us know if this went really well for you.
+This recording will be up an email.
+within the next couple of hours.
+But again,
+Thank you, Ricky. Thank you, Jackie.
+Thank you, DC. Thank you, Selena.
+Thank you, too.
+Thank you, Johnnie, for being here with us anymore.
+And thank you too.
+every person who submitted and showed up.
+today and for those who didn't who are going to watch the reporting thank you so much.
+for watching the recording as well and I hope you have a great day.
+rest of your morning, afternoon, and evening.
+it's evening, go to sleep.
+So.
+Thanks so much everyone.
+Thanks everybody. Thank you everyone.
+Thanks everyone for joining and can't wait to see what you've built.
+I appreciate everyone. Thanks.
+[MUSIC PLAYING]
+(upbeat music)

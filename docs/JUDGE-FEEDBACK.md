@@ -67,3 +67,66 @@ a clean `small.en` re-run is pending). More recordings may be appended below._
 > server? — I think it's pre-seated for the demo, but I'd love to hear if that's true.
 >
 > Thank you so much [Jin] for sharing your project. That was a fun one.
+
+---
+
+# Analysis (owner diagnosis + transcript evidence + how they score)
+
+## The real problem: a cold reviewer has no entry point
+The owner's read is correct and the transcript backs it: the judges **hadn't read the
+description or tried the demo beforehand**, didn't know **where to start**, and nobody
+narrated it live. Mnemos' value is a *conceptual mapping* (star = memory, chip = citation,
+dimming = decay, ablation = impact) that is invisible until explained. Cold, it reads as
+"pretty stars + a chat box." The confusion is the signature of an un-explained model:
+- "I haven't read it before, to be honest."
+- "What does this tell you?" … "curious where the memories are" … "How do you know this about me?"
+- "Is this a single server? when I opened it it already had memory…" (they mistook the
+  per-visitor seeded sandbox for a shared/global vault)
+- "if you refresh the page it looked like it wanted to give you a link to a video"
+  (the onboarding card was misread as a video prompt)
+
+**Strategic point:** the real judging (Dec) is **asynchronous** — a judge clicks the link with
+no one to explain it. So the demo must onboard a cold reviewer *itself*. That is now the #1
+fix, above anything else.
+
+## What the judges said they reward (from the 15-min Q&A) — and where we stand
+1. **Elegance over a big stack.** "Don't want a super complex tech stack for simple
+   implementations… maybe just use one thing but implemented really well." "Solving a clear
+   goal is better than implementing multiple integrations." → We should frame as **one
+   platform (Nebius Token Factory) used deeply**, every integration has one job serving the
+   explainable-memory story — not lead with breadth.
+2. **"30 seconds to wow."** Each piece must serve the main story or be cut. → Our wow is the
+   **ablation** ("what if it forgot this?") and the **live citations**. Put them first.
+3. **Publishing failures/limitations = RIGOR, not weakness.** "I love seeing the failures…
+   it speaks higher to me than a super polished product that looks good on the surface." →
+   This is a direct endorsement of what we already do (honest benchmark ranges, the
+   "matched-but-not-cited" self-audit, the diary's honest failure note). **Make it
+   front-and-center, not buried.**
+4. **Model attribution + performance metrics, surfaced not cluttered** (their answer about
+   terminal/technical UIs). → Our ⚙ Telemetry drawer (model/tokens/latency/USD) is exactly
+   this — call it out.
+5. **Accessibility matters but is easy to glaze over — make it obvious.** → We respect
+   `prefers-reduced-motion`, have aria-labels and keyboard support; **state it in the
+   submission** so judges notice.
+6. **Last-10-days advice:** talk to real users, budget time for packaging/narrative, zero-in
+   on scope (don't add features), make the main features stand out. → Do NOT add scope;
+   sharpen the guided path + description.
+
+## Prioritized fixes (decided; not yet done)
+- [ ] **P0 — a "Review in 60 seconds" guided tour / judge mode**: a distinct first-run path
+      (separate from user onboarding) that walks a cold reviewer: ① ask "what do you remember"
+      → watch recall light the stars + citations; ② click a citation → the star flares; ③ run
+      "what if it forgot this?" → see impact; ④ open ⚙ Telemetry → see model + cost; ⑤ open
+      Vault → see it's YOUR private, isolated, exportable copy. The app already has a Tour
+      (`btn-tour`) + deep links (`?demo=1..4`, `?ablate=1`, `?dream=1`) to build on.
+- [ ] **P0 — a short "How to evaluate Mnemos" block** at the top of the Devpost description
+      (judges won't read the long story cold): the 5 steps above + the 30-sec wow.
+- [ ] **P1 — make the seeded-vs-private vault unmistakable**: label the sandbox clearly
+      ("your private per-visitor vault; the N stars are demo seed — teach it something and
+      watch it learn *you*") so no one thinks it's a shared server.
+- [ ] **P1 — surface rigor**: one line up top — "we publish our failure cases and a measured
+      abstention benchmark on purpose — see FEEDBACK.md / eval."
+- [ ] **P2 — call out accessibility** (reduced-motion, aria, keyboard) in the description.
+- [ ] **P2 — reframe around elegance/depth**, not tech breadth.
+
+Raw transcript of the open Q&A: `docs/JUDGE-TRANSCRIPT-2-QA.txt`.
