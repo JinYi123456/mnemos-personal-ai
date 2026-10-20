@@ -349,3 +349,65 @@ vault counts. **Was the recall actually useful? No — the one true thing it tol
 me from the single memory I had written two minutes earlier, so its value today was
 entirely as a detector: 8,961 tokens bought a clean, reproducible demonstration that Mnemos
 silently loses most of what it is told and then files its own inventions as memories.**
+
+### Day 4 addendum — same day, after fixing what the session found
+
+Three commits later (`19ed0ce`, `e1421a5`, `f6480d3`), 41 tests green, `tsc --noEmit` clean,
+deployed and re-probed on the live demo. Two of my own Day-4 readings above were wrong, and
+correcting them matters more than the fixes.
+
+**Correction 1 — I implied `/api/status` was untrustworthy. It is not.**
+[src/server.js:240-252](../src/server.js) serves status from the *requesting* session's store, and
+my jar was valid throughout (`mnemos_sid` 6c82cad4…). The reason it kept reporting 18 while my
+vault held 24 is that the instance **restarted between my turns** — `provider.spend.calls` went
+12 → 0 and `tokensLeftToday` refilled to 400,000, i.e. a new process — and all six memories from
+the session were gone **within twenty minutes of being written**. That is a harder durability
+finding than anything above: on the plan the judge demo runs on, same-day evidence does not
+survive. Neither does the spend ceiling, since the gate is per-process and a restart-happy free
+instance refills its own daily budget.
+
+**Correction 2 — the write loss had a second cause I had not seen.** The old extractor input was
+`USER: text.slice(0, 800)` plus `ASSISTANT: reply.slice(0, 800)` ([src/brain.js:820](../src/brain.js),
+pre-`e1421a5`). My turn-1 message was **1,086 characters**, so fact 3 was cut mid-sentence and
+never reached the extractor. Facts 1 and 2 *were* fully visible and it still emitted one memory —
+so the loss is truncation **plus** a summariser asked for "0-3 durable memories, ≤120 chars". The
+UI echoed all three because the answer had the whole message; only the write path saw a fragment.
+
+**What changed.** (1) Extraction reads only the owner's words, whole: the assistant reply is no
+longer an input, the 800-char slice is gone, up to 6 memories per turn, and a turn made only of
+questions and requests skips extraction entirely and says so (`learned 0` with `asked`).
+(2) The store refuses what must not become a star: `[M…]`/`【M…】` chips and their "cited from
+memory" tail are stripped before hashing, question-shaped text is refused, and a candidate whose
+content tokens sit ≥80% inside an existing live memory is refused as adding nothing. The
+morphology-based "does this sentence have a predicate" gate I wrote first was **removed** — it
+refused valid memories ("the capacitor hums at midnight", "an extra memory written by one arm").
+(3) The citation resolver now sees full-width chips, and any figure in an answer that appears in
+**no** memory the model read is flagged as invented.
+
+**Live re-probe after deploy** (fresh seed sky, 3 turns, 7,478 tokens: 400,000 → 392,522):
+stated 4 verified facts in 724 chars → `learned=4, skipped=0`, and `/api/memories` held exactly
+those four (`M754fdea` models, `M39cf790` redeploy-wipes-vault, `M852e8b9` today's fix,
+`M31960a7` judging Dec 1-15). Question-only turn → `learned=0, skipped=0`, **zero new memories**
+(before the fix, the same shape of turn produced three hollow echoes). Repeat probe → `learned=0`,
+`asked=true`. Vault scan for chips or the invented `00:00 UTC` signature: **0 hits**. The
+laundering loop is closed — a bad answer can no longer become a memory.
+
+**What is still broken, with the real evidence.** The answer side keeps inventing. Earlier in the
+day it claimed "You first opened Mnemos on **2026-10-20**" after being told explicitly to name
+what it did not know, and it said the seed sky holds "**1** demo memory" while the true 18 sat in
+`M39cf790`, which recall never surfaced. My new figure check catches **neither**: measured on the
+actual strings it flags Day-4's invented `00:00` readings (`["0","00"]`) but returns `[]` for "1",
+because the digit 1 also occurs in "Dec 1-15". It is a sound-but-narrow guard — anything it flags
+is certainly invented, and many inventions pass. A final probe on the re-seeded sky did abstain
+cleanly on all three questions, so abstention is now *sometimes* right rather than reliably right.
+Also honest: the extractor still paraphrases, so `M39cf790` reads "re-seds" where I wrote
+"re-seeds" — "only my own words" means my words are the only *source*, not that they are stored
+verbatim.
+
+**Did it change what I do?** Yes. (1) The next unit is recall coverage for figures, not more write
+work: when a question asks for a count or a value, require that a recalled memory actually carries
+one before answering — the "1 vs 18" error is a retrieval miss dressed as an answer, and a judge
+will hit it in ten seconds. (2) The dogfood job must `/api/export` after every session and diff
+against the previous export, because a same-day restart deletes the very evidence this diary is
+made of. (3) README's demo-URL row no longer claims the cron means it "never cold-boots", and its
+test count now matches `npm test`.
