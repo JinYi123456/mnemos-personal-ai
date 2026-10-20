@@ -858,6 +858,11 @@ function sendChat() {
         const chips = ev.matchedUncited.map((m) => `<button class="cite-chip uncited" data-id="${m.id}" title="used in the wording, not cited by the model">◌ ${esc(m.text)}</button>`).join('');
         b.innerHTML += `<div class="cite-bar"><span style="font-size:11px;color:var(--ink-faint);width:100%">matched but not cited ↓ the model leaned on these without saying so</span>${chips}</div>`;
       }
+      if ((ev.unsupported || []).length) {
+        // A figure that is in none of the memories it read was counted by the model
+        // itself. Flagged, not hidden: on the live demo it invented "1 demo memory".
+        b.innerHTML += `<div class="cite-bar"><span class="cite-warn">⚠ ${esc(ev.unsupported.join(', '))} — no memory it read contains ${ev.unsupported.length === 1 ? 'this figure' : 'these figures'}; treat as invented</span></div>`;
+      }
       if ((ev.recalled || []).length && !(ev.cites || []).length && !(ev.matchedUncited || []).length) {
         b.innerHTML += `<div class="cite-bar"><span class="cite-warn">⚠ drew on ${ev.recalled.length} memories but cited none — treat this answer as unverified</span></div>`;
       }

@@ -81,10 +81,22 @@ function deriveTags(text) {
 
 // A stored `[M…]` chip is a copy of an answer, not a fact: on Day 4 it made a
 // fabricated timestamp look sourced. Chip text is stripped before hashing.
-const CHIP_RE = /[\[(]\s*(?:see\s+|cited\s+from\s+)?M[0-9a-f]{4,}\b[^)\]]{0,40}[)\]]/gi;
+const CHIP_RE = /[[【(]\s*(?:see\s+|cited\s+from\s+)?M[0-9a-f]{4,}\b[^)】\]]{0,40}[)】\]]/gi;
 // What the chip leaves behind once the id itself is gone: "…recorded at 00:00 UTC,
 // cited from memory  (0 days old)".
 const CHIP_TAIL_RE = /\b(?:cited\s+from|see)\s+memor(?:y|ies)\b\s*/gi;
+
+/**
+ * Remove the model's own receipts from a string: a chip is provenance noise, and left in
+ * place its hex id reads as data (a "figure" the answer supposedly invented).
+ * @param {string} text
+ * @returns {string}
+ */
+export function stripChips(text) {
+  const raw = String(text ?? '');
+  const out = raw.replace(CHIP_RE, '').replace(CHIP_TAIL_RE, '');
+  return out.length === raw.length ? raw : out.replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').trim();
+}
 
 const QUESTION_FIRST = new Set([
   'who', 'whom', 'whose', 'what', 'when', 'where', 'why', 'how', 'which', 'whether',
@@ -294,9 +306,7 @@ export class Store {
    */
   tryAddMemory(text, source = 'chat', seed = false) {
     const refuse = (/** @type {string} */ reason) => ({ ok: false, reason, memory: null });
-    const raw = safeText(text, 600);
-    const stripped = raw.replace(CHIP_RE, '').replace(CHIP_TAIL_RE, '');
-    const clean = stripped.length === raw.length ? raw : safeText(stripped.replace(/\s+/g, ' ').replace(/\s+([,.])/g, '$1').trim(), 600);
+    const clean = safeText(stripChips(String(text ?? '')), 600);
     if (clean.length < 8) return refuse('too-short');
     if (source === 'chat' && !seed) {
       const shape = claimShape(clean);

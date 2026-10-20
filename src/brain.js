@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { LLM } from './llm.js';
 import { tokenize } from './util.js';
-import { cosine } from './store.js';
+import { cosine, stripChips } from './store.js';
 
 /** Red-block injected verbatim into the system prompt. */
 let RED_BLOCK = '';
@@ -332,6 +332,7 @@ ${seen.text}`;
       reply,
       cites,
       matchedUncited,
+      unsupported: Brain.unsupportedFigures(reply, recalled),
       toolCalls,
       recalled: recalled.map((m) => m.id.slice(0, 8)),
       learned,
@@ -783,17 +784,45 @@ ${seen.text}`;
   }
 
   /**
-   * Resolve [Mxxxxxx] citations in reply against recalled memory ids.
+   * Resolve [Mxxxxxx] citations in reply against recalled memory ids. The model writes
+   * the chip in full-width brackets 【M…】 often enough to matter — on the live demo it
+   * did, and the citation was invisible to the app.
    * @param {string} reply
    * @param {Array<{id: string, text: string}>} recalled
    */
   static extractCites(reply, recalled) {
     const found = new Set();
-    for (const m of reply.matchAll(/\[M([0-9a-f]{4,10})\]/g)) {
+    for (const m of String(reply).matchAll(/[[【(]M([0-9a-f]{4,10})[】\])]/g)) {
       const hit = recalled.find((r) => r.id.startsWith(m[1]));
       if (hit) found.add(hit.id);
     }
     return Array.from(found).map((id) => ({ id: id.slice(0, 8), text: (recalled.find((r) => r.id === id) || {}).text || '' }));
+  }
+
+  /**
+   * Figures in the answer that appear in no memory the model actually read. Sound but
+   * not complete: a flagged number is certainly invented, while an invented number that
+   * happens to reuse digits from another star passes. Day 4: "1 demo memory" (the sky
+   * holds 18) and a "recorded at 00:00 UTC" timestamp the owner never gave.
+   * @param {string} reply
+   * @param {Array<{id: string, text: string}>} recalled
+   * @returns {string[]}
+   */
+  static unsupportedFigures(reply, recalled) {
+    const pool = new Set(
+      (recalled || []).map((m) => m.text).join(' ')
+        .split(/[^0-9]+/).filter((d) => d && /\d/.test(d)),
+    );
+    /** @type {string[]} */
+    const out = [];
+    // The chips come off first: an id is not a figure the model invented.
+    for (const m of stripChips(reply).matchAll(/(\d[\d,.\u2013/: -]{0,14}\d|\d)/g)) {
+      for (const digits of m[1].split(/[^0-9]+/)) {
+        if (!digits || pool.has(digits) || out.includes(digits)) continue;
+        out.push(digits);
+      }
+    }
+    return out.slice(0, 8);
   }
 
   /** @param {any} args */
@@ -807,12 +836,6 @@ ${seen.text}`;
     return out;
   }
 
-  /**
-   * Post-turn memory extraction — the AI quietly becomes durable.
-   * @param {string} userText
-   * @param {string} reply
-   * @param {(ev: any) => void} emit
-   */
   /**
    * Cheap JSON call: turns the owner's own statements into memories.
    * @param {string} asserted only what the user stated this turn

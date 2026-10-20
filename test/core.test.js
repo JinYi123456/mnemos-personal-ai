@@ -115,6 +115,41 @@ test('citations: extractCites resolves real ids and ignores fake ones', () => {
   assert.equal(cites[0].id, 'abcdef12');
 });
 
+test('citations: the model writes chips in full-width brackets too', async () => {
+  const recalled = [{ id: '31960a7d0000', text: 'judging runs Dec 1-15 2026' }];
+  // exactly how the live demo wrote it on 2026-10-20, which the old regex missed
+  const cites = Brain.extractCites('Judging covers December 1 – 15, 2026【M31960a7d】.', recalled);
+  assert.equal(cites.length, 1, 'the chip resolves instead of vanishing');
+  assert.equal(cites[0].id, '31960a7d');
+
+  const s = tmpStore();
+  await s.load();
+  const r = s.tryAddMemory('Judging runs Dec 1-15 2026 【Mdeadbeef】 (0 days old)', 'chat');
+  assert.ok(r.ok);
+  assert.ok(!/M[0-9a-f]{4,}/.test(/** @type {import('../src/store.js').Memory} */ (r.memory).text), 'no full-width chip reaches the sky');
+});
+
+test('unsupportedFigures: a number in none of the memories read is flagged', () => {
+  const recalled = [
+    { id: 'a1', text: 'A redeploy wipes every visitor vault and re-seeds the 18 demo memories; measured twice on 2026-10-20' },
+    { id: 'a2', text: 'Judging runs Dec 1-15, 2026' },
+  ];
+  assert.deepEqual(
+    Brain.unsupportedFigures('The vault holds 24 memories and the ping took 22.8 seconds.', recalled),
+    ['24', '22', '8'],
+  );
+  assert.deepEqual(
+    Brain.unsupportedFigures('The sky holds 18 demo memories; judging runs Dec 1-15, 2026.', recalled),
+    [],
+    'figures the memories actually carry are left alone',
+  );
+  assert.deepEqual(
+    Brain.unsupportedFigures('Judging covers Dec 1-15, 2026【M31960a7d】 [Mb4dfd276].', recalled),
+    [],
+    'a citation chip is not an invented figure',
+  );
+});
+
 test('parseAction: accepts tool JSON, rejects prose', () => {
   assert.deepEqual(Brain.parseAction('{"tool":"time.now","args":{}}'), { tool: 'time.now', args: {} });
   assert.equal(Brain.parseAction('The answer is 42.'), null);
