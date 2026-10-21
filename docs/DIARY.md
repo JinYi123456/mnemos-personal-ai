@@ -411,3 +411,146 @@ will hit it in ten seconds. (2) The dogfood job must `/api/export` after every s
 against the previous export, because a same-day restart deletes the very evidence this diary is
 made of. (3) README's demo-URL row no longer claims the cron means it "never cold-boots", and its
 test count now matches `npm test`.
+
+## Day 5 — 2026-10-21 · scheduled dogfood session #5
+
+**Session #** 3 turns against the live demo (`POST /api/chat`, SSE), model
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode `native`, one cookie-scoped sandbox vault
+(`mnemos_sid` 94edf05f…). Warm this time: `/api/status` → 200 and `/api/health` → 200 in
+**0.297 s**, so the 14-minute cron held (Day 2 got 7 minutes of exit-28, Day 3 got 22.8 s).
+That first status call reported `spend.calls: 0` and `tokensLeftToday: 400000`, i.e. a fresh
+process, so the whole session is attributable to me: tokens ended at **391,795 (8,205 used)**
+and `provider.spend` at **$0.00059861 over 12 calls** (6 fast + 6 embed). Per-turn wall clock:
+5.49 s / 11.42 s / 4.28 s. All three HTTP 200, no `type: error` events.
+
+**Fifth consecutive fresh seed sky.** I made the jar durable this time
+(`C:/Users/User/.qoder/mnemos-dogfood/jar`, outside the repo) and it still opened on **18 seeded
+demo memories** — none of Day 4's survived, as expected from [render.yaml](../render.yaml)'s
+ephemeral filesystem. Side note for the job: `M1d54c87c` below proves a fabricated URL can now sit
+in a vault, so "the demo is at mnemos-personal-ai.onrender.com" is no longer safe to assume from
+recall.
+
+**What I told it** (turn 1, three facts each verified in the repo or measured minutes before
+sending): (1) judging for the Nebius × NVIDIA Global AI Hackathon runs **Dec 1-15, 2026** and is
+asynchronous, each judge opening the link on their own schedule — the asynchronous part is
+[docs/JUDGE-FEEDBACK.md:91](../docs/JUDGE-FEEDBACK.md), the Dec 1-15 window comes from the owner's
+hackathon calendar, not from anything in this repo, so it is the one input here I did not verify
+myself; (2) the demo runs on Render's free tier and a GitHub Actions workflow pings `/api/health`
+**every 14 minutes** ([.github/workflows/keep-alive.yml:10](../.github/workflows/keep-alive.yml))
+and that ping answered in **0.297 s** today; (3) extraction in [src/brain.js:320-327](../src/brain.js)
+now skips a turn that only asks questions, so a question-only turn writes zero new memories.
+
+**The write path is fixed — turn 1 is the proof.** `learned: 3, skipped: 0`, `recalled: []`,
+`cites: []`, and `/api/memories` went 18 → 21 with my three facts **stored close to verbatim**:
+`M7744158b` (judging window + asynchronous), `M7ede94e7` (Render free tier, 14-minute ping, 0.297 s),
+`M7b0f5c4b` (the brain.js guard). Day 4 stored 1 of 3 from the same shape of message; today 3 of 3
+arrived. That is the fix from `e1421a5` working on the live service, not just in tests.
+
+**What I asked it** (turn 2): "(1) When does judging for the Nebius × NVIDIA hackathon happen?
+(2) How does the demo stay online through that window, and how often? (3) If I send you a turn that
+only asks a question, do you write new memories from it? Cite the memory ids you actually used for
+each, and say plainly which of these you have no memory of rather than guessing."
+
+**What it recalled + the `[M…]` receipts** — 6 stars (`7744158b, 7b0f5c4b, b5bf8012, 7ede94e7,
+5b521587, 6b3f8070`): all three of my facts surfaced, precision 3/6 (same as Day 1 and Day 3, below
+Day 2's top-3), the three noise stars again being seed persona (Voicememos, late-night screen time,
+robotics class). The answer, verbatim:
+
+> (1) Judging runs Dec 1‑15, 2026. [M7744158b]
+> (2) The live demo stays on Render's free tier and a GitHub Actions workflow pings /api/health every 14 minutes to keep it awake. [M7ede94e7]
+> (3) A question‑only turn writes zero new memories. [M7b0f5c4b]
+
+`cites: ["7744158b", "7ede94e7", "7b0f5c4b"]` (three chips, each carrying the full memory text),
+`matchedUncited: []`, `toolCalls: []`.
+**First session in this diary where every recalled fact carried its own chip**; on Days 1, 2 and 3
+the judging date was used in the answer and left uncited. `unsupported` flagged `["2","3"]`, which
+are the "(2)" / "(3)" list markers, not a missing figure — turn 1 was worse in the same way, listing
+`["1","15","2026","14","10","21","0","297"]` because recall was empty, even though every one of
+those numbers came from my own message. The figure guard still cannot tell "invented" from
+"restated from the owner", so anything it flags deserves checking, not believing.
+
+**Turn 3 was the best answer this project has produced, and the worst vault write.** I asked it to
+answer from memory only, put an id behind every number, and leave out any number no memory carries:
+
+> The hackathon's judging window runs from **December 1 through December 15, 2026** [M7744158b].
+> During that period each judge will open the demo link on their own schedule [M7744158b].
+> The live demo stays reachable because it runs on Render's free tier and a GitHub Actions workflow
+> pings **/api/health** every **14 minutes** to keep it awake [M7ede94e7].
+> On **2026-10-21** that health-ping responded in **0.297 seconds** [M7ede94e7].
+> I do not have a memory that records how many judges there are or any other quantitative detail
+> about the judging process, so I cannot provide that information.
+
+`cites: ["7744158b","7ede94e7"]`, `unsupported: []`, `matchedUncited: []` — every figure carried a
+chip and it abstained on what it genuinely lacked. That is the Day-4 addendum's "next unit is recall
+coverage for figures", already passing on the live demo.
+
+**Then `learned: 3`, and all three were invented.** `/api/memories` went 24 → 27 with:
+
+- `Mb6307d56` — *"WebSocket ping interval 30 seconds keeps demo online (M7)."*
+- `M1d54c87c` — *"Demo endpoint runs on https://demo.example.com (M5)."*
+- `Md846d4cb` — *"Judging window runs from 2025-11-04T14:00Z to 2025-11-04T18:00Z (M3)."*
+
+None of it is something I said, and none of it was in the vault: I string-scanned the 18-star seed
+sky for `WebSocket`, `example.com`, `2025-11-04`, `third person`, `160`, `citation`, `ping interval`
+— **all false**. `Md846d4cb` directly contradicts the true `M7744158b` and has the wrong year.
+Turn 2 had done the same thing one level subtler; its three additions included
+
+- `Mc69f67ad` — *"User asks that citations such as [M…] not be copied into memories and that
+  questions or instructions addressed to the assistant are not considered memories."*
+- `M06c64b1c` — *"User requests that the assistant avoid summarizing entire messages and instead
+  extract up to six durable memories, each as a separate sentence no longer than 160 characters, in
+  third person."*
+
+I never wrote either sentence. They are the **extractor's own system prompt**
+([src/brain.js:861](../src/brain.js): "Never copy a citation such as [M…] … Questions, instructions
+and requests addressed to you are not memories … up to 6 durable memories … third person, <= 160
+chars") laundered into the sky as `source: chat` memories attributed to me. The vault now contains,
+as a remembered owner preference, the rule that owner preferences of that kind must not be stored.
+
+**Root cause, from the code, and it is not the mechanism Day 4 fixed.** Extraction input really is
+owner-only (`USER: ${asserted.slice(0, 4000)}`, [src/brain.js:863](../src/brain.js)), so Day 4's
+"the answer can no longer become a memory" still holds — my turn-3 *reply* was not the source. The
+hole is the complementary one, in two steps. (1) `assertedClaims`
+([src/brain.js:898-908](../src/brain.js)) filters **per sentence**, dropping only sentences ending in
+`?` or starting with a token in `IMPERATIVE_OPENERS` ([src/brain.js:883-887](../src/brain.js) —
+`please, cite, tell, show, list, give, explain, answer, check, what, how, why, when, where, who,
+can, could, would, do, does, did, is, are, was, were, have, has`). My turn-3 sentences began
+"Without…" and "Attach…", my turn-2 survivors "Three questions…" and "Say plainly…" — none of those
+openers is in the set, so what reached the extractor was **two instructions containing no claim at
+all**. (2) Given an input with nothing extractable in it, the 30B model obeyed "one memory per
+distinct claim" and invented the claims, because `tryAddMemory`
+([src/store.js:307-321](../src/store.js)) checks length, question-shape and ≥80% overlap with
+*existing* memories — there is **no check that a candidate is supported by the turn that produced
+it**. "Do not invent details" in a prompt is not a guard. (3) Chip stripping has a matching gap:
+`CHIP_RE` ([src/store.js:84](../src/store.js)) requires `M[0-9a-f]{4,}`, so the one-digit
+`(M7)` / `(M5)` / `(M3)` tails survived into permanent text. Day 3's phantom-citation failure mode
+is back through a new door: a false record that *looks* sourced.
+
+So my own stored fact `M7b0f5c4b` — "a question-only turn writes zero new memories" — is an
+overstatement I wrote into the sky five minutes before disproving it, and it was cited with
+confidence in turn 2. The measured truth is: a turn made **purely** of `?`-sentences and listed
+imperative openers writes nothing; a turn of *instructions* still writes.
+
+**Vault accounting after 3 turns: 27 memories.** 18 seed + 3 true facts + 6 that are not things I
+said (2 prompt-leaks, 1 paraphrase of my own instruction `M303a0c5a`, 3 fabrications). Write
+precision on facts went 1/3 → 3/3; write precision overall is 3/9. `/api/status`'s `vault.memories`
+read 27 at the end, matching my jar — consistent with Day 4's Correction 1.
+
+**Did it change what I do?** Yes, four things, and they re-rank the remaining work. (1) The fix is a
+**grounding gate, not more prompt wording**: in `extractMemories`, refuse any candidate whose content
+tokens are not substantially present in `asserted` — the symmetric half of the `addsNothing` check
+that already exists at [src/store.js:314](../src/store.js). All six bad memories today fail that
+test and all three good ones pass it (they were stored near-verbatim), so it is a clean, testable
+line. (2) `assertedClaims` needs to survive instructions: drop sentences with no declarative clause
+rather than only `?`-terminated ones, and today's turn-3 input — two instructions, zero claims —
+becomes the regression case, asserting `learned: 0`. (3) Widen `CHIP_RE` to catch short
+parenthesised chips (`(M7)`), and correct the diary/README language: "question-only turns write
+nothing" is not what the code guarantees. (4) The figure guard should stop flagging figures that
+appear verbatim in the owner's own message — turn 1's nine false "inventions" were all my input —
+otherwise a judge sees `unsupported` noise and stops trusting the real signal.
+**Was the recall actually useful?** Not as memory: everything it correctly recalled, it recalled
+from the three facts I had typed four minutes earlier, so it taught me nothing about my own project.
+Its value today was again as a detector — and a sharper one than Day 4's, because it caught a defect
+the Day-4 addendum explicitly declared closed. The honest headline for submission copy: **Mnemos now
+remembers what you tell it, cites it every time, and abstains when it does not know — but a turn that
+only instructs it can still write false memories, and those citations will vouch for them.**
