@@ -474,6 +474,14 @@ if (reviewBtn) reviewBtn.addEventListener('click', () => Review.show());
 const railClose = $('rail-close');
 if (railClose) railClose.addEventListener('click', () => Review.hide());
 
+/* A reviewer who reads the card and does nothing is a reviewer who has not noticed the
+   rail. One soft pull, only while the card is still up. */
+setTimeout(() => {
+  if ($('onboard').classList.contains('hidden') || !reviewBtn) return;
+  reviewBtn.classList.add('nudge');
+  reviewBtn.addEventListener('mouseenter', () => reviewBtn.classList.remove('nudge'), { once: true });
+}, 14000);
+
 /* the vault panel explains whose vault you are in, every time it opens */
 $('btn-panel').addEventListener('click', () => { renderOwnership(); });
 renderOwnership();

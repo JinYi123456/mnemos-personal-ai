@@ -116,6 +116,23 @@ Batch API; there is no `/v1/batches` path in the published OpenAPI. We planned o
 retrieval benchmark around batching and had to run it live (fine — Nano is cheap — but the
 docs misled us for a day).
 
+**8. Citation discipline on Nemotron 3 Nano is prompt-form sensitive, and it fails silently.**
+Our memory protocol asks the model to tag every claim it took from recalled context with
+`[Mxxxx]`. On 21 October two consecutive production turns retrieved three memories, restated
+them *correctly*, and emitted **zero** chips — the answer looked healthy and the receipts were
+simply missing, which is the worst possible failure for a trust feature. Tightening the rule to
+name the exact ASCII form, forbid full-width brackets and require one chip per recalled fact
+made chips appear again (five resolved chips on the next live turn). Two things the platform
+could help with: the model writes 【M…】 often enough that a plain `[M` regex silently drops
+the citation — we now accept both forms — and nothing in the response signals "a structured
+marker was intended but malformed", so an app that measures itself on cited answers can
+regress without any error surfacing. For scale: in our benchmark the agent-loop arm's chips
+resolve 37.5% against the *initial* recall set, and part of that gap is the scorer's own
+definition (a tool loop legitimately retrieves more memories mid-turn).
+*Ask:* document recommended phrasing when you need a model to emit inline structured markers,
+and consider surfacing a warning/`finish_reason` when a response violates a format the prompt
+explicitly constrained.
+
 ## NVIDIA open models — product observations
 
 * **Quality scales where you'd hope — but we did not A/B it properly.** We moved the
