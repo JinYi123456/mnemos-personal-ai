@@ -27,14 +27,17 @@ a clean `small.en` re-run is pending). More recordings may be appended below._
 3. **Self-explanatory demo** — one judge hadn't read the description before reviewing; the demo has
    to communicate fast (the onboarding card helps — keep it).
 
-## 📋 Recommended actions (decided, not yet done — awaiting go-ahead)
-- [ ] **Impact**: condense the real self-use story (`docs/DIARY.md`) into one concrete line in the
-      Devpost description — "who uses it daily, for what, what it changed."
-- [ ] **Isolation visibility**: surface "this is YOUR private, per-visitor vault (isolated, expiring)"
-      in the top bar / onboarding / morning brief so judges can't mistake it for a shared server.
-- [ ] **MCP prominence**: it landed well — consider one more line up top of the description.
-- [ ] Keep the onboarding pop-up + falling stars (judges liked it).
-- [ ] Re-run the transcript with `small.en` for a clean verbatim record (optional).
+## ✅ Actions from session 1 — all shipped 2026-10-21
+- [x] **Impact**: the diary story is now one concrete paragraph in README and the Devpost
+      description — day 3's wrong TTL claim, traced to the star it came from, fixed the same
+      evening. "Not *it remembers*: a wrong belief becomes visible and deletable."
+- [x] **Isolation visibility**: top-bar "🔒 your vault · Mxxxx" + the rail's own line.
+- [x] **MCP prominence**: kept in the description's "It is yours" paragraph, which now sits
+      above the implementation detail.
+- [x] Onboarding pop-up + falling stars kept — the card only gained two buttons.
+- [x] Transcript re-run: the second recording (the open Q&A) is transcribed in full in
+      `docs/JUDGE-TRANSCRIPT-2-QA.txt`; nothing was truncated.
+
 
 ## Raw transcript (base.en, rough)
 > Thank you. Let's see… would be the first thing that you're doing, looking at it — what does this
@@ -112,21 +115,27 @@ fix, above anything else.
    on scope (don't add features), make the main features stand out. → Do NOT add scope;
    sharpen the guided path + description.
 
-## Prioritized fixes (decided; not yet done)
-- [ ] **P0 — a "Review in 60 seconds" guided tour / judge mode**: a distinct first-run path
-      (separate from user onboarding) that walks a cold reviewer: ① ask "what do you remember"
-      → watch recall light the stars + citations; ② click a citation → the star flares; ③ run
-      "what if it forgot this?" → see impact; ④ open ⚙ Telemetry → see model + cost; ⑤ open
-      Vault → see it's YOUR private, isolated, exportable copy. The app already has a Tour
-      (`btn-tour`) + deep links (`?demo=1..4`, `?ablate=1`, `?dream=1`) to build on.
-- [ ] **P0 — a short "How to evaluate Mnemos" block** at the top of the Devpost description
-      (judges won't read the long story cold): the 5 steps above + the 30-sec wow.
-- [ ] **P1 — make the seeded-vs-private vault unmistakable**: label the sandbox clearly
-      ("your private per-visitor vault; the N stars are demo seed — teach it something and
-      watch it learn *you*") so no one thinks it's a shared server.
-- [ ] **P1 — surface rigor**: one line up top — "we publish our failure cases and a measured
-      abstention benchmark on purpose — see FEEDBACK.md / eval."
-- [ ] **P2 — call out accessibility** (reduced-motion, aria, keyboard) in the description.
-- [ ] **P2 — reframe around elegance/depth**, not tech breadth.
+## Prioritized fixes — status after the 2026-10-21 session
+- [x] **P0 — a "Review in 60 seconds" guided tour**: shipped in `2cc1759`. `?review=1` (and a
+      button on the first-run card) opens a five-step rail — recall → click a citation →
+      ablate it → telemetry → your vault — each step stating what to look for before it is
+      clicked. Verified on the live demo, 1920×1080, real models, no console errors.
+- [x] **P1 — make the seeded-vs-private vault unmistakable**: a persistent
+      "🔒 your vault · Mxxxx" tag now sits in the top bar with the isolation explanation in its
+      tooltip, and the rail states it again in the reviewer's own words.
+- [x] **P1 — surface rigour**: the About tab leads with "Known limits — published on purpose"
+      (measured numbers, not adjectives), and the rail footers every step with links to the
+      benchmark, FEEDBACK.md and the diary.
+- [x] **P2 — call out accessibility**: README + Devpost now state the reduced-motion, keyboard,
+      aria-live and colour-not-alone facts that were true but invisible.
+- [x] **P2 — reframe around elegance/depth**: "one platform used deeply, not five used wide"
+      replaces the breadth framing in README and the submission text.
+- [x] **P0 — a short "How to evaluate Mnemos" block** at the top of the Devpost description:
+      drafted in `DEVPOST.md` §5 and applied to the live submission.
+- [x] **Found while verifying**: the citation instruction was not being followed often enough to
+      demo (two runs, zero chips) and a cited memory was *also* listed as "used but not cited" —
+      both fixed in `71e8b8e`, with a regression test. The live benchmark is being re-run because
+      the prompt change moves the published numbers.
+
 
 Raw transcript of the open Q&A: `docs/JUDGE-TRANSCRIPT-2-QA.txt`.

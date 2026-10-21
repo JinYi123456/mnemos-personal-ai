@@ -6,11 +6,12 @@
 
 **Nebius × NVIDIA Global AI Hackathon · Personal AI track · Team Softmatter Labs**
 
+🧭 [Review it in 60 seconds](https://mnemos-personal-ai.onrender.com/?review=1) ·
 ▶ [Live demo](https://mnemos-personal-ai.onrender.com) ·
 [3-minute video](https://youtu.be/7Cq7HQzpTZQ) ·
 [Feedback on the platform](FEEDBACK.md)
 
-`Nebius Token Factory` · `NVIDIA Nemotron 3 Nano/Super/Ultra/Super-VL` · `Tavily` · MIT · 41 tests
+`Nebius Token Factory` · `NVIDIA Nemotron 3 Nano/Super/Ultra/Super-VL` · `Tavily` · MIT · 42 tests
 
 ![Mnemos: the memory sky with the live telemetry drawer open](assets/gallery-01-telemetry.png)
 
@@ -35,14 +36,50 @@ Three beats, in the order you should try them:
 
 ---
 
-## Does it meet the rules? (checked, not asserted)
+## Review it in 60 seconds — nobody needs to narrate this
 
+A judge should not need a walkthrough, so the demo gives one itself. Open
+[`/?review=1`](https://mnemos-personal-ai.onrender.com/?review=1) and a five-step rail is
+already waiting: each step says what to look for *before* you click it, every prompt is
+hard-coded into the app (nothing arrives from the URL, so a shared link cannot inject a
+question into somebody else's vault), and it runs against the real models.
+
+| | what you are checking |
+|---|---|
+| **1 · Ask it what it remembers** | retrieval is visible: the stars it reads pulse, the tool calls stream past, the answer arrives with `[M…]` chips |
+| **2 · Click a citation** | that exact star flares. A chip that cannot resolve renders **red**; a memory it used without citing shows up as a dashed *matched but not cited* row — the app auditing its own model |
+| **3 · "What if it forgot this?"** | the same question answered with that memory and without it, diffed and scored. Trust here is an experiment, not a claim |
+| **4 · ⚙ Telemetry** | model, tier, tokens, cache hits, latency and USD for every call, priced live from Token Factory |
+| **5 · ☰ Vault** | it is *your* copy: one vault per visitor, plain JSON, exportable, burnable, expiring — the tag in the top bar names it |
+
+**Impact, as one true story.** Its author has used it daily since 18 Oct as the checking tool
+on his own claims ([docs/DIARY.md](docs/DIARY.md)). On day 3 it asserted a confident rule
+about vault expiry that was flatly wrong — and the chips it cited pointed at memories that did
+not exist. Because every claim carried a receipt, the false belief was traceable to the star
+it came from, and the write path was fixed the same evening (`19ed0ce`, `e1421a5`, `f6480d3`)
+and re-probed on the live demo. That is the use case: not *it remembers*, but **a wrong belief
+becomes visible, and you can delete it.**
+
+**One platform used deeply, not five used wide.** Every model call in the app goes to Nebius
+Token Factory: one OpenAI-compatible endpoint, four NVIDIA Nemotron 3 models chosen by their
+own advertised `supported_features`, `Qwen3-Embedding-8B` for recall, Tavily for the outward
+dream. The server has **zero runtime dependencies** — plain Node, no SDK, no framework.
+
+**Accessibility, stated so you can check it.** `prefers-reduced-motion` is honoured twice over
+(the canvas stops drifting *and* CSS animations are damped), every control is a real `<button>`
+reachable by keyboard, `Esc` closes what `Esc` should close, the transcript and the status
+ticker are `aria-live` regions, and no state is carried by colour alone — an uncited chip
+differs in *border style*, not just hue.
+
+---
+
+## Does it meet the rules? (checked, not asserted)
 | Requirement | Where it is true |
 |---|---|
 | Runs on Nebius Token Factory | every turn, every dream, every embedding is a runtime call to `https://api.tokenfactory.nebius.com/v1`. The UI's **⚙ Under the hood** drawer shows the model, tier, tokens, latency and USD for each live call. |
 | ≥1 NVIDIA open-source model | four: `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` (fast tier), `nvidia/nemotron-3-super-120b-a12b` (reasoning), `nvidia/Nemotron-3-Ultra-550b-a55b` (frontier: dream synthesis + morning brief), `nvidia/Nemotron-3.5-Super-VL` (photo → memory). |
 | Personal AI track | persistent memory + reusable skills (`SKILL.md`) + your choice of tools + tasks across daily workflows + data under your control, and it uses the named toolchain: MCP memory server for **NVIDIA Hermes / NemoClaw** hosts, plus an **OpenShell** default-deny policy in [`deploy/openshell/`](deploy/openshell/README.md). |
-| Working demo URL | https://mnemos-personal-ai.onrender.com (free tier; a keep-alive cron usually keeps it warm — measured 0.30 s on 2026-10-20, but 22.8 s after a cold boot on 2026-10-19 — and every restart re-seeds the sandbox vault, because Render free has no disk). |
+| Working demo URL | [mnemos-personal-ai.onrender.com](https://mnemos-personal-ai.onrender.com) — for a first look use [`/?review=1`](https://mnemos-personal-ai.onrender.com/?review=1), the guided path above. (Free tier; a keep-alive cron usually keeps it warm — measured 0.30 s on 2026-10-20, but 22.8 s after a cold boot on 2026-10-19 — and every restart re-seeds the sandbox vault, because Render free has no disk.) |
 | Public repo + open-source licence | MIT, visible in the repo's About panel. |
 | Best Use of Tavily | `web.search` is a native agent tool **and** the Dream Engine's world model ("outward dream": tonight's replay turns one memory into a query, searches, and wakes with new stars). Runtime calls, not a mention. |
 | New in the Submission Period | first commit **6 October 2026** — inside the window. Nothing predates it. |
@@ -178,6 +215,7 @@ cannot inject a question into somebody else's sandbox.
 
 | Link | What you see |
 |---|---|
+| `?review=1` | the five-step review rail, open and waiting — the path described above |
 | `?demo=1#telemetry` | a real turn in flight with the telemetry drawer open |
 | `?demo=2` | the agent calling Tavily mid-answer and citing the result |
 | `?demo=1&ablate=1` | the ablation experiment on the first cited memory |
@@ -208,7 +246,7 @@ degrades politely.
 | `VAULT_TTL_DAYS` | 45 | sandbox vaults expire |
 
 ```bash
-npm test            # 41 tests: store, decay, citations, hybrid recall, agent loop,
+npm test            # 42 tests: store, decay, citations, hybrid recall, agent loop,
                     # SSRF guard, dream engine, nightly catch-up, MCP protocol
 npm run typecheck                   # strict JS type-check over src/, public/, eval/, test/
 npm run eval                        # the live benchmark (spends ~$0.01, asks for --yes)
@@ -236,7 +274,7 @@ src/night.js      03:30 nightly dream + catch-up on boot
 public/           galaxy renderer, chat, ablation card, under-the-hood drawer, tour, sound
 eval/             LongMemEval-style benchmark harness + dataset + results
 deploy/           OpenShell policy + Nebius Jobs notes (honest, verified-or-labelled)
-test/             41 tests · tools/vault-doctor.js · .github/workflows/keep-alive.yml
+test/             42 tests · tools/vault-doctor.js · .github/workflows/keep-alive.yml
 ```
 
 ## The pitch in three minutes
