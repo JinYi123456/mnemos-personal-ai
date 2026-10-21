@@ -1236,5 +1236,7 @@ draw(); // start the render loop immediately — the sky should never wait on th
   // autodetect model + lazy-embed older memories on first load
   try { await api('/api/autodetect', { method: 'POST' }); await refreshStatus(); } catch { /* offline */ }
   try { await api('/api/embed/backfill', { method: 'POST' }); } catch { /* no embeddings provider */ }
-  if (!state.owner) els.onboard.classList.remove('hidden');
+  // A reviewer who chose the tour or the review rail must not have the first-run card
+  // dropped back over the sky on the next refresh.
+  if (!state.owner && !state.onboardDismissed) els.onboard.classList.remove('hidden');
 })();

@@ -479,8 +479,8 @@ body.flare #galaxy { animation: flare 1.2s ease; }
 ::-webkit-scrollbar-corner, ::-webkit-resizer { background: transparent; }
 /* scroll where you mean to, and never drag the sky behind a panel */
 #messages, .ablate-card, .hood-calls, .dream-stream, #panel, .tab-body,
-.arranger-card { overscroll-behavior: contain; }
-.ablate-card, #panel, .tab-body { scrollbar-gutter: stable; }
+.review-rail, .arranger-card { overscroll-behavior: contain; }
+.ablate-card, #panel, .tab-body, .review-rail { scrollbar-gutter: stable; }
 /* horizontal rails (chips, shape picker) get the same language, flatter */
 /* ===== photo memory: composer attach + what the vision model read ===== */
 .attach-btn { white-space: nowrap; }
@@ -587,4 +587,77 @@ body.flare #galaxy { animation: flare 1.2s ease; }
   border: 1px solid rgba(127, 215, 232, 0.3);
 }
 .peek-act button:hover { background: rgba(127, 215, 232, 0.2); }
+
+/* ===== review rail: the 60-second path for a reviewer nobody is explaining to =====
+   Mirrors the telemetry drawer so nothing in the chrome looks like a second design. */
+.vault-tag {
+  font-size: 10.5px; letter-spacing: 0.06em; color: #d8defc;
+  background: linear-gradient(135deg, rgba(60, 58, 122, 0.55), rgba(28, 32, 70, 0.6));
+  border: 1px solid rgba(143, 123, 255, 0.4);
+  border-radius: 999px; padding: 4px 10px;
+  max-width: 168px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* the bar is already carrying eight controls on a 13" laptop — the vault id is a
+   nice-to-have there, the fact that the vault is yours is not. Below that the row
+   scrolls instead of pushing ☰ Vault off-screen. */
+@media (max-width: 1340px) { .vt-id { display: none; } }
+@media (max-width: 1180px) { .top-actions { overflow-x: auto; scrollbar-width: none; } }
+.review-rail {
+  position: fixed; top: 64px; left: 14px; z-index: 46;
+  width: min(348px, calc(100vw - 28px));
+  max-height: calc(100vh - 130px);
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 12px 13px 11px;
+  background: var(--panel); backdrop-filter: blur(14px);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  font-size: 12.5px; overflow-y: auto; scrollbar-gutter: stable;
+  animation: rise 0.35s ease;
+}
+.rail-head { display: flex; align-items: baseline; gap: 8px; }
+.rail-head b { font-size: 13.5px; color: var(--gold-hot); letter-spacing: 0.04em; white-space: nowrap; }
+.rail-sub { color: var(--ink-faint); font-size: 11px; flex: 1; }
+.rail-you { color: var(--ink-dim); font-size: 11.5px; line-height: 1.5; }
+.seed-w { color: var(--gold); font-weight: 600; }
+.born-w { color: #8fe3b0; font-weight: 600; }
+.rail-steps { display: flex; flex-direction: column; gap: 7px; }
+.rail-step {
+  border: 1px solid var(--line); border-radius: 10px;
+  background: rgba(143, 123, 255, 0.06);
+}
+.rail-go {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: transparent; border: 0; color: var(--ink);
+  font-family: inherit; font-size: 12.5px; text-align: left;
+  padding: 8px 9px; cursor: pointer; transition: color 0.18s ease;
+}
+.rail-go:hover { color: var(--gold-hot); }
+.rail-go i {
+  flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%;
+  display: grid; place-items: center; font-style: normal; font-size: 10.5px;
+  background: rgba(143, 123, 255, 0.22); color: var(--gold-hot);
+}
+.rail-look { color: var(--ink-faint); font-size: 11px; line-height: 1.5; padding: 0 10px 8px; }
+.rail-step.ok { border-color: rgba(118, 220, 173, 0.45); background: rgba(38, 98, 76, 0.2); }
+.rail-step.ok .rail-go { color: #d3fbe8; }
+.rail-step.ok .rail-go i { background: rgba(118, 220, 173, 0.25); color: #d3fbe8; }
+.rail-auto {
+  align-self: flex-start; background: transparent; border: 0;
+  color: var(--cyan); font-family: inherit; font-size: 11.5px; cursor: pointer;
+  padding: 2px 0; text-decoration: underline dotted; text-underline-offset: 3px;
+}
+.rail-auto:hover { color: var(--gold-hot); }
+.rail-foot { color: var(--ink-faint); font-size: 11px; line-height: 1.55; }
+.rail-foot a { color: var(--cyan); }
+.rail-foot b { color: var(--ink-dim); font-weight: 600; }
+
+/* the two ways into the demo, under the name prompt, on one line when they fit */
+.onboard-alt { margin-top: 10px; justify-content: center; flex-wrap: wrap; }
+.onboard-why { font-size: 11.5px !important; line-height: 1.6; }
+.onboard-why a { color: var(--cyan); }
+
+/* published limitations in the About tab */
+.legend.limits li { font-size: 12px; line-height: 1.55; color: var(--ink-dim); }
+.legend.limits b { color: var(--gold-hot); font-weight: 600; }
+.legend.limits code { color: var(--cyan); font-size: 11px; }
 

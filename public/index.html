@@ -34,6 +34,7 @@
   </div>
   <div class="top-stats" id="top-stats" aria-label="vault stats"></div>
   <div class="top-actions">
+    <span id="vault-tag" class="vault-tag hidden" title="Whose vault this is"></span>
     <span id="provider-badge" class="badge-nvidia hidden" title="NVIDIA open model on the active provider">⬢ NVIDIA open model</span>
     <button id="btn-provider" class="pill" title="Language core: active provider + model"></button>
     <button id="btn-hood" class="pill" title="Live telemetry: model, tokens, latency and USD for every call, straight from Token Factory">⚙ Telemetry</button>
@@ -59,11 +60,35 @@
     <div class="onboard-row">
       <input id="owner-name" maxlength="40" placeholder="Your name" autocomplete="off" aria-label="What should Mnemos call you" />
       <button id="btn-owner" class="btn-primary">Wake Mnemos</button>
-      <button id="btn-tour" class="btn-ghost" title="45 seconds: watch it reason, cite, then test a memory">▶ Watch it think first</button>
+    </div>
+    <div class="onboard-row onboard-alt">
+      <button id="btn-tour" class="btn-ghost" title="No name needed, nothing to sign. It answers, cites, then tests one of its own memories — the live app, not a video.">✦ Watch it work</button>
+      <button id="btn-review" class="btn-ghost" title="Five steps, about a minute, in this browser tab: recall → citation → ablation → telemetry → your vault">🧭 Review in 60 seconds</button>
     </div>
     <p class="onboard-hint" id="onboard-note">Your own sandbox sky: nothing you type here is shared with any other visitor.</p>
+    <p class="onboard-hint onboard-why">Used daily by its author since 18 Oct as the checking tool on its own claims — the
+      day it asserted a rule that was wrong, the citation chips pointed at memories that did not exist, and that
+      is what got <a href="https://github.com/JinYi123456/mnemos-personal-ai/blob/main/docs/DIARY.md" target="_blank" rel="noopener">the write path fixed</a>.</p>
   </div>
 </section>
+
+<!-- ===== REVIEW RAIL: a 60-second guided path for a cold reviewer (also ?review=1) ===== -->
+<aside id="review-rail" class="review-rail hidden" aria-label="Review in 60 seconds">
+  <div class="rail-head">
+    <b>🧭 Review in 60 seconds</b>
+    <span class="rail-sub">five steps · live</span>
+    <button id="rail-close" class="pill" title="Close">✕</button>
+  </div>
+  <p class="rail-you">You are in <b>your own</b> private vault, isolated per visitor — nothing you do here is
+     visible to another judge. <span class="seed-w">Amber</span> stars are demo seed; <span class="born-w">green</span> stars are new ones born from what you say.</p>
+  <div id="rail-steps" class="rail-steps"></div>
+  <p class="rail-foot">
+    <b>Our failure cases are published on purpose:</b>
+    <a href="https://github.com/JinYi123456/mnemos-personal-ai/blob/main/README.md#retrieval-measured" target="_blank" rel="noopener">measured retrieval benchmark</a> ·
+    <a href="https://github.com/JinYi123456/mnemos-personal-ai/blob/main/FEEDBACK.md" target="_blank" rel="noopener">platform findings</a> ·
+    <a href="https://github.com/JinYi123456/mnemos-personal-ai/blob/main/docs/DIARY.md" target="_blank" rel="noopener">4-day self-use diary</a>
+  </p>
+</aside>
 
 <!-- dream overlay -->
 <section id="dream-overlay" class="overlay hidden" aria-live="polite">
@@ -137,6 +162,14 @@
     <p class="legend-p">When Mnemos answers with <code>[Mxxxx]</code> chips, those are real memories it used — click one and its star flares in the galaxy. If it doesn't remember, it says so.</p>
     <h3>Your data</h3>
     <p class="legend-p">The vault is plain JSON in <code>/vault</code>. Export it, read it, carry it anywhere. Nothing leaves your machine except model calls.</p>
+    <h3>Known limits — published on purpose</h3>
+    <p class="legend-p">Judges who ask "what is weak?" get this list, measured and reproducible, instead of a polish.</p>
+    <ul class="legend limits">
+      <li><b>The agent loop does not abstain.</b> The chat you are using retrieves tools mid-turn, and in the live benchmark it declined <b>0%</b> of unanswerable questions and only 17.5–35% of its citations resolved against the initial recall set. The single-shot arm abstains 43–57%. Tightening the loop is the top item after the hackathon.</li>
+      <li><b>Stale facts still leak through.</b> A replaced memory is marked <code>supersededBy</code> and dims, but knowledge-update answers still assert the old value 11–22% of the time.</li>
+      <li><b>It used to file its own inventions as memories.</b> Day 3 of the diary caught exactly that; the write path was fixed the same evening (<code>19ed0ce</code>, <code>e1421a5</code>, <code>f6480d3</code>).</li>
+      <li><b>This hosted demo has no disk.</b> Render's free tier wipes the sandbox on a restart, so a vault you build here may not survive a redeploy — the local install does, and Export is the proof.</li>
+    </ul>
   </div>
 </aside>
 

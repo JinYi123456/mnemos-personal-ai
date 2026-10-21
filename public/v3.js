@@ -266,6 +266,19 @@ async function renderOwnership() {
     el.innerHTML = s.mode === 'sandbox'
       ? `Your own sandbox vault <code>M${String(s.sid).slice(0, 8)}</code> — no account, no shared index, no telemetry. Only your model calls leave this browser. Export it, or burn it; idle vaults expire on their own.`
       : 'Owner vault on this machine — the same file the MCP server and the nightly dream read.';
+    // A judge who assumes one shared server mistakes the seeded sandbox for everyone's
+    // memory, so the answer has to sit in the chrome, not only inside the panel.
+    const tag = $('vault-tag');
+    if (tag) {
+      if (s.mode === 'sandbox') {
+        tag.innerHTML = `🔒 your vault<span class="vt-id"> · M${esc(String(s.sid).slice(0, 8))}</span>`;
+        tag.title = 'Isolated per visitor. This sky belongs to this browser only — another judge cannot see it, and you cannot see theirs. Amber-tinted stars are the demo seed; a star that turns green was born from something you just said. Idle vaults expire on their own.';
+      } else {
+        tag.textContent = '🏠 owner vault';
+        tag.title = 'The vault this machine owns — the same JSON file the MCP server and the nightly dream read.';
+      }
+      tag.classList.remove('hidden');
+    }
     // The first-run note must not read like a broken install: on the hosted demo
     // it should say what you get, not how to configure a key.
     const note = $('onboard-note');
@@ -278,6 +291,106 @@ async function renderOwnership() {
     el.textContent = '';
   }
 }
+
+/* ---------- Review rail: the path a cold reviewer can follow with nobody explaining ----------
+ * Five steps, all prompts hard-coded (nothing arrives from the URL), each one tells you
+ * what to look for before you click it. ?review=1 opens it straight away.
+ */
+const Review = (() => {
+  const rail = $('review-rail');
+  const host = $('rail-steps');
+  /** @type {Set<string>} */
+  const done = new Set();
+
+  /* cited chips first — those are the receipts. A dashed chip is the fallback: a real
+     memory the model used without attributing it, surfaced by our own audit. */
+  function pickChip() {
+    return document.querySelector('.cite-chip:not(.uncited)') || document.querySelector('.cite-chip');
+  }
+
+  const STEPS = [
+    {
+      key: 'recall', t: 'Ask it what it remembers',
+      look: 'Watch the retrieval, not the text: the stars it reads pulse, the tool calls stream by, and the answer arrives with [M…] chips — one receipt per claim.',
+      go: () => runDemo(0),
+    },
+    {
+      key: 'cite', t: 'Click a citation chip',
+      look: 'The exact memory behind that sentence flares in the sky. A chip that cannot be resolved renders red. If the chips are dashed amber, they are our own audit catching a memory the model used but forgot to cite — an uncited claim is still traceable.',
+      go: () => {
+        const c = pickChip();
+        if (c) { c.click(); toast('✦ That star is the receipt.'); return true; }
+        toast('This answer carried no chips — run step 1 again and it will cite.');
+        return false;
+      },
+    },
+    {
+      key: 'ablate', t: 'Test it — "what if it forgot this?"',
+      look: 'The same question, answered with that memory and without it: the two sentences diffed, the citations it lost, and whether that star was load-bearing.',
+      go: () => {
+        const c = pickChip();
+        if (!c) { toast('Run step 1 first — ablation needs a real memory.'); return false; }
+        Ablate.run(c.getAttribute('data-id'), c.textContent.replace(/^◌\s*/, ''));
+        return true;
+      },
+    },
+    {
+      key: 'telemetry', t: 'Open ⚙ Telemetry',
+      look: 'Model, tier, tokens, KV-cache hits, latency and USD for every call — prices read live from Nebius Token Factory, not typed in by us.',
+      go: () => {
+        if ($('hood').classList.contains('hidden')) Hood.toggle();
+        Hood.refresh();
+        return true;
+      },
+    },
+    {
+      key: 'vault', t: 'Open ☰ Vault — this copy is yours',
+      look: 'Your private, per-visitor vault: the seed is amber, anything born from your own words turns green. Export it as readable JSON, or burn it.',
+      go: () => { openPanel(); renderOwnership(); return true; },
+    },
+  ];
+
+  function runDemo(i) {
+    if (state.busy) { toast('One moment — it is still answering.'); return false; }
+    els.input.value = DEMOS[i];
+    sendChat();
+    return true;
+  }
+
+  function render() {
+    if (!host) return;
+    host.innerHTML = STEPS.map((s, i) => `
+      <div class="rail-step${done.has(s.key) ? ' ok' : ''}" data-k="${s.key}">
+        <button class="rail-go"><i>${done.has(s.key) ? '✓' : i + 1}</i>${esc(s.t)}</button>
+        <p class="rail-look">${esc(s.look)}</p>
+      </div>`).join('') + `
+      <button class="rail-auto" id="rail-auto">✦ Run the whole path for me</button>`;
+    host.querySelectorAll('.rail-go').forEach((b) => {
+      b.addEventListener('click', () => {
+        const step = STEPS.find((s) => s.key === b.parentElement.getAttribute('data-k'));
+        if (!step) return;
+        if (step.go() !== false) {
+          done.add(step.key);
+          render();
+          Sound.wake();
+        }
+      });
+    });
+    const auto = $('rail-auto');
+    if (auto) auto.addEventListener('click', () => { hide(); Tour.start(); });
+  }
+
+  function show() {
+    if (!rail) return;
+    state.onboardDismissed = true;
+    $('onboard').classList.add('hidden');
+    rail.classList.remove('hidden');
+    render();
+  }
+  function hide() { if (rail) rail.classList.add('hidden'); }
+  return { show, hide, get open() { return rail && !rail.classList.contains('hidden'); } };
+})();
+
 
 $('btn-hood').addEventListener('click', () => Hood.toggle());
 $('hood-close').addEventListener('click', () => Hood.toggle());
@@ -342,6 +455,7 @@ showStarPeek = function (/** @type {any} */ s, /** @type {any} */ clickEvent) {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!$('ablate-overlay').classList.contains('hidden')) $('ablate-close').click();
+    if (Review.open) Review.hide();
     if (!$('hood').classList.contains('hidden')) Hood.toggle();
   }
 });
@@ -349,9 +463,16 @@ document.addEventListener('keydown', (e) => {
 /* tour entry point: skip the name prompt, just show the machine working */
 const tourBtn = $('btn-tour');
 if (tourBtn) tourBtn.addEventListener('click', () => {
+  state.onboardDismissed = true;
   $('onboard').classList.add('hidden');
   Tour.start();
 });
+
+/* the guided 60-second review path, for a reviewer nobody is sitting next to */
+const reviewBtn = $('btn-review');
+if (reviewBtn) reviewBtn.addEventListener('click', () => Review.show());
+const railClose = $('rail-close');
+if (railClose) railClose.addEventListener('click', () => Review.hide());
 
 /* the vault panel explains whose vault you are in, every time it opens */
 $('btn-panel').addEventListener('click', () => { renderOwnership(); });
@@ -412,6 +533,7 @@ async function showBriefIfWaiting() {
 setTimeout(showBriefIfWaiting, 1800);
 
 /* ---------- Deep links: a judge (or a video frame) can open Mnemos mid-demo ----------
+ * ?review=1     opens the guided 60-second review path for a cold reviewer
  * ?demo=1..4    runs one of the preset questions on load
  * ?hidechat=1   collapses the transcript so the sky is the subject
  * ?ablate=1     then ablates the first memory the answer cited
@@ -431,6 +553,7 @@ function applyDeepLinks() {
   const params = new URLSearchParams(location.search);
   const n = Number.parseInt(params.get('demo') || '', 10);
   if (params.get('hidechat') === '1') setTimeout(() => els.chatCollapse.click(), 120);
+  if (params.get('review') === '1') setTimeout(() => Review.show(), 500);
   if (Number.isInteger(n) && n >= 1 && n <= DEMOS.length) {
     setTimeout(() => {
       if (!state.busy) { els.input.value = DEMOS[n - 1]; sendChat(); }
@@ -457,4 +580,4 @@ function applyDeepLinks() {
 applyDeepLinks();
 
 /* expose for app.js's chat stream hooks (loaded earlier, called later) */
-Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, tracePulse, renderOwnership, showBriefIfWaiting, applyDeepLinks });
+Object.assign(window, { Sound, Hood, Ablate, Tour, Photo, Review, tracePulse, renderOwnership, showBriefIfWaiting, applyDeepLinks });
