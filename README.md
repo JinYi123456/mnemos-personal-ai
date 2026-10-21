@@ -52,6 +52,8 @@ question into somebody else's vault), and it runs against the real models.
 | **4 · ⚙ Telemetry** | model, tier, tokens, cache hits, latency and USD for every call, priced live from Token Factory |
 | **5 · ☰ Vault** | it is *your* copy: one vault per visitor, plain JSON, exportable, burnable, expiring — the tag in the top bar names it |
 
+![The review rail mid-run: two steps checked off, the answer's [M…] chips, and the star one of them points at, flaring](assets/gallery-07-review-rail.png)
+
 **Impact, as one true story.** Its author has used it daily since 18 Oct as the checking tool
 on his own claims ([docs/DIARY.md](docs/DIARY.md)). On day 3 it asserted a confident rule
 about vault expiry that was flatly wrong — and the chips it cited pointed at memories that did
