@@ -128,16 +128,23 @@ say so). Every arm is scored for retrieval quality, answer correctness against a
 citation validity, staleness, latency and spend, using the real provider.
 
 Two independent live runs of the same shipped code, `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`
-+ `Qwen/Qwen3-Embedding-8B`, k=6. Retrieval metrics are deterministic and identical across
++ `Qwen/Qwen3-Embedding-8B`, k=6, re-run on 21 October after the diary found the model
+answering from recalled memories **without emitting a single citation chip** — so the chip
+instruction got stricter. Retrieval metrics are deterministic and identical across
 runs; answer-side metrics are shown as the range the two runs produced, because the model is
 sampled and pretending otherwise would be fake precision:
 
 | Arm | hit@6 | recall@6 | MRR | answer acc | stale answer | citations resolve | abstains | $ / 100 q |
 |---|---|---|---|---|---|---|---|---|
-| lexical only | 97.0% | 94.4% | 0.737 | 75.8–81.8% | 0.0–22.2% | 80.0–88.6% | 57.1–71.4% | $0.0024 |
-| embedding only | 100.0% | 94.4% | **0.909** | 78.8–81.8% | 33.3–44.4% | 91.7–91.9% | 42.9–57.1% | $0.0028 |
-| **hybrid (shipped)** | 97.0% | 92.9% | 0.824 | 69.7–75.8% | 11.1–22.2% | 83.3–86.1% | 42.9–57.1% | $0.0028 |
-| full agent loop | 97.0% | 92.9% | 0.824 | 69.7–78.8% | 11.1% | 17.5–35.0% | 0% | $0.0137 |
+| lexical only | 97.0% | 94.4% | 0.737 | 75.8–81.8% | 11.1% | 88.2–100.0% | 71.4–85.7% | $0.0024–0.0025 |
+| embedding only | 100.0% | 94.4% | **0.909** | 78.8–81.8% | 33.3–55.6% | 86.5–91.7% | 42.9% | $0.0029 |
+| **hybrid (shipped)** | 97.0% | 92.9% | 0.824 | 72.7–81.8% | 0.0–11.1% | 88.6–88.9% | 42.9–57.1% | $0.0028–0.0029 |
+| full agent loop | 97.0% | 92.9% | 0.824 | 63.6–66.7% | 11.1% | 37.5% | 0% | $0.0121–0.0122 |
+
+The stricter instruction did what it was meant to: citations resolving in the agent loop went
+from 17.5–35.0% to **37.5% in both runs**, and the loop's answers now resolve every chip they
+carry. What that bought in accuracy is nothing — the loop is still the least careful arm we
+ship, which is the point of publishing it.
 
 **What the numbers made us fix.** The first live run reported that the system answered
 unanswerable questions almost every time, which flatly contradicted our own
@@ -152,10 +159,10 @@ found two separate causes:
 
 After both, the shipped arm abstains on 43–57% of unanswerable questions (up from 0–43%
 before, where part of that gap was the detector itself), and marking a replaced memory
-`supersededBy` and dimming it holds stale-fact assertions to 11–22%.
+`supersededBy` and dimming it holds stale-fact assertions to 0–11% on the shipped arm.
 
 **What is still weak, stated plainly.** The full agent-loop arm abstains 0% of the time and
-only 35% of its citations resolve against the *initial* recall set — because in a tool loop
+only 37.5% of its citations resolve against the *initial* recall set — because in a tool loop
 the agent legitimately retrieves more memories mid-turn, which this scorer does not credit,
 and because its conversational system prompt is less strict about declining than the
 direct-answer arms. Both are real: the loop is more useful and less careful than the

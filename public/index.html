@@ -165,8 +165,8 @@
     <h3>Known limits — published on purpose</h3>
     <p class="legend-p">Judges who ask "what is weak?" get this list, measured and reproducible, instead of a polish.</p>
     <ul class="legend limits">
-      <li><b>The agent loop does not abstain.</b> The chat you are using retrieves tools mid-turn, and in the live benchmark it declined <b>0%</b> of unanswerable questions and only 17.5–35% of its citations resolved against the initial recall set. The single-shot arm abstains 43–57%. Tightening the loop is the top item after the hackathon.</li>
-      <li><b>Stale facts still leak through.</b> A replaced memory is marked <code>supersededBy</code> and dims, but knowledge-update answers still assert the old value 11–22% of the time.</li>
+      <li><b>The agent loop does not abstain.</b> The chat you are using retrieves tools mid-turn, and in the live benchmark it declined <b>0%</b> of unanswerable questions and only 37.5% of its citations resolved against the initial recall set. The single-shot arm abstains 43–57%. Tightening the loop is the top item after the hackathon.</li>
+      <li><b>Stale facts still leak through.</b> A replaced memory is marked <code>supersededBy</code> and dims — it holds the shipped arm to 0–11% wrong-value answers, but the agent loop still asserts a superseded fact 11% of the time.</li>
       <li><b>It used to file its own inventions as memories.</b> Day 3 of the diary caught exactly that; the write path was fixed the same evening (<code>19ed0ce</code>, <code>e1421a5</code>, <code>f6480d3</code>).</li>
       <li><b>This hosted demo has no disk.</b> Render's free tier wipes the sandbox on a restart, so a vault you build here may not survive a redeploy — the local install does, and Export is the proof.</li>
     </ul>
