@@ -293,3 +293,17 @@ test('fetchPage: blocks private networks (SSRF guard)', async () => {
   await assert.rejects(() => Brain.fetchPage('http://192.168.1.5/x', ''), /SSRF/);
   await assert.rejects(() => Brain.fetchPage('ftp://example.com', ''), /http/);
 });
+
+test('citations: a cited memory is never also flagged as uncited', () => {
+  const recalled = [
+    { id: 'a4f991917d5c9e2', text: 'Is preparing a demo of Nebula Notes for a small meetup' },
+    { id: 'c61431e8aa11bb22', text: 'Prefers concise answers with concrete next steps' },
+    { id: '528847bd33221100', text: 'Is nervous about presenting; feels calmer after rehearsing aloud twice' },
+  ];
+  const reply = 'You are preparing a demo of Nebula Notes for a small meetup [Ma4f99191], '
+    + 'you prefer concise answers with concrete next steps 【Mc61431e8】, and rehearsing twice is what calms you.';
+  const cites = Brain.extractCites(reply, recalled);
+  assert.equal(cites.length, 2, 'one ASCII chip and one full-width chip both resolve');
+  const uncited = Brain.matchedUncited(reply, recalled, new Set(cites.map((c) => c.id)));
+  assert.deepEqual(uncited.map((u) => u.id), ['528847bd'], 'only the memory it never cited is flagged');
+});

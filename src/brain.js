@@ -137,7 +137,10 @@ MEMORY PROTOCOL
 1. If the question touches anything personal, ongoing, or previously discussed, call memory.search first.
 2. Recalled memories appear as lines like: [M4f2b91a1] text (3d old). Anything not in
    that list is NOT something you know.
-3. When your answer uses a recalled memory, cite it inline exactly like [M4f2b91a1]. Cite only what you truly used; never cite what you invented.
+3. Cite inline, in plain ASCII square brackets, at the end of every claim you took from a
+   memory: [M4f2b91a1]. If you stated three recalled facts, your answer carries three chips —
+   a recalled fact with no chip is a bug, not brevity. Cite only what you truly used; never
+   cite what you invented, and never use 【 】 brackets.
 4. NEVER fabricate or guess a personal fact. If MEMORY RECALL says none were found, or
    memory.search returns nothing relevant, you must say plainly that you do not remember
    and offer to note it — do not answer from general knowledge, do not infer, do not
@@ -773,10 +776,13 @@ ${seen.text}`;
    */
   static matchedUncited(reply, recalled, citedIds) {
     const answer = new Set(tokenize(reply));
+    // Cites come back shortened (and sometimes M-prefixed); compare like like, or a
+    // cited memory also shows up as "used but not cited" — a visible self-contradiction.
+    const cited = new Set(Array.from(citedIds || [], (x) => String(x).replace(/^M/, '').slice(0, 8)));
     /** @type {Array<{id: string, text: string, overlap: number}>} */
     const out = [];
     for (const m of recalled) {
-      if (citedIds.has(m.id)) continue;
+      if (cited.has(String(m.id).slice(0, 8))) continue;
       const overlap = tokenize(m.text).filter((t) => answer.has(t)).length;
       if (overlap >= 2) out.push({ id: m.id.slice(0, 8), text: m.text, overlap });
     }
