@@ -554,3 +554,124 @@ Its value today was again as a detector — and a sharper one than Day 4's, beca
 the Day-4 addendum explicitly declared closed. The honest headline for submission copy: **Mnemos now
 remembers what you tell it, cites it every time, and abstains when it does not know — but a turn that
 only instructs it can still write false memories, and those citations will vouch for them.**
+
+## Day 6 — 2026-10-22 · scheduled dogfood session #6
+
+**Session #** 3 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`,
+tool mode `native`, same durable jar as Day 5 (`mnemos_sid` 94edf05f…). Warm: the first
+`/api/memories` answered in **0.345 s**. Process was fresh (`spend.calls: 0`,
+`tokensLeftToday: 400000`), so all spend below is mine: **8,342 tokens** (400,000 → 391,658)
+and `$0.0006026` over **11 calls** (6 fast `$0.00059418` + 5 embed `$0.00000842`). The three
+answer calls alone metered $0.000173 / $0.000171 / $0.000138. Wall clock 13.35 s / 8.27 s /
+5.16 s. All HTTP 200, no `type: error` events.
+
+**Sixth consecutive fresh seed sky.** The vault opened on 18 seeded demo memories with none of
+Day 5's `M7744158b` / `M7ede94e7` / `M7b0f5c4b` — consistent with [render.yaml](../render.yaml).
+
+**What I told it** (turn 1, 886 chars, three facts each verified minutes before sending): (1)
+judging for the Nebius × NVIDIA Global AI Hackathon runs **Dec 1-15, 2026**, and I said explicitly
+in the message that this window comes from the owner's hackathon calendar and **not** from anything
+in the repo — it is the one input in this diary I still cannot verify myself; (2) the live benchmark
+**was re-run on 21 October** after the citation instruction got stricter, and the published table
+says the full agent-loop arm's citation resolution went from 17.5-35% to **37.5% in both fresh
+runs**, that the same arm **still abstains 0% of the time**, and that the shipped hybrid arm
+abstains **42.9-57.1%** ([README.md:139-146](../README.md), commit `8cfdd5c`, `eval/results/live-prompt2.json`);
+(3) **none of the four fixes queued in the Day-5 entry have been merged** — I checked the code, not
+the diary: `CHIP_RE` still requires four hex digits at [src/store.js:84](../src/store.js),
+`extractMemories` at [src/brain.js:851](../src/brain.js) still has no grounding check against the
+owner's words, `assertedClaims` at [src/brain.js:898](../src/brain.js) still only drops `?`-sentences
+and imperative openers, `unsupportedFigures` at [src/brain.js:817](../src/brain.js) still pools only
+recalled memories, and the newest commit is the Day-5 diary entry itself (`a07b493`).
+
+**Write path: 3 of 3, stored whole.** `learned: 3, skipped: 0`, `cites: []`, vault 18 → 21:
+`Mdfb4b8d4` (156 chars), `Mb0346c84` (286), `Me20e4ed6` (355) — all near-verbatim. Side finding:
+the extractor prompt asks for "≤160 chars" but nothing enforces it; `tryAddMemory` caps at 600
+([src/store.js:309](../src/store.js)), so a 355-character run-on sentence is now a permanent star.
+
+**What I asked it** (turn 2): "Based only on what you actually remember, answer these three
+questions. When does judging for the Nebius x NVIDIA hackathon happen? What did the 21 October
+benchmark re-run change about the full agent-loop arm citation resolution, and what did it leave
+unfixed about that arm? Have the four Day-5 diary fixes been merged? Put the memory id behind every
+claim and every number, and say plainly which of these you have no memory of instead of guessing."
+
+**What it recalled + the `[M…]` receipts** — 6 stars, and **my three facts took the top three ranks**
+(`dfb4b8d4, b0346c84, e20e4ed6`, then seed noise `b5bf8012, 5b521587, 71438a23`): Day 2's best
+precision, matched. The answer, verbatim:
+
+> Judging for the Nebius × NVIDIA hackathon runs from 2026-12-01 to 2026-12-15 [Mdfb4b8d4].
+>
+> The 21 October benchmark re-run changed the full agent-loop arm citation resolution from a range of 17.5-35 % up to 37.5 % in both fresh runs [Mb0346c84].
+>
+> That same arm still abstains 0 % of the time, while the shipped hybrid arm abstains 42.9-57.1 % [Mb0346c84].
+>
+> The four Day-5 diary fixes have **not** been merged [Me20e4ed6].
+>
+> I do not remember any other details about these topics.
+
+`cites: ["dfb4b8d4","b0346c84","e20e4ed6"]`, `matchedUncited: []`, `toolCalls: []`. Every number in
+the reply was one I had typed ninety seconds earlier, and every claim carried its chip. This is the
+cleanest recall turn in the diary. One wrinkle: `unsupported: ["12","01"]` — it reformatting
+"Dec 1-15, 2026" into `2026-12-01` produced two digit-strings absent from the cited memory, so the
+figure guard flagged a **faithful restatement**. The guard is still "sound but noisy", and a judge
+reading `unsupported` would see two false alarms.
+
+**Turn 2 was a pure question turn and it still wrote two false memories.** `assertedClaims` dropped
+all three `?`-sentences but kept my two instructions ("Based only on what you actually remember,
+answer these three questions." and "Put the memory id behind every claim…"), so the extractor was
+handed two imperatives containing no claim — the exact Day-5 input. Result `learned: 2, skipped: 2`,
+and the two additions are a new failure mode:
+
+- `M2f227889` — *"I have no memory of question 1."*
+- `M813e4a17` — *"I cannot answer any of the three questions because I have no memory of them."*
+
+Both are **false statements about its own memory**, written seconds after it cited three memories
+correctly. Day 5 invented project facts (a WebSocket interval, `demo.example.com`, a 2025 judging
+window); today it invented its own amnesia, in first person, `source: chat`. So the contamination
+has moved from "wrong facts about the world" to "wrong facts about whether Mnemos knows anything" —
+which is the class that could flip a future correct abstention into a wrong answer, or vice versa.
+
+**Turn 3 was the abstention probe, and it passed.** I asked for two numbers that were never in this
+vault and never in my messages: today's `npm test` count, and the Devpost gallery photo id of the
+guided-path frame (real, `5631386`, from commit `70a22e1` — deliberately withheld). It recalled 6
+stars, **none** of them the two self-doubt memories from turn 2, and answered: *"I don't remember
+either number."* — `cites: []`, `unsupported: []`, `learned: 0, skipped: 0`, `toolCalls: []`, and
+`matchedUncited` correctly flagged `e20e4ed6` (overlap 2) rather than citing it to pad the answer.
+Note the contrast with turn 2: **same shape of input** (an instruction-only claim set), opposite
+outcome — so the "don't learn from instructions" behaviour is stochastic prompt-following, not a
+guard. That is the Day-5 fix still missing, measured again.
+
+**The headline finding, and it is not about recall: `/api/export` silently omits everything the chat
+wrote.** After the session I ran the Day-4 addendum's own prescription — export the vault so the
+evidence survives a restart. `GET /api/export` returned **18 memories**. `/api/memories` on the same
+cookie returned **23**. The 5 missing ids are exactly this session's five chat-written memories
+(`Mdfb4b8d4 Mb0346c84 Me20e4ed6 M2f227889 M813e4a17`), i.e. precisely what an owner would be
+exporting to keep. Root cause, in the code: `handleChat` ([src/server.js:501-530](../src/server.js))
+never calls `store.flush()`, and `src/brain.js` contains **no `flush()` call at all**, while every
+other mutating endpoint does flush (`/api/owner:287`, `/api/redzone:329`, `/api/forget:381`,
+`/api/layout:411`, `/api/reset:453`, …). The export route reads `vault.json` straight off disk
+([src/sessions.js:118-124](../src/sessions.js)), so it serves the file last written when the vault
+was seeded ([src/sessions.js:80](../src/sessions.js)). And [src/sessions.js:193](../src/sessions.js)
+states the opposite as fact: *"Stores are flushed on every write, so dropping the handle loses
+nothing."* Three consequences, all worse than the ephemeral-disk story I have written four times:
+(1) on a **persistent** disk, conversation memory still would not survive a restart — so this is a
+Mnemos bug, not only a Render free-tier fact; (2) since `sweep()` measures the 45-day TTL from
+`vault.json`'s mtime and chat never writes that file, a visitor who only ever chats never pushes
+their expiry out — Day 3's mtime finding, now with a concrete mechanism; (3) the diary's own
+durability advice is broken: the export the job was told to trust has never contained a chat memory.
+I have not fixed it — recording it is the deliverable here.
+
+**Did it change what I do?** Yes. (1) One-line fix with a real test: `await store.flush()` after a
+chat turn, and an assertion that `/api/export` contains a memory written by `/api/chat` — the test
+that would have caught this on day one. (2) Correct the [src/sessions.js:193](../src/sessions.js)
+comment and re-check the README's export/import claim before submission copy repeats it. (3) The
+dogfood job must read the vault delta from `/api/memories`, not from `/api/export`, until (1) ships —
+and today's export file is evidence that a green "exported OK" is not durability. (4) Re-rank the
+Day-5 grounding gate: `M2f227889` and `M813e4a17` are refutable by the turn's own `cites` array, so
+the cheapest first guard is "refuse a candidate that asserts the assistant has no memory when the
+turn returned non-empty `cites`" — plus the general token-overlap-with-`asserted` gate, which remains
+the real fix. (5) Tell the owner the Dec 1-15 window is now load-bearing in a memory that nothing in
+the repo can confirm.
+**Was the recall actually useful?** As memory, no — it repeated, correctly and fully cited, the three
+things I had typed two minutes earlier. As a detector, yes, and this time for something bigger than
+its own answers: the session produced the cleanest recall yet and, three minutes later, proof that
+the product does not write its conversations to disk.
