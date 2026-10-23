@@ -675,3 +675,126 @@ the repo can confirm.
 things I had typed two minutes earlier. As a detector, yes, and this time for something bigger than
 its own answers: the session produced the cleanest recall yet and, three minutes later, proof that
 the product does not write its conversations to disk.
+
+## Day 7 — 2026-10-23 · scheduled dogfood session #7
+
+**Session #** 4 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool
+mode `native`, same durable jar as Day 5-6 (`mnemos_sid` 94edf05f…). **Cold this time**: the opening
+`/api/status` took **22.45 s**, then everything else was warm — 0.26-0.68 s for the vault reads.
+Answer wall clocks 11.85 s / 24.07 s / **73.30 s** / 15.05 s (metered model time 2.6 / 16.4 / 17.1 /
+14.1 s, so turn 3's 73 s was mostly not the model). Process started fresh (`spend.calls: 0`,
+`tokensLeftToday: 400000`), so all spend is mine: **12 calls, 9,384 tokens, $0.00064683**
+(6 fast $0.00064044 + 6 embed $0.00000639), ending at `tokensLeftToday: 390616`. All HTTP 200, no
+`type: error` events, `chain.nebius.fail: 0`.
+
+**Seventh consecutive fresh seed sky.** The jar opened on the same **18** seeded memories; none of
+Day 6's five chat-written memories (`Mdfb4b8d4`, `Mb0346c84`, `Me20e4ed6`, `M2f227889`, `M813e4a17`)
+were there. Note the correction to Day 4's reading, observed directly today: `/api/status` sent
+*without* the jar said `vault.memories: 18`, the *same* request with the jar said **21** — the status
+route does follow the cookie, and its 18 was its own cookieless vault, exactly as Day 4 claimed.
+
+**What I told it** (turn 1, 705 chars, three facts, each checked against the repo minutes before
+sending): (1) judging for the Nebius × NVIDIA Global AI Hackathon runs **Dec 1-15, 2026**; (2) the
+demo is on **Render free tier** and a GitHub Actions workflow named **keep-alive** pings
+`/api/health` **every 14 minutes** because Render sleeps after 15 idle, and the same workflow makes a
+**weekly heartbeat commit to `docs/heartbeat.json`** so GitHub doesn't disable the schedule after 60
+days without commits ([.github/workflows/keep-alive.yml:10](../.github/workflows/keep-alive.yml),
+[:39-45](../.github/workflows/keep-alive.yml)); (3) as of today `handleChat` in `src/server.js`
+**still never calls `store.flush()`**, so `GET /api/export` omits chat-written memories — Day 6 found
+it and it has not been fixed. Honesty on (1): it is the only input in this diary I still cannot
+verify, and today its sole in-repo source is this diary itself — the other two facts are machine-
+checkable, and (3) is checkable by `grep -c flush` over the handler body, which returns **0** at HEAD.
+
+**Turn 1 stored all three, and the figure guard misfired on my own input.** `learned: 3, skipped: 0`,
+`cites: []` (correct — intake turn, nothing to recall, `recall` stars was empty). But `unsupported`
+came back as `["1","15","2026","2","14","60","3","6"]` — every one of those digits is a figure I had
+typed 20 seconds earlier, flagged as unsupported because no *memory* vouches for them yet. The three
+new memories are `Me5c828bc`, `Ma4eef670`, `M811b59e8`, all `source: chat`.
+
+**Turn 2 was the recall question** — "Answer these from what you remember of my hackathon project,
+with the memory id behind each claim: (1) When does judging happen? (2) How is the demo kept online,
+and what second thing does that workflow do and why? (3) Is the /api/export bug fixed?" It recalled
+6 stars (the three mine + `Mb5bf8012` Voicememos + `M5b521587` screen time + `M6b3f8070` robotics)
+and answered, verbatim:
+
+> (1) Judging runs from Dec 1-15, 2026. [Me5c828bc]
+>
+> (2) The demo stays online on Render's free tier via a GitHub Actions workflow that pings
+> /api/health every 14 minutes to keep the service from sleeping, and it also commits a weekly
+> heartbeat to docs/heartbeat.json so the schedule remains active. [Ma4eef670]
+>
+> (3) No – the /api/export endpoint still omits memories written during chat turns because handleChat
+> doesn't call store.flush(). [M811b59e8]
+
+**3 claims, 3 chips, 3 correct, `matchedUncited: []`** — and (3) is a claim about *our own source
+code at this moment*, which it can only know because I told it, and it got right. `learned: 0,
+skipped: 0, asked: true`: the instruction-only turn wrote nothing, where Day 6's same-shaped turn
+wrote two false memories. So Day 6's conclusion stands and sharpens: the guard is **stochastic
+prompt-following, not a guard** — two identical inputs, opposite outcomes, no code change between
+them. `unsupported: ["2","3"]` again flagged nothing but my own list numbering.
+
+**Turn 3 is the finding I came for, and it is not about recall.** I re-sent fact (1) *verbatim* as a
+bare declarative sentence to test dedupe. Dedupe worked: `learned: 0, skipped: 1`, and the vault
+stayed at 21. The answer was the problem, verbatim:
+
+> Got it—I'm signed up to judge for the Nebius × NVIDIA Global AI Hackathon, which runs from
+> December 1-15, 2026. I'll be reviewing entries during that window and will aim to give concise,
+> actionable feedback.
+
+`cites: []` — it asserted the window with no chip — while `matchedUncited` correctly flagged
+`e5c828bc` at `overlap: 7`. So the detector *saw* the uncited recall and the reply still invented a
+new identity for itself out of my sentence. This is a class neither Day 5 nor Day 6 produced: Day 5
+invented project facts, Day 6 invented its own amnesia, **today it absorbed a user fact as a fact
+about itself** ("I'm signed up to judge", "I'll be reviewing entries"), unprompted, from input that
+said nothing about who judges. The saving grace, measured: nothing was stored — `grep` over the final
+vault for a self-as-judge memory returns **none**.
+
+**Turn 4 asked it directly whether the lie was in its memory**, and it gave me a **wrong yes**:
+
+> Yes. Memory IDs: [Me5c828bc] Judging for the Nebius x NVIDIA Global AI Hackathon runs Dec 1-15,
+> 2026 (0d old)
+
+`cites: ['e5c828bc']`, `learned: 0, skipped: 0, asked: true`. The chip is real and the memory text is
+correct — and it is being used to endorse a claim that memory does not make. Day 6 put a false
+statement about itself *in the vault*; Day 7 kept the vault clean and put a false statement about
+itself *in the answer, with a citation attached*. For a judge reading the chat, that is worse, because
+the chip is the trust signal and here it decorates the error. `unsupported: ["0"]` flagged the "(0d
+old)" age figure.
+
+**Read the code, then proved it: memory ids are content hashes.** [src/store.js:319-323](../src/store.js)
+does `sha256(clean.toLowerCase().replace(/\s+/g, ' '))` and refuses any memory whose id already
+exists. I reproduced it offline: `sha256("judging for the nebius x nvidia global ai hackathon runs
+dec 1-15, 2026")` starts `e5c828bcb…` → chip `Me5c828bc`, which is **the same id Day 1's diary
+recorded** (there written one char short, as `Me5c828b`, [docs/DIARY.md:53](./DIARY.md)). Three
+consequences: (1) turn 3's `skipped: 1` was this hash path, not the token-overlap gate — so the
+duplicate protection I have been asking for on paraphrases still isn't what fired; (2) identical
+facts are idempotent across every vault and every reseeding, so "the same memory keeps coming back"
+in this diary is **re-seeding, not persistence**; (3) an id proves nothing about provenance — two
+visitors who type the same sentence get the same chip, which a reviewer could read as a shared
+history.
+
+**Day 6's export bug reproduces, untouched.** After the session `/api/memories` on my cookie said
+**21** and `/api/export` said **18**; the three absent texts are exactly today's chat memories
+(`Me5c828bc`, `Ma4eef670`, `M811b59e8`). [src/sessions.js:193](../src/sessions.js) still states the
+opposite as fact ("Stores are flushed on every write"). The one-line fix Day 6 prescribed has not
+shipped — recording again is the deliverable, not fixing it here.
+
+**Did it change what I do?** Yes. (1) The self-absorption probe (turn 3's shape: one bare declarative
+user fact, no first person anywhere) now belongs in the benchmark next to the abstention probe —
+"does the reply claim something about the assistant that no cited memory says" is checkable against
+`cites` + `matchedUncited`, and today `matchedUncited` already caught it at overlap 7 and nothing
+acted on that signal. (2) `unsupported` is being trained on my own input: on an intake turn every
+flagged figure is an echo, so the figure guard should exclude the turn's `asserted` claims before
+warning the user — otherwise the UI spends its credibility on false alarms and a reviewer learns to
+ignore the one badge meant to catch hallucination. (3) Content-addressed ids: either document the chip
+as *not* a provenance/freshness signal, or salt the hash with `sid`, because "0d old" next to an id
+that a stranger's vault can also generate is a misleading freshness claim. (4) Ship
+`await store.flush()` at the end of `handleChat` plus an assertion that `/api/export` contains a
+memory written by `/api/chat`, before any submission copy repeats the export/import claim.
+**Was the recall actually useful?** As memory, no — it recited, correctly and fully cited, three facts
+I had typed one turn earlier, and the only genuinely hard item (the `/api/export` bug) it could only
+know because I told it. As a detector, yes, and better than Day 6's: within four turns the same jar
+produced the cleanest cited recall this product has managed *and* a false "I'm the judge" that the
+turn's own `matchedUncited` flagged, then a wrong "Yes" propped on a real chip — so the gap is no
+longer whether it recalls, but whether a citation is allowed to vouch for a claim the memory doesn't
+make.
