@@ -798,3 +798,102 @@ produced the cleanest cited recall this product has managed *and* a false "I'm t
 turn's own `matchedUncited` flagged, then a wrong "Yes" propped on a real chip — so the gap is no
 longer whether it recalls, but whether a citation is allowed to vouch for a claim the memory doesn't
 make.
+
+## Day 8 — 2026-10-24 · scheduled dogfood session #8
+
+**Session #** 3 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool
+mode `native`. **New jar**: no cookie file from Day 5-7 survived on this machine (nothing matching
+`*jar*` in the repo or its parent), so today's visitor vault is a fresh one — `mnemos_sid`
+`4d26c1010045549171b10962`, opening on the same **18** seeded memories. `/api/status` before I typed
+anything said `vault.memories: 18`, `spend.calls: 0`, `tokensLeftToday: 400000` (a cold process, so
+all spend below is mine). I did not wall-clock these turns; metered model time was **1.53 s** and
+**1.40 s** for the two that reached the model. Session total per `/api/meter`: **6 calls, 4,194
+prompt + 337 completion tokens, $0.00031732** (3 fast $0.00031428 + 3 embed $0.00000304), ending
+`tokensLeftToday: 395,469`.
+
+**What I told it** (turn 1, 307 chars, three facts, the last two machine-checkable): (1) judging for
+the Nebius × NVIDIA Global AI Hackathon runs **Dec 1-15, 2026**; (2) the Mnemos demo is hosted on the
+**Render free tier** and is kept awake by a **GitHub Actions keep-alive** workflow; (3) I built it on
+the **Nebius Token Factory provider chain** rather than a single fixed model. `learned: 3, skipped:
+0`, `cites: []` (correct for an intake turn — `recall` stars was empty), and the three new memories
+are `Mc610aa09`, `M7b91df0c`, `M43bdca31`, all `source: chat`, each now `uses: 1`. **Day 7's
+intake-echo misfire reproduces on a third of the input**: `unsupported: ["1","15","2026"]` — three
+figures lifted out of my own sentence twenty seconds earlier and flagged as unsupported, because a
+fact cannot be vouched for by a memory until the moment after it is stored.
+
+**Turn 2 was the recall** — "Without me repeating anything: when does judging for this hackathon
+happen, how is the demo kept online, and which provider chain did I say I built with? Cite the
+memories you used." (181 chars). It pulled 6 stars (my three + `Mb5bf8012` Voicememos + `M5b521587`
+screen time + `Ma4f99191` camera lens) and answered, verbatim:
+
+> Judging for the Nebius × NVIDIA Global AI Hackathon runs from **December 1 – December 15, 2026** [M6f2b91a1].
+> The demo stays online on the Render free tier, which is kept alive by a GitHub Actions keep‑alive workflow [M7b91df0c].
+> You said you built the project with the **Nebius Token Factory provider chain** [M43bdca31].
+
+Every claim is correct and `unsupported: []`. **The first chip is a fabrication.** `6f2b91a1` is not
+in the `cites` array (which carries only `7b91df0c` and `43bdca31`), not in the 6 ids under
+`recalled`, not among the **21** ids of `/api/memories`, and not among the 18 of `/api/export`. The
+memory actually under that sentence is `Mc610aa09`, and the turn's own telemetry says so:
+`matchedUncited: [{id: "c610aa09", …, overlap: 8}]` — the detector found the real memory behind that
+wording while the model printed a different, nonexistent id. Hashing closes it:
+`sha256("judging for the nebius x nvidia global ai hackathon runs dec 1-15, 2026.")` starts
+`c610aa096`, and even the reply's own rephrasing hashes to `5ab9c7dba…`, so `6f2b91a1` is a hash of
+nothing on this turn. **Day 7 attached a real chip to a false claim; Day 8 attached a false chip to a
+true claim** — and only today's version survives a fact-check of the sentence, because the sentence
+is right.
+
+**The client is built to notice this and does not.** [public/app.js:744](../public/app.js) rewrites
+`[M<hex>]` in the prose into a clickable `.cite` span, and `flareStar` answers a miss with the toast
+**"That memory has already faded."** ([public/app.js:758](../public/app.js)) — so a judge clicking
+today's first chip would be told a real memory had *decayed*, when it never existed; the message
+turns fabrication into natural loss. The red state exists but is unwired: `.cite.bad` is styled at
+[public/app.css:206](../public/app.css) and `grep` over `app.js` + `v3.js` for `'bad'` returns
+**nothing**, while the guided tour promises the opposite in print — "A chip that cannot be resolved
+renders red" ([public/v3.js:319](../public/v3.js)).
+
+**Turn 3 failed upstream, and it was the best-behaved moment of the day.** I asked it to restate the
+judging date and the hosting setup with ids. Retrieval ran first and returned exactly one star,
+`c610aa09`; then the generation call died and the reply was the fallback: "I'm here, but I couldn't
+reach my language core just now. Check provider keys in .env — I'll keep your memories safe
+meanwhile." `cites: []`, `matchedUncited: []`, `learned: 0`, `recalled: ["c610aa09"]`, and
+`/api/status` shows why: `chain.nebius → {ok: 6, fail: 5, lastError: "nebius embeddings 503: … 503
+Service Temporarily Unavailable"}`. **It abstained instead of inventing, and billed nothing for the
+attempt** (`spend.usd` stayed 0.00031732). Two honest nits: the fallback's advice is wrong for a
+transient 503, and "check .env" is unactionable for a sandbox visitor who has no keys — the person
+being told this is the one person who can do nothing about it.
+
+**Punctuation, measured: the same fact is a different memory.** Day 7 hashed this sentence *without*
+its trailing period and got `e5c828bcb` → `Me5c828bc`; today's stored text ends `…2026.` and hashes
+to `c610aa096` → `Mc610aa09`. I reproduced both offline, so Day 7's arithmetic was right and the ids
+differ by one character of my own typing. Content-addressing is confirmed across two days — and so is
+the consequence: "the judging window" is now two different chips in two different vaults, the
+duplicate protection Day 1-5 asked for remains punctuation-sensitive, and a chip id continues to
+prove nothing about provenance or freshness.
+
+**Day 6's export bug reproduces, third consecutive day, untouched.** This jar: `/api/memories` →
+**21**, `/api/export` → **18**, and the three absent texts are precisely today's `Mc610aa09`,
+`M7b91df0c`, `M43bdca31`. Root cause is still at HEAD — `handleChat`
+([src/server.js:501-530](../src/server.js)) contains no `store.flush()`; `grep -n flush
+src/server.js` returns 12 hits, none inside that range.
+
+**A cost reading I had not noticed before.** Turn 1 surfaces one `meter` event (1,751 prompt + 132
+completion) and turn 2 one (1,910 + 116), yet the meter counts **3** fast calls for these two turns.
+The remainder — **533 prompt + 89 completion tokens** — is the second chat call on the intake turn,
+made by `extractMemories` ([src/brain.js:875](../src/brain.js)), which emits no `meter` line: the
+only emit is the reply path at [:391](../src/brain.js). So the turn that actually writes memories,
+which is the turn the demo is about, is under-billed on screen.
+
+**Did it change what I do?** (1) Chip validation is now the top pre-submission item and it is small:
+at render time resolve every `[M…]` token against `cites ∪ recalled`, apply the already-written
+`.cite.bad`, and change `flareStar`'s miss message from "already faded" to "this citation does not
+exist". Today's product told me the truth and lied about where the truth came from, and the tour copy
+promises a guard that no code sets. (2) `recalled` + `matchedUncited` are enough to detect it — turn
+2 already knew — so this is an assertion to add, not a capability to build. (3) Keep the 503
+abstention wording; across eight days of diary this is the first time the model refused to fill a gap,
+which makes it the strongest trust evidence I have. (4) Ship `await store.flush()` at the end of
+`handleChat` before any submission copy repeats the export/import claim. (5) Stop treating an `M…`
+chip as a citation in writing — the judging window now has two ids in this diary's own records.
+**Was the recall actually useful?** Yes on content, no on provenance, and this is the sharpest split
+the product has produced: it returned all three facts correctly, unprompted, with none of my wording
+repeated in the question, and I still cannot tell a judge which memory the first claim rests on,
+because the id it printed belongs to nothing in the vault.
