@@ -807,8 +807,9 @@ parent folder for the durable jar, found nothing, and recorded "no jar survived"
 Day 5-7 jar has been at `~/.qoder/mnemos-dogfood/jar` (`mnemos_sid` 94edf05f…) the whole time, and
 after this session it returns the stock **18** memories with none of Day 7's three chat memories
 (`Me5c828bc`, `Ma4eef670`, `M811b59e8`) present. So the jar was fine and the **vault was not**: the
-overnight restart re-seeded it again, which is the fifth consecutive day this diary has had to write
-"the memories are gone" and the first time I misattributed why. Today's turns therefore ran on a new
+overnight restart re-seeded it again — the **eighth consecutive fresh seed sky** this diary has
+recorded (Day 5 wrote "Fifth", Day 6 "Sixth", Day 7 "Seventh") — and the only new thing today was that
+I misattributed the cause. Today's turns therefore ran on a new
 jar, `mnemos_sid` `4d26c1010045549171b10962`, opening on the same **18** seeded memories.
 `/api/status` before I typed
 anything said `vault.memories: 18`, `spend.calls: 0`, `tokensLeftToday: 400000` (a cold process, so
