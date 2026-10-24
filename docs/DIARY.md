@@ -802,9 +802,15 @@ make.
 ## Day 8 — 2026-10-24 · scheduled dogfood session #8
 
 **Session #** 3 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool
-mode `native`. **New jar**: no cookie file from Day 5-7 survived on this machine (nothing matching
-`*jar*` in the repo or its parent), so today's visitor vault is a fresh one — `mnemos_sid`
-`4d26c1010045549171b10962`, opening on the same **18** seeded memories. `/api/status` before I typed
+mode `native`. **New vault, and not for the reason I first wrote down.** I searched the repo and its
+parent folder for the durable jar, found nothing, and recorded "no jar survived"; that was wrong — the
+Day 5-7 jar has been at `~/.qoder/mnemos-dogfood/jar` (`mnemos_sid` 94edf05f…) the whole time, and
+after this session it returns the stock **18** memories with none of Day 7's three chat memories
+(`Me5c828bc`, `Ma4eef670`, `M811b59e8`) present. So the jar was fine and the **vault was not**: the
+overnight restart re-seeded it again, which is the fifth consecutive day this diary has had to write
+"the memories are gone" and the first time I misattributed why. Today's turns therefore ran on a new
+jar, `mnemos_sid` `4d26c1010045549171b10962`, opening on the same **18** seeded memories.
+`/api/status` before I typed
 anything said `vault.memories: 18`, `spend.calls: 0`, `tokensLeftToday: 400000` (a cold process, so
 all spend below is mine). I did not wall-clock these turns; metered model time was **1.53 s** and
 **1.40 s** for the two that reached the model. Session total per `/api/meter`: **6 calls, 4,194
