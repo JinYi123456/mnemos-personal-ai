@@ -904,3 +904,137 @@ chip as a citation in writing — the judging window now has two ids in this dia
 the product has produced: it returned all three facts correctly, unprompted, with none of my wording
 repeated in the question, and I still cannot tell a judge which memory the first claim rests on,
 because the id it printed belongs to nothing in the vault.
+
+## Day 9 — 2026-10-25 · scheduled dogfood session #9
+
+**Session #** 4 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool
+mode `native`, on a brand-new jar `mnemos_sid` `7985089e3ce2e9a5dfe4dc8f`. `/api/session` answered
+`isNew: true` **and the vault still opened on the stock 18 seeded persona memories** — the ninth
+consecutive fresh seed this diary has recorded, and the reason the "isolated visitor vault" is not
+empty at first contact. `/api/status` said `vault.memories: 18`, `spend.calls: 0`,
+`tokensLeftToday: 400000` before I typed, and the first request cost **22.4 s wall** (the Render
+cold-start I told the product about, measured). Turns 1-2 took **6.65 s** and **7.45 s** wall; I did
+not time turns 3-4. Metered model time: 796 / 866 / 1212 / 1380 ms.
+
+**Provider health: a clean control day.** `chain.nebius → {ok: 11, fail: 0}`. Day 8's abstention was
+caused by `503 Service Temporarily Unavailable`; **nothing failed today**, so every finding below is
+a behaviour of the product, not an artifact of an unhealthy upstream. Session cost per
+`/api/status → provider.spend`: **11 calls, 8,130 prompt + 535 completion tokens, $0.00059185**
+(5 fast $0.00058698 + 6 embed $0.00000487), ending `tokensLeftToday: 391,335`. **Day 8's
+under-billing reproduces, and today I can put a number on it:** the on-screen `meter` events total
+**4** calls (one per turn) = 7,406 + 449 tokens = $0.00055212, while the server billed **5** fast
+calls. The invisible remainder is **1 call, 724 prompt + 86 completion tokens, $0.00003973** — the
+`extractMemories` second chat call on the intake turn, which still emits nothing
+([src/brain.js:391](../src/brain.js) is the only `meter` emit).
+
+**What I told it** (turn 1, three facts): judging for the Nebius × NVIDIA Global AI Hackathon runs
+**December 1 to December 15, 2026**; the public demo is hosted on the **Render free tier** and kept
+awake by a **GitHub Actions keep-alive workflow**; cold starts there can take **over 20 seconds** for
+the first request after it sleeps. `learned: 4, skipped: 0` — my second sentence was **split into two
+memories**, which is the decomposition working as advertised:
+`Mc2683d22` "Judging … December 1 to December 15, 2026",
+`Mcc2ab663` "The public demo is hosted on the Render free tier",
+`M2c014742` "The public demo is kept awake by a GitHub Actions keep-alive workflow",
+`M89cfc076` "Cold starts on the Render free tier can take over 20 seconds for the first request after
+sleep" — all `source: chat`, each now `uses: 1`. The intake-echo misfire that Day 7 and Day 8 both
+recorded is **milder but still present**: `unsupported: ["20"]` — a figure lifted out of the sentence
+I had typed seconds earlier and flagged as unsourced, because it is not yet a memory when the check
+runs.
+
+**What I asked, and the answer was right.** Turn 2: *"When does judging happen for this hackathon,
+and how is the demo kept online?"* — none of my stored wording repeated in the question. It returned,
+verbatim:
+
+> Judging for the Nebius x NVIDIA Global AI Hackathon runs from December 1 to December 15, 2026.
+> The public demo stays online via a GitHub Actions keep‑alive workflow that prevents it from idling
+> out, and it's hosted on the Render free tier. Note that cold starts on Render's free tier can exceed
+> 20 seconds for the first request after a period of inactivity.
+
+All four facts, correctly, unprompted. **`cites: []` — zero chips on a four-fact recall.** That is not
+the model being terse; the system prompt explicitly forbids it: *"Cite inline, in plain ASCII square
+brackets, at the end of every claim you took from a memory: [M4f2b91a1]. If you stated three recalled
+facts, your answer carries three chips — a recalled fact with no chip is a bug, not brevity."*
+([src/brain.js:140-143](../src/brain.js)). **On its own core use case, the product broke its own
+written contract.** The receipts it then reported were the detector's, not the model's:
+`matchedUncited` = `c2683d22` (overlap 11), `89cfc076` (11), `cc2ab663` (6) — i.e. the server already
+knew which three memories the prose rested on. Two honest nits about that evidence:
+`matchedUncited` is hard-capped `slice(0, 3)` ([src/brain.js:789](../src/brain.js)), which is why
+`2c014742` — the keep-alive memory, quoted almost word-for-word in the reply — is absent from it. This
+turn is Day 8's exact inversion: there the sentence was true and the chip false; here the sentence is
+true, the chip is *missing*, and the correct chips are sitting one field away, unwritten.
+
+**Turn 3 was a probe for chips and turned into a retrieval-continuity finding.** I wrote: *"Answer
+that again, but this time attach the [M…] citation chip for every fact you pull from memory."* The
+retrieval for that turn recalled **none of my four facts** — `recalled` was six stock persona memories
+(`c61431e8`, `b5bf8012`, `5b521587`, `41312395`, `2ce92706`, `c528847b`) — and the reply dutifully
+echoed them back as bullet points with chips: "Prefers concise answers with concrete next steps…",
+"…Nebula Notes for a small meetup on November 12". **Anaphora has no recall bridge**: "that again"
+does not carry the previous turn's facts into this turn's retrieval, so a follow-up question that
+depends on the one before it silently changes subject. Chips did appear this time — six in the prose,
+only **five in `cites`**, and the missing one is diagnosable: the model wrote `[M61431e8]` for memory
+`c61431e8`, **dropping the leading hex digit**, and `extractCites` requires
+`recalled.find(r => r.id.startsWith(m[1]))` ([src/brain.js:799-804](../src/brain.js)), so a
+one-character truncation is an unresolvable chip; it reappeared in `matchedUncited` at overlap 9.
+**The client consequence is now measured, not inferred.** `flareStar` resolves a chip by
+`stars.find(st => st.id.startsWith(id.replace(/^M/, '')))` and, on a miss, toasts **"That memory has
+already faded."** ([public/app.js:756-758](../public/app.js)). I replayed exactly that predicate
+against the live `/api/galaxy` payload: 22 stars, ids are bare 64-hex, `c61431e8…` **is present**, and
+**no** star id starts with `61431e8`. So clicking that chip tells the user a memory has decayed while
+that same star is on screen. I did not perform this click in a browser — the evidence is the live
+payload plus the source predicate, which is the same test. (Also confirmed there is no per-id detail
+route: `/api/memories/<id>` 404s for both spellings, so resolution is entirely client-side.)
+
+**Turn 4 is the worst citation result this diary has recorded.** I removed the anaphora: *"From
+memory, answer with a [M…] chip after each fact: when does judging happen for the Nebius x NVIDIA
+hackathon, and how is the demo kept online?"* Retrieval improved — `c2683d22`, `cc2ab663`,
+`2c014742` all came back — but `89cfc076` (the cold-start fact, the freshest memory in the vault)
+dropped out, and so did the answer's second half. Reply, verbatim:
+
+> Judging for the Nebius × NVIDIA hackathon runs from December 1 to December 15, 2026 [Mc2683d22].
+> The public demo is kept online by a GitHub Actions keep‑alive workflow [M2ce92706].
+
+`cites` = `[c2683d22, 2ce92706]`. The first chip is **correct**. The second points at
+`2ce92706` — *"Works on a personal knowledge app called "Nebula Notes" as a side project"* — a stock
+persona memory that says nothing about Render, GitHub Actions, or hosting. The star that actually
+supports the claim, `2c014742` "The public demo is kept awake by a GitHub Actions keep-alive
+workflow", **was recalled in the same turn, appears in the same `stars` payload, and was left
+uncited** in `matchedUncited` at overlap 6. **This is not a rendering glitch: `cites` itself carries
+the wrong pairing**, so any server-side consumer — the citation bar, an export, a judge's receipt
+check — inherits the misattribution. Day 8's conclusion that an `M…` chip proves nothing about
+provenance has now been promoted: a chip can also point at a *different real memory* and be resolved
+successfully by every validator in the pipeline, because `extractCites` checks only that the id is
+*in the recalled set*, never that it supports the sentence attached to it.
+One more thing the persona seeds make sharp: `41312395` ("…demo … for a small meetup on **November
+12**") was recalled into a deadline question on **both** turns 3 and 4. It did not leak into either
+answer today — but that was luck, not a guard, and a judge who asks "when is my deadline?" against a
+seeded vault has a decoy date one retrieval miss away.
+
+**Day 6's export bug reproduces, fourth consecutive day, untouched.** `/api/memories` → **22**,
+`/api/galaxy` → **22 stars**, `/api/status.vault.memories` → **22**, but `/api/export` → **18**, and
+the four absent texts are precisely today's `Mc2683d22`, `Mcc2ab663`, `M2c014742`, `M89cfc076`. So
+export is now the lone outlier against three agreeing views of the same vault. Root cause is still at
+HEAD: `handleChat` ([src/server.js:501-530](../src/server.js)) contains no `store.flush()` —
+`grep -n flush src/server.js` returns **12** hits, the last at :453, none inside that range.
+
+**Did it change what I do?** (1) **Chip repair moves server-side, and it is now the single top item.**
+Turn 2 proved the deterministic fix already has everything it needs: when `cites` is empty but
+`recalled` + `matchedUncited` are not, derive the chips from the overlap instead of shipping an
+uncited answer; and reject or normalize any chip whose hex does not resolve (`M61431e8` vs
+`c61431e8`). (2) **Add the assertion the pipeline is missing**: a chip must overlap the sentence it is
+attached to, not merely exist in `recalled` — `matchedUncited`'s own tokenizer can score that, and
+turn 4 is the counterexample that proves presence-checking alone is not verification. (3) **Raise the
+`slice(0, 3)` cap** at [src/brain.js:789](../src/brain.js) at least for diagnostics, or the receipt
+evidence is truncated at exactly the moment it matters. (4) **Demo script must use self-contained
+questions** — turn 3 showed a follow-up built on the previous turn's retrieval silently retargets, so
+the guided path should never rely on "that again", and this belongs in the limits copy, not hidden.
+(5) Ship `await store.flush()` in `handleChat` before any submission text repeats the export/import
+claim. (6) The no-failures chain today is the strongest **content** evidence I have: correct answers
+about dates, hosting, and cold starts, recalled from text I never repeated in the question.
+**Was the recall actually useful?** Yes on turn 2 for content — it answered a two-part question
+correctly from four memories stored one request earlier (all four `created` at
+2026-10-25T13:01:28Z), and the detector named its sources
+faithfully even when the prose did not; no, on provenance, and it got worse rather than better: turn 3
+showed chips are unreliable under a one-hex-digit slip and that the client then reports the live
+memory as faded, and turn 4 attached a real, correctly-resolved chip to a claim that memory does not
+support. Across nine days the answer content has never once been wrong; the receipts have now been
+absent, fabricated, truncated, and — today — pointed at the wrong thing.
