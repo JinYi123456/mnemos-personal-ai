@@ -1038,3 +1038,135 @@ showed chips are unreliable under a one-hex-digit slip and that the client then 
 memory as faded, and turn 4 attached a real, correctly-resolved chip to a claim that memory does not
 support. Across nine days the answer content has never once been wrong; the receipts have now been
 absent, fabricated, truncated, and — today — pointed at the wrong thing.
+
+## Day 10 — 2026-10-26 · scheduled dogfood session #10
+
+**Session #** 4 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool
+mode `native`. `/api/status` returned 200 first, with `spend.calls: 0` and `tokensLeftToday: 400000`
+— a fresh process, so every call in the cost ledger below is mine. Ran on a new jar, `mnemos_sid`
+`372962771d3c5ffdc33bf87a`, which `/api/session` answered `isNew: true`, and the vault again opened on
+the stock **18** seeded persona memories: the tenth consecutive fresh-seed sky. I also probed the
+durable jar at `C:\Users\User\.qoder\mnemos-dogfood\jar`: its `mnemos_sid`
+`94edf05f031e297b9dfd3330` came back **`isNew: false`** but its vault was the stock 18 with **0**
+`source: chat` memories — worth recording because `isNew` only means "the request carried a cookie"
+([src/server.js:210-216](../src/server.js)); it is not evidence that anything survived, and a reader
+who thinks it is will write a false continuity claim. Wall vs metered model time per turn:
+**10.49 s / 791 ms**, **31.65 s / 1106 ms**, **9.35 s / 889 ms**, **12.39 s / 431 ms**.
+
+**The receipts came back, and all of them were right.** What I told it (turn 1, three facts, no
+question in the message): judging for the Nebius × NVIDIA Global AI Hackathon runs **December 1 to
+December 15, 2026**; the public demo is hosted on the **Render free tier** and is kept awake by a
+**GitHub Actions keep-alive workflow**; the demo sandbox has a **daily model budget of 400000 tokens**.
+`learned: 3, skipped: 0`, and all three landed close to verbatim with nothing invented:
+`Mc2683d22`, `Ma02ed743`, `M0760de73` (all `source: chat`, all `created` 2026-10-26T13:02:13Z).
+I re-hashed each stored text offline — `sha256(lower, whitespace-collapsed)[:8]` — and all three
+**MATCH** their ids ([src/store.js:319](../src/store.js)), so the ids are content-addressed as
+documented; `Mc2683d22` is byte-identical to Day 9's judging chip and proves nothing about freshness.
+
+Then the recall question, phrased so that none of my stored wording reappeared in it: *"Quick check of
+what you know about my project: when is the judging window, and what keeps the demo from going
+offline?"* Reply, verbatim:
+
+> Judging runs from **December 1 to December 15, 2026** – that’s the official window for the Nebius ×
+> NVIDIA Global AI Hackathon.
+>
+> Your demo stays online because it’s hosted on the **Render free tier** and a **GitHub Actions
+> keep‑alive workflow** keeps the service pinged so it doesn’t idle out.
+>
+> [Mc2683d22] [Ma02ed743]
+
+`cites` = `[c2683d22, a02ed743]`, `matchedUncited: []`, `unsupported: []`, and both chip texts match
+the memories they name. I replayed the client's own resolver against the live `/api/galaxy` payload
+(21 stars, bare 64-hex ids): **all three of today's chips resolve**, so `M0760de73` from turn 3 too —
+none of them would render the "That memory has already faded." toast Day 9 measured. **This is the first recall turn since Day 5 whose receipts I would put in front of someone without a caveat.** Not a
+new high: Day 4 was the first all-cited recall and Day 5 remains the cleanest turn in the diary, and the
+four days since then each broke the receipts differently — Day 9's own closing line tallies them as
+"absent, fabricated, truncated, and … pointed at the wrong thing."
+
+**Chip placement still breaks its own contract, though mildly.** The system prompt demands the chip
+"at the end of every claim you took from a memory" ([src/brain.js:140-143](../src/brain.js)); turn 2
+instead parked both chips together on a trailing line, so the prose does not map claim→chip 1:1 even
+though `cites` is correct. Turn 3 was inline and parenthetical — *"(as recalled in memory
+[M0760de73])"*. So placement, not resolution, is now the remaining chip defect.
+
+**Turn 3, the least-tagged memory, and it passed.** *"How much model spend can the sandbox burn in one
+day?"* → *"The sandbox’s daily model budget is **400 000 tokens** (as recalled in memory [M0760de73]).
+This limit is reset each day."* Correct chip, correct number, and `0760de73` is the memory whose 6-tag
+window (`demo, sandbox, daily, model, budget, 400000`) is the only one carrying its own figure. One
+inaccuracy that is **not the model's fault**: the limit is not only daily — the spend gate is
+per-process, so a Render restart refills it (observed 2026-10-20). The vault holds "a daily model
+budget", so a faithful recall propagates a fact that is itself incomplete.
+
+**Turn 4, abstention control, was the right call and slightly over-broad.** *"Who are the teammates on
+my hackathon project?"* → *"I don’t have any record of a hackathon project or its teammates in my
+memories. If you can share the names or details, I can help you organize or recall anything
+relevant."* `cites: []`, `learned: 0`, no fabrication. But `a02ed743` — a hackathon-project memory —
+was sitting in that turn's recall block, so "no record of a hackathon project" denies more than the
+gap requires. Correct behaviour, imprecise scope.
+
+**Decomposition is stochastic, and today it merged.** Day 9 typed the same *kind* of compound sentence
+(Render free tier **and** keep-alive workflow) and got **two** memories; today one memory, `Ma02ed743`,
+carries both claims — against the extractor's own instruction "One memory per distinct claim: do not
+merge separate facts" ([src/brain.js:861](../src/brain.js)). The merge is visible in the tags,
+because `deriveTags` is `tokenize(text).slice(0, 6)` ([src/store.js:78-80](../src/store.js)): the six
+kept words are `public, demo, hosted, render, free, tier`, i.e. the **front** half only, no `github` or
+`actions`. Retrieval still found it for "what keeps the demo from going offline", so the truncated tag
+window did not cost recall here — but the same real-world fact now minted a different id than Day 9's
+split version, and one chip can no longer distinguish which half it vouches for.
+
+**Intake-echo misfire, third consecutive day, and both roots are now nameable.** Turn 1's `unsupported`
+= `["1","15","2026","2","3","400","000"]` — seven flags, every one of them a figure from the message I
+had typed seconds earlier. Reading `unsupportedFigures`
+([src/brain.js:817-831](../src/brain.js)): the pool is built **only from `recalled`**, and on an intake
+turn `recalled` is empty by construction (extraction runs *after* the answer,
+[src/brain.js:318-327](../src/brain.js)), so the reply's echo can never be matched; and both sides are
+split on `/[^0-9]+/`, so thousands separators destroy the match — I typed `400000`, the model rendered
+`400,000` on turn 1 and `400 000` on turn 3, and turn 3 flagged `["400","000"]` **on a turn whose chip
+was correct**. `"2"` and `"3"` are the markdown list markers, exactly as Day 4 saw. Day 9 called this
+"milder"; today it is bigger, because today's echo restated more figures. Conclusion unchanged: treat
+`unsupported` as noise on any turn that restates, and never as proof of invention.
+
+**True-but-unmemorialized half-claim.** Turn 2 asserted the keep-alive "keeps the service pinged so it
+doesn’t idle out". I verified that in the repo — `.github/workflows/keep-alive.yml:10` (`cron:
+*/14 * * * *`) and `:22` (`curl … /api/health`) — but the memory it cited, `a02ed743`, says only "kept
+awake by a GitHub Actions keep-alive workflow". So the mechanism came from the word "keep-alive", not
+from the vault, and rode a chip that does not carry it. Same shape Day 5 warned about; harmless today
+because the inference happens to be right, which is exactly why it needs no new mechanism to be caught.
+
+**Export staleness: fifth consecutive day, still unfixed.** `/api/memories` **21**, `/api/galaxy` **21
+stars**, `/api/status.vault.memories` **21**, `/api/export` **18** — and the three absent texts are
+exactly today's three. `handleChat` ([src/server.js:501-530](../src/server.js)) still contains **zero**
+`store.flush()` (`grep -c flush src/server.js` → 12, last at :453), and `git log` shows no commit since
+`b99d587` touching it. `/api/export` remains a bad durability probe; read `/api/memories`.
+
+**Provider health: a clean control day again.** `chain.nebius → {ok: 11, fail: 0}`, `tavily: true`,
+`mode: sandbox`. Cost for the session: **11 calls, 8,083 prompt + 419 completion tokens, $0.00056309**
+(5 fast $0.00055860 + 6 embed $0.00000449), `tokensLeftToday` 400,000 → 391,498. **Day 8/9's
+under-billing reproduces with the same shape:** on-screen `meter` events = **4** (one per turn) =
+7,401 + 339 tokens = $0.00052542, while the server billed **5** fast calls. Invisible remainder =
+**1 call, 682 prompt + 80 completion, $0.00003318** — `extractMemories`
+([src/brain.js:853](../src/brain.js)) makes its own chat call and emits only `learned`; `:391` is
+still the sole `meter` emit. Six embedding calls across four turns also surface nothing, which is where
+the 8.5-30.5 s of wall time per turn that is not generation must be spent. **I did not instrument that
+gap**, so it is an observation about meter coverage, not a proven cause — but turn 2 waited 31.65 s to
+show 1.1 s of model time, and no on-screen number explains it to a visitor.
+
+**Did it change what I do?** (1) `await store.flush()` in `handleChat` stays the top item — five days of
+reproduction and it is still the one claim in the copy that the export endpoint refutes. (2) **Chips:
+enforce placement, not existence.** Today proves resolution works when the model bothers; add a check
+that a chip sits at the end of the sentence it supports (or emit the trailing group into the citation
+bar and stop asking the prose to carry it). Day 9's `slice(0, 3)` cap on `matchedUncited`
+([src/brain.js:789](../src/brain.js)) should still be raised — today it was not exercised, because the
+model cited properly on its own, which is the weakest possible reason for a pass. (3) **Figure guard:
+seed the pool from `userText` when `recalled` is empty, and split on thousands separators.** Those two
+one-line fixes would have silenced all 7 turn-1 flags and both turn-3 flags. (4) **Stop claiming
+"one fact per memory"** in the demo copy, or enforce it: today's merge means a compound sentence may
+produce one chip for two claims, and the guided path should not promise the split it did not get. (5)
+The abstention wording needs its scope narrowed to the actual question — "no record of your teammates",
+not "no record of a hackathon project".
+**Was the recall actually useful?** Yes, and today it was useful *as receipts*, not just as content: a
+question worded nothing like my stored text returned both facts with two real, resolvable chips and an
+empty `matchedUncited`, and two turns later it declined an unanswerable question honestly. What it did
+**not** do is change any decision — every recalled fact was something I had typed five minutes earlier
+and already knew, so the value here is evidence that the core loop works when the model follows its own
+citation rule, plus a restatement of the three unfixed bugs above.
