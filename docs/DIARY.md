@@ -1170,3 +1170,141 @@ empty `matchedUncited`, and two turns later it declined an unanswerable question
 **not** do is change any decision — every recalled fact was something I had typed five minutes earlier
 and already knew, so the value here is evidence that the core loop works when the model follows its own
 citation rule, plus a restatement of the three unfixed bugs above.
+
+## Day 11 — 2026-10-27 · scheduled dogfood session #11
+
+**Session #** 3 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode
+`native`. `/api/status` returned 200 first with `spend.calls: 0` and `tokensLeftToday: 400000` again — a
+fresh process for the fourth day running. Before opening a new jar I re-played the Day 10 cookie
+(`mnemos_sid` `372962771d3c5ffdc33bf87a`): `/api/session` answered **`isNew: false`** and `/api/memories`
+returned the stock **18** with **0** `source: chat` — Day 10's four facts were gone. Eleventh consecutive
+fresh-seed sky, and the `isNew: false` line is the trap again: the cookie survives, the vault does not.
+So today ran on a new jar, `mnemos_sid` `7f2902bbf150c65a93e32032`. Wall vs metered model time:
+**9.71 s / 1413 ms**, **9.50 s / 820 ms**, **12.83 s / 1293 ms**.
+
+**What I told it** (turn 1, four facts chosen so the fourth depends on the third): judging for the
+Nebius × NVIDIA Global AI Hackathon opens 1 December 2026 and closes 15 December 2026; the demo runs on
+the Render free tier at mnemos-personal-ai.onrender.com, which spins down after ~15 minutes idle and
+makes the next request pay a cold-start wake; keep-warm is a GitHub Actions workflow curling `/api/health`
+every 14 minutes; and the same workflow makes a weekly heartbeat commit, because GitHub disables a
+`schedule` workflow in a repo with no commits for 60 days. All four are real — I read the last one out of
+`.github/workflows/keep-alive.yml:3-4` and `:10` (`cron: */14 * * * *`) and `:22` before typing it.
+`learned: 4, skipped: 0`, one memory per claim, each near-verbatim, all four content-addresses MATCHED
+on re-hash: `M45293e5f`, `Md5a83fd9`, `M7e294637`, `Mbf1ce491`.
+
+**The recall question** was deliberately multi-hop and phrased with none of my stored wording: *"Suppose
+a visitor opens the demo link after the machine has sat untouched all afternoon. What will they
+experience, and does anything you hold explain why that does not normally happen? If it does, say how
+many separate things of mine your answer depends on."* It pulled the right three stars (`d5a83fd9`,
+`7e294637`, `bf1ce491` all in `recall.stars`), answered the cold-start correctly, and counted **three**
+dependencies — which is the right number and is not something I ever stated. Verbatim, with its chips:
+
+> When a visitor opens the demo link after the service has been idle all afternoon, the first request
+> wakes the sleeping container. Because the free tier on Render spins down after about 15 minutes of
+> inactivity, the wake-up incurs a cold-start delay, so the visitor will notice a brief loading pause
+> before the app becomes responsive.
+>
+> My answer rests on three separate pieces of information you have given me:
+>
+> 1. The demo runs on Render's free tier and idles out after ~15 minutes [M4f2b91a1].
+> 2. The first request after sleep causes a cold-start wake [M4f2b91a1].
+> 3. You have set up a keep-warm GitHub Actions workflow that curls `/api/health` every 14 minutes
+> [M7e294637].
+
+**Today's headline bug: it fabricated a chip, and the fabrication was a verbatim copy from its own system
+prompt.** `M4f2b91a1` is not a memory — `grep` it in the live vault and it is absent, and it is absent
+from `recalled` — it is the *example id* written into the MEMORY PROTOCOL at
+[src/brain.js:138-141](../src/brain.js) ("Recalled memories appear as lines like: `[M4f2b91a1] text (3d
+old)`… Cite inline… `[M4f2b91a1]`"). The model needed two chips for claims 1 and 2, did not have the real
+id in front of it in a usable form, and produced the prompt's own placeholder twice. Consequences, all
+measured rather than inferred: `cites` came back as **one** entry (`7e294637` only), because
+`extractCites` resolves each match through `recalled.find(r => r.id.startsWith(...))`
+([src/brain.js:800-806](../src/brain.js)) and **silently drops** anything that does not resolve — so the
+prose shows two authoritative-looking chips that the citation bar and any downstream audit will never
+see. Worse, `4f2b91a1` is also the example id in the `memory.forget` argument schema
+([src/brain.js:32](../src/brain.js)); a model that confuses prompt examples with vault ids can cite a
+ghost, and the same confusion one day deletes against a ghost. **Fix: put a random per-vault placeholder
+id in the prompt, or better, an id that cannot exist (`Mdeadbeef`), and have `extractCites` report
+unresolved chips instead of swallowing them** — an invented chip is exactly the signal a memory product
+must never hide.
+
+**The audit signals did their job, though — this is the good news.** `matchedUncited` listed
+`d5a83fd9` at `overlap: 16`: the Render fact was used in the prose, not credited with a resolvable chip,
+and the app surfaced it as "used but not cited". That is precisely the right inference, and it is the
+first time I have seen the two signals disagree in a way that indicts the model rather than the tooling.
+(`bf1ce491` also surfaced at `overlap: 4` — recalled, never used, harmless.) `unsupported` was
+`["1","2","3"]`: the markdown list markers from Day 4, and nothing else. Note *why* nothing else: the
+figure guard runs on `stripChips(reply)` ([src/brain.js:825](../src/brain.js)), so the fabricated chip is
+removed before digit pooling — the guard cannot catch an invented id, only an invented number. Day 10's
+"treat `unsupported` as noise on any turn that restates" still stands; today it cost nothing because the
+restatement's real numbers (`15`, `14`, `2026`) were all in the recalled pool.
+
+**Intake-echo misfire, fourth consecutive day, but it is now exactly one line wide.** Turn 1's
+`unsupported` = `["1","2026","15","14","60"]` — five flags, all of them figures I had typed seconds
+earlier, all of them present in memories that did not exist yet when the answer was written. Cause
+unchanged: the pool is built only from `recalled` ([src/brain.js:817-831](../src/brain.js)) and `recalled`
+is `[]` by construction on an intake turn (`"recall","stars":[]` is the first event on the wire today).
+Seed the pool from `userText` when `recalled` is empty and all five flags disappear.
+
+**New, and worse than the chip: extraction ran on a turn where nothing was asserted, and stored my
+question as five facts about me.** Turn 3 emitted `learned: 5, skipped: 1` from a message that contained
+no new personal fact at all. The five stored, all `source: chat`:
+`Mb14e137a` "The user asked to count separate things the answer depends on under the described
+scenario."; `Mcd728488` "The user specified that the question is addressed to the assistant and should
+not be treated as a memory."; `M10df49e4` "The user asked to state how many separate things my answer
+depends on if a visitor opens the demo link after the machine has sat untouched all afternoon.";
+`M3e36be23` "The user gave a recall test instruction to answer only from what they have told me."; and
+`M55950b0f` **"The user wants the response to be only JSON with a memories array."** The first four are
+the `assertedClaims` guard ([src/brain.js:315-327](../src/brain.js)) failing on an imperative-phrased
+question; the fifth is **prompt leakage into the durable store** — "Questions, instructions and requests
+addressed to you are not memories. Reply ONLY JSON: {"memories":[…]}" is the extractor's own system
+prompt at [src/brain.js:860](../src/brain.js), and the model wrote it out as a preference I hold. Vault
+22 → 27, i.e. 19% of this sky is now junk that will be embedded, recalled, and ranked against real facts.
+The control proves the guard can work: turn 2 (a housekeeping question) correctly emitted
+`learned: 0, skipped: 0, asked: true` and made no extraction call — the cost ledger below shows exactly
+that. So the boundary is not "questions are refused"; it is *how the question is phrased*, which is the
+least robust possible criterion. Day 10's recommendation "stop promising one fact per memory" is
+superseded by this: the real rule to enforce is **never extract on a turn whose reply is a recall
+answer**.
+
+**Honest abstention, and it cost one call.** Turn 2 asked how many model calls had been billed in this
+process and how much of today's token budget remained — data that lives in `/api/status`, not in any
+memory. Reply: *"I don't have visibility into usage metrics or token-budget accounting, so I can't tell
+you how many model calls have been billed…"*, with `cites: []`, `matchedUncited: []`, `unsupported: []`,
+and **no** attempt to pad the answer with the six stars it had retrieved (three of which were unrelated
+persona facts). Rule 4 at [src/brain.js:144-148](../src/brain.js) was followed exactly.
+
+**Export staleness: sixth consecutive day, unchanged and now measurable against my own junk.**
+`/api/memories` **27**, `/api/status.vault.memories` **27**, `/api/export` **18** — the export still
+serves the boot-time seed, and `grep -c flush src/server.js` → 12 with the last at :453 while the
+`handleChat` body (:501-532) contains **zero**. `git log -3 -- src/server.js` shows no commit touching it
+since `fb0c4a8`. Nine memories written and never flushed: my four real facts, and the five the extractor
+should not have made. `/api/export` remains a false durability probe; `/api/memories` is the only honest
+one.
+
+**Provider health: clean control day.** `chain.nebius`, `tavily: true`, `mode: sandbox`, no fail counts.
+Session cost: **11 calls, 7,030 prompt + 795 completion tokens, $0.00057480** = 5 fast $0.00056724 + 6
+embed $0.00000756, `tokensLeftToday` 400,000 → 392,175. **The under-billing shape reproduces with a new
+detail:** on-screen `meter` events = **3** (5,756 + 523 tokens = $0.00047088) vs **5** billed fast calls;
+invisible remainder = **2 calls, 1,274 prompt + 272 completion, $0.00009636** from `extractMemories`
+([src/brain.js:853](../src/brain.js)), which emits only `learned`. Today's ledger splits it cleanly by
+turn — turn 1 and turn 3 each carried one invisible extraction call, turn 2 carried none — which is the
+clearest evidence yet that the meter covers generation and not the whole turn. Six embedding calls still
+surface nothing on screen, and that is where most of the 8.3–11.5 s of non-generation wall time per turn
+goes. I did not instrument the gap.
+
+**Did it change what I do?** (1) **De-placeholder the prompt** — one string edit at
+[src/brain.js:138-141](../src/brain.js) and `:32`, and today's headline bug cannot recur; this is now
+above the flush line, because a fabricated receipt is worse for a memory product than a stale export.
+(2) `extractCites` must return unresolved chips as a distinct `ghostChips` field; the UI should render
+them visibly, not hide them. (3) Skip `extractMemories` whenever the turn answered from recall — or gate
+it on "the user's message contained a declarative clause", not on length. (4) `await store.flush()` in
+`handleChat`, sixth day running. (5) Seed the figure pool from `userText` on intake turns.
+**Was the recall actually useful?** Yes on content, no on trust. The multi-hop answer was genuinely
+correct, the "three dependencies" count was a real inference and not a restatement, and the abstention on
+turn 2 was honest — but the same turn fabricated its receipts from its own instructions and then
+polluted the vault with five non-facts about me, one of which quoted the product's internal prompt. Two
+days ago I wrote that the core loop works when the model follows its own citation rule; today the model
+broke the rule on claims 1 and 2, and the only reason the break was visible at all is the `matchedUncited`
+overlap score. For a judge clicking "ask it about last week", a ghost chip is not a cosmetic defect — it
+is the one failure mode this product must not have.
