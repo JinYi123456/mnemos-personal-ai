@@ -1308,3 +1308,122 @@ days ago I wrote that the core loop works when the model follows its own citatio
 broke the rule on claims 1 and 2, and the only reason the break was visible at all is the `matchedUncited`
 overlap score. For a judge clicking "ask it about last week", a ghost chip is not a cosmetic defect — it
 is the one failure mode this product must not have.
+
+## Day 12 — 2026-10-29 · scheduled dogfood session #12
+
+**Session #** 4 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode
+`native`. Session-start `/api/status` (saved as `day12/status0.json`) again returned `spend.calls: 0` with
+`tokensLeftToday: 400000` — a fresh process, fifth day running, so the whole ledger below is mine.
+**The durable jar was gone again**: `C:\Users\User\.qoder\mnemos-dogfood\jar` did not exist (`ls` → No such
+file or directory, the third time that path has been cleaned out from under this ritual). I rebuilt it in
+place, got `mnemos_sid` `f74b3323c0bd004cac025179`, and `/api/memories` opened on the stock **18** with
+**0** `source: chat` — the **twelfth consecutive fresh-seed sky**.
+
+**What I told it, and the false fact I slipped in.** Turn 1, verbatim intent, all verifiable in-tree:
+the demo runs on Render's free tier, where an instance sleeps after about 15 minutes with no traffic
+([render.yaml](../render.yaml)); and `.github/workflows/keep-alive.yml` pings it every 14 minutes
+([:10](../.github/workflows/keep-alive.yml#L10)). I added a third clause — "the page polls `/api/status`
+to show connection health" — which happens to be **true** ([src/server.js:240](../src/server.js#L240),
+[public/app.js:1152](../public/app.js#L1152)), and then *deliberately* let the wording imply that the
+workflow's target was the same endpoint. It is not: the workflow hits `/api/health`
+([keep-alive.yml:22](../.github/workflows/keep-alive.yml#L22), [src/server.js:203](../src/server.js#L203)).
+Mnemos accepted the implication without challenge and minted `M6f061c1d` **"A GitHub Actions workflow
+named keep-alive.yml pings the /api/status endpoint every 14 minutes."** — a false durable memory, authored
+by me and ratified by the product. Second consecutive day a false assertion of mine entered the sky
+undisputed. Turn 1 wrote **6** memories from two-and-a-bit facts, including two duplicate pairs:
+`Me57bbf90` + `Mc5069dba` (the sleep window) and `M4bf2b582` + `M717ba36c` (the page polling `/api/status`,
+same claim, different wording, so content-hash dedupe at [src/store.js:319](../src/store.js#L319) could not
+see them).
+
+**Turn 2 — the recall, and it was clean.** Question: *"What keeps the demo online, and how does that relate
+to the instance's sleep window? Which of those numbers did I tell you, and which did you just work out?"*
+Reply (real, `day12/sse2.txt`): *"The demo stays alive because a keep-alive workflow pings the
+`/api/status` endpoint roughly every 14 minutes. That timing fits right inside the Render free-tier sleep
+window (the instance would otherwise go to sleep after about 15 minutes of inactivity)…"* then it listed,
+inline, **[Me57bbf90] [Mc5069dba] [M050ed2e3] [M6f061c1d]** with their stored texts, and volunteered that
+*"The other two memories ([M5b521587] and [Mb5bf8012]) are about personal preferences and aren't relevant"*.
+`cites` = those **6** ids, `recalled` = the same 6, `matchedUncited: []`, `learned: 0`. I diffed every
+inline `M…` token against `cites ∪ recalled ∪ /api/memories`: **all six resolve to real stars with exactly
+the text quoted.** Second session since Day 10 with zero ghost chips. `unsupported: ["0"]` was a false
+alarm — it is the `0` in the `(0d old)` age marker the model wrote into its own prose.
+
+**But it failed the provenance half of the question, and the failure is precise.** Asked which number it
+had *worked out*, it answered: *"I didn't invent any new facts—everything above comes directly from the
+memories you gave me."* Both timings had in fact been given, so "which did you work out" was a null set for
+the numbers — yet the whole causal conclusion (14-minute probe < 15-minute idle timeout ⇒ therefore the
+instance is prevented from sleeping) is **in no memory**; I never said it. The correct reply is "both
+numbers are yours, the reasoning is mine." It disclaimed the one genuinely new thing it had just done. A
+visitor clicking through the demo cannot tell a recalled claim from an inferred one, and the product's own
+"no invented facts" line actively hides the difference.
+
+**Turn 3 — a correction arrives as chat and never becomes data.** I stated, in my own message, that the
+workflow pings `/api/health` (not `/api/status`), that the page separately polls `/api/status`, and added
+the true fact that the workflow commits a weekly heartbeat because GitHub stops `schedule` triggers on
+repos with no commits for 60 days ([keep-alive.yml:3-5](../.github/workflows/keep-alive.yml#L3)). The reply
+was **correct**: *"The keep-alive workflow actually pings **/api/health**… `/api/status`… does not keep the
+instance alive"*, plus the 60-day chain. And `cites: []` — the honest zero, with `matchedUncited` flagging
+`Mc5069dba` (overlap 9), `M6f061c1d` (7) and `Me57bbf90` (7), i.e. the detector saw that the answer was
+built from stars and said so in metadata only; the reader sees nothing. `learned: 2`, and the two stored
+memories are `M3eed5057` (heartbeat/60-day — mine) and `M873cd857` "The page separately polls /api/status
+for connection health" (also mine). **The correction that `/api/health` is the ping target produced no
+memory at all** — it was assistant-echoed text, and extraction only reads user-authored claims
+([src/brain.js:860](../src/brain.js#L860)). So the sky holds the false `M6f061c1d` beside three paraphrases
+of the same true `/api/status` page-poll fact, and **not one star saying `/api/health`**. No
+contradiction-resolution exists: nothing retired, superseded, or flagged `M6f061c1d`.
+
+**Turn 4 — this is the one that matters.** A question answerable *only* from the sky, with no facts in the
+message: *"Without me repeating anything: name the exact endpoint the keep-alive workflow hits to stop the
+instance sleeping, and the endpoint the page polls for health."* It answered, with total confidence:
+*"The keep-alive workflow pings the **/api/status** endpoint to stop the instance from sleeping."* **Wrong**
+— and it had, 60 seconds earlier, correctly said `/api/health`. There is no way for it to be right: no
+memory containing `/api/health` exists, and the only stored workflow-target claim is my false one.
+`recalled` = `Me57bbf90, M050ed2e3, M6f061c1d, Mc5069dba, M873cd857, M4bf2b582` — **`M3eed5057`, freshly
+minted one turn earlier and the most on-topic star in the sky for a question about what keeps the instance
+awake, was not retrieved at all.** Second-half answer (`/api/status` for page health) was right. `cites:
+[]` again while `matchedUncited` flagged three of the recalled stars. Then extraction, triggered by a turn
+whose text contains **no endpoint facts whatsoever**, wrote two fabricated memories: **`M5147f561` "The
+page polls for health at the endpoint named /api/v1/health."** and **`M89cbfa06` "The keep-alive workflow
+stops the instance sleeping at the endpoint named /api/v1/keep-alive/status."** I grepped the tree: the
+string `api/v1` exists exactly once, as the OpenRouter base URL at [src/llm.js:129](../src/llm.js#L129) —
+neither endpoint appears in this conversation, in the server routes, or in the workflow. Day 11 produced
+junk memories that were *paraphrases of my questions*; Day 12 produces **invented world-facts**, and the
+proximate cause is my own phrasing "Without me repeating anything", which reads as an instruction.
+
+**Vault accounting.** `/api/memories` 18 → 24 → 26 → **28** across four turns: **10** `source: chat`
+memories from one session, of which **3 are false** (`M6f061c1d` ratified by me, plus the two `/api/v1/...`
+fabrications) and **4 are near-duplicates** of 2 distinct claims — so ~30% fabricated, ~40% redundant, ~30%
+load-bearing. **`/api/export` still serves 18** while `/api/memories` and `/api/status.vault` both say 28:
+seventh consecutive day, `grep -c flush src/server.js` → 12 with **0** inside `handleChat`
+([src/server.js:501-532](../src/server.js#L501)). `store.flush()` in the chat path remains the single
+cheapest correctness fix in this repo and still has not shipped.
+
+**Provider health: clean control day.** `chain.nebius`, `tavily: true`, `mode: sandbox`, no fail counts.
+Cost: `spend.calls` 15 = **7 fast $0.00070290 + 8 embed $0.00000690 = $0.00070980**;
+`tokensLeftToday` 400,000 → **390,238**, exactly the 9,762 billed. **On-screen `meter` events = 4**
+($0.00060510, 8,189 tokens) vs **7 billed fast calls**; invisible remainder = **3 fast calls ≈ 1,573
+tokens**, one per turn where `learned > 0` (turns 1, 3, 4) and none on turn 2 where `learned: 0` —
+reproducing Day 11's attribution exactly, with the bonus that this session's meter/turn correspondence lets
+me state it without inference. Eight embedding calls surface nothing on screen and are where most of the
+11.6 / 22.2 / 15.2 / 17.7 s per-turn wall time goes.
+
+**`unsupported` as a false-alarm machine, now with a third shape.** Turn 1 flagged `["15","14"]` — digits
+from *my* message, on an intake turn where `recalled` is empty by construction. Turn 2 flagged `["0"]` —
+the `0` of the age marker in its own sentence. Turn 3 flagged `["60"]` — again mine. Turn 4: `[]`. Same two
+roots as Day 11 (pool drawn only from `recalled`, [src/brain.js:817-831](../src/brain.js#L817)): nothing a
+user can read this as is evidence about invention.
+
+**Did it change what I do?** (1) **Corrections must become data.** Treat "that's wrong, it's X" as a first-
+class operation: match the user's correction against the retrieved set, supersede the contradicted star,
+and store the corrected claim — otherwise every confident early turn permanently poisons later retrieval,
+which is exactly what happened here. (2) The product should **answer provenance questions honestly**: a
+claim not found in any recalled star is *reasoned*, not *remembered*; today it explicitly denied reasoning.
+(3) Dedupe by embedding similarity at write time, not by content hash of punctuation-normalised text.
+(4) `await store.flush()` in `handleChat` — seventh day. (5) Skip extraction on any turn whose reply was
+produced from `recalled` (turns 2 and 4 both wrote, one of them fiction). **Was the recall actually useful?**
+Genuinely yes on turn 2: it retrieved exactly the four stars that answer the question, quoted their stored
+text verbatim, every chip resolved against the live vault, and it transparently marked the two irrelevant
+seed memories as irrelevant — for a cold visitor that is real, checkable value, and it is the loop working.
+Then the same machinery answered turn 4 **confidently wrong**, because the truth was never allowed into the
+store and the lie was, and in the gap it wrote two endpoints that do not exist. Recall is useful right up
+to the moment it becomes the only source of truth available — which, in a memory product, is every turn
+after the first correction.
