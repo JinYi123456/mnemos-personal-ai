@@ -54,9 +54,10 @@ question into somebody else's vault), and it runs against the real models.
 
 ![The review rail mid-run: two steps checked off, the answer's [M…] chips, and the star one of them points at, flaring](assets/gallery-07-review-rail.png)
 
-**Impact, as one true story.** Thirteen dated sessions in thirteen days (17–29 Oct), ~17,000
-words, every entry pasting the citations the live demo actually returned — including the days
-it was wrong ([docs/DIARY.md](docs/DIARY.md)). On day 3 it asserted a confident rule
+**Impact, as one true story.** A dated session every day since 17 October — 17,000+ words by
+the deadline, growing while the repo lives — every entry pasting the citations the live demo
+actually returned, including the days it was wrong ([docs/DIARY.md](docs/DIARY.md)). On day 3
+it asserted a confident rule
 about vault expiry that was flatly wrong — and the chips it cited pointed at memories that did
 not exist. Because every claim carried a receipt, the false belief was traceable to the star
 it came from, and the write path was fixed the same evening (`19ed0ce`, `e1421a5`, `f6480d3`)
