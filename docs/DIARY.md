@@ -1427,3 +1427,92 @@ Then the same machinery answered turn 4 **confidently wrong**, because the truth
 store and the lie was, and in the gap it wrote two endpoints that do not exist. Recall is useful right up
 to the moment it becomes the only source of truth available — which, in a memory product, is every turn
 after the first correction.
+
+## Day 13 — 2026-10-29 · scheduled dogfood session #13
+
+**Session #** 2 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode
+`native`, wall time 5.4 s / 11.2 s. Fresh jar written to `C:/Users/User/.qoder/mnemos-dogfood/day13/`
+(raw captures `turn1_out.json`, `turn2_out.json`, outside the repo), sid `20e824fe13d8c26365e2d301`;
+`/api/session` → `isNew: true`, and `/api/memories` opened on the stock **18** with **0** `source: chat` —
+thirteenth consecutive fresh-seed sky. Session-start `/api/status` again returned `spend.calls: 0` with
+`tokensLeftToday: 400000`, so the ledger below is mine unless another visitor arrived mid-session; the end
+count of 8 calls is exactly what two turns account for.
+
+**What I told it (turn 1).** Three facts, each true and each checked before I typed it: judging for the
+Nebius x NVIDIA hackathon runs December 1-15, 2026; the demo is on Render free tier and a GitHub Actions
+keep-alive workflow curls `/api/health` every 14 minutes ([keep-alive.yml:10,22](../.github/workflows/keep-alive.yml#L10),
+[src/server.js:205](../src/server.js#L205)) so the instance never sleeps; and the project must stay on a
+zero-dollar budget. No poison fact this time — after Day 12 ratified a false one of my own making, every
+clause here was something I had just grepped.
+
+**What it wrote.** Exactly **3** memories, one per fact, no duplicates, vault 18 → **21**:
+- `Ma8bf8e80` — *"Judging for the Nebius x NVIDIA Global AI Hackathon runs December 1-15, 2026."*
+- `M83c619c1` — *"The Mnemos demo is hosted on the Render free tier and uses a GitHub Actions keep-alive
+  workflow that curls /api/health every 14 minutes to prevent sleeping."*
+- `M4cbb1f4b` — *"The entire project must stay on a zero-dollar budget, requiring every component to run on
+  free tiers."*
+
+First session in this run with zero duplicate pairs and zero invented facts on the intake turn, and the
+endpoint it stored is the one the workflow actually hits — no confusion with the page's `/api/status` poll,
+which was Day 12's failure. The reply recapped all points correctly; `cites: []`, nothing to cite on intake.
+
+**What I asked (turn 2).** *"Quick check of what you remember about my project: which hackathon am I
+working on, when is it being judged, and how is the demo kept online through that window?"* — no fact
+repeated, and no directive-sounding phrasing, since Day 12 showed "Without me repeating anything" reads to
+this model as an instruction to invent.
+
+**What it recalled.** `recalled` = `41312395, a8bf8e80, b5bf8012, 83c619c1, 2ce92706, 4cbb1f4b` — both new
+project stars plus four seed stars. Reply, verbatim from `turn2_out.json`:
+
+> You're participating in the **Nebius × NVIDIA Global AI Hackathon**, with judging scheduled for
+> **December 1-15 2026**.
+>
+> To keep the Nebula Notes demo running throughout that period, the project is hosted on the Render free
+> tier and uses a GitHub Actions keep-alive workflow that curls `https://api.health/` (or `/api/health`)
+> every 14 minutes. This periodic request prevents the free-tier instance from being put to sleep,
+> ensuring the demo stays online while the hackathon is underway.
+>
+> [M83c619c1]
+
+All three sub-questions answered, correctly, one turn after intake, from memory. `learned: 0, skipped: 0,
+asked: true` — the question turn wrote nothing, so Day 12's ask (5) holds on its own. `unsupported: []`,
+clean for the first time in three sessions; on turn 1 it flagged `["1","15","2026","14"]`, four digits
+lifted out of *my own* message on a turn where `recalled` is unrelated by construction, which is still
+exactly the two-root diagnosis from Day 11/12 (pool drawn only from `recalled`,
+[src/brain.js:817-831](../src/brain.js#L817)) and still nothing a reader can take as evidence of invention.
+
+**Two defects inside the sentence that got it right.** (1) **The chips under-report what was used.** One
+chip (`M83c619c1`) on an answer whose second load-bearing claim — the December 1-15 window — came from
+`Ma8bf8e80`, and the product's own matcher says so: `matchedUncited` = `a8bf8e80` overlap **8**, `41312395`
+overlap 3, `2ce92706` overlap 3. Three used-but-uncited stars, thrown away by the UI. (2) **The prose
+drifted from the star it quoted.** The cited memory says "The **Mnemos** demo…"; the reply says "To keep
+the **Nebula Notes** demo running", and Nebula Notes is the app-name of `M2ce92706` — one of the seed stars
+the matcher flagged as used. The endpoint the whole claim rests on is rendered as a URL that does not exist,
+`https://api.health/`, with the correct `/api/health` demoted to a parenthetical. The memory was right; the
+sentence about it was not, and a judge who clicks the chip gets a correct star sitting behind a mangled
+claim about it.
+
+**Export still lies — eighth consecutive session.** After turn 1, `/api/memories` = 21 and
+`/api/status.vault.memories` = 21, but `/api/export` returns **18**, and the string `December 1-15` and the
+ids `a8bf8e80` / `83c619c1` / `4cbb1f4b` are **absent from it**. `grep -c flush src/server.js` → **12**,
+with **0** inside `handleChat` ([src/server.js:512-541](../src/server.js#L512)). Everything Mnemos
+remembered this session lives in the process, not on disk: keep the instance up and the recall works,
+export the vault and the conversation never happened. `await store.flush()` in the chat path is still the
+cheapest correctness fix in this repo and still has not shipped.
+
+**Cost.** `spend` = 8 calls / **$0.00035690** (3 fast + 5 embed). On screen: 2 `meter` events =
+$0.00031194 (3,879 prompt + 330 completion tokens). The invisible remainder is exactly **one** fast call ≈
+$0.00004496 (970 prompt + 94 completion), and it lands on turn 1 — the turn with `learned: 3` — while turn
+2 (`learned: 0`) emitted none. Cleanest reproduction yet of the Day 11/12 attribution rule: one hidden fast
+call per turn in which memory extraction runs. `tokensLeftToday` 400,000 → **394,975**.
+
+**Did it change what I do?** (1) Citation rendering should be driven by `matchedUncited` as well as by the
+chips the model typed — the data needed to close the under-report is already in the `done` payload and is
+discarded. (2) When a reply quotes a star, print that star's own surface form: if the answer names the
+endpoint differently from `M83c619c1`, the chip no longer testifies to the sentence above it. (3)
+`await store.flush()` in `handleChat` — eighth day. **Was the recall actually useful?** Yes, and this is the
+first session in the run where I can say so without an asterisk about what it made up: three true facts went
+in, three clean memories came out, and one question later it told me the judging window and the exact
+keep-alive endpoint I had never repeated, which is the whole promise of the product. The shortfall is not
+in recall at all — it is that the answer shipped one receipt where it used four, and garbled the name and
+the URL of the thing it had correctly remembered.
