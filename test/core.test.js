@@ -307,3 +307,13 @@ test('citations: a cited memory is never also flagged as uncited', () => {
   const uncited = Brain.matchedUncited(reply, recalled, new Set(cites.map((c) => c.id)));
   assert.deepEqual(uncited.map((u) => u.id), ['528847bd'], 'only the memory it never cited is flagged');
 });
+
+test('recall intent: "what do you remember" is an open question, not an abstention', () => {
+  assert.equal(Brain.wantsWholeSky('What do you remember about me? Tell me what to plan next.'), true);
+  assert.equal(Brain.wantsWholeSky('what do you know about me?'), true);
+  assert.equal(Brain.wantsWholeSky('What do you remember'), true);
+  assert.equal(Brain.wantsWholeSky('Show me my memories'), true);
+  assert.equal(Brain.wantsWholeSky('When is the portfolio review?'), false);
+  assert.equal(Brain.wantsWholeSky('What do you know about the deploy date?'), false);
+  assert.equal(Brain.wantsWholeSky('Remind me what I am preparing for'), false);
+});

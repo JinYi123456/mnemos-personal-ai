@@ -254,7 +254,8 @@ ${seen.text}`;
     // An open question has nothing to match, so abstaining would be a bug, not
     // honesty: show what the sky actually holds. A *specific* question that
     // nothing clears still abstains — that is the case the floor exists for.
-    const openEnded = recalled.length === 0 && tokenize(userText).length < 2;
+    const openEnded = Brain.wantsWholeSky(userText)
+      || (recalled.length === 0 && tokenize(userText).length < 2);
     if (openEnded) recalled = this.store.strongest(6);
     this.store.reinforce(recalled.map((m) => m.id));
     // Retrieval always returns *something* near a question; that is how a memory
@@ -543,6 +544,24 @@ ${seen.text}`;
         error: String(/** @type {any} */ (e).message || e),
       };
     }
+  }
+
+  /**
+   * "What do you remember about me?" shares almost no wording with the memories it
+   * is asking about, so the relevance floor — built for *specific* questions —
+   * correctly returns nothing and a cold visitor is told "I don't remember you"
+   * while the vault holds eighteen memories. An open question is not an abstention
+   * case: it asks for the sky, so answer with the sky.
+   * @param {string} text
+   */
+  static wantsWholeSky(text) {
+    const t = String(text || '');
+    return /\bwhat (do|did) you (remember|know)( about me)?\s*\?/i.test(t)
+      || /^\s*(what|tell me what) (do |did )?you (remember|know)( about me)?\s*[?.!]?$/i.test(t)
+      || /\bwhat have you got on me\b/i.test(t)
+      || /\bremember (about|of) me\b/i.test(t)
+      || /\btell me (what|everything) you (remember|know)\b/i.test(t)
+      || /\bmy (memory|memories)\b/i.test(t);
   }
 
   /**

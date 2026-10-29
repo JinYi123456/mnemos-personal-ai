@@ -17,6 +17,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const PORT = num(process.env.PORT, 8787) || 8787;
 const PUBLIC_DIR = path.join(ROOT, 'public');
+/** Stores whose missing vectors we already kicked off, so one visitor costs one batch. */
+const embedKicked = new WeakSet();
 
 /**
  * Demo mode vs owner mode.
@@ -233,6 +235,15 @@ async function api(req, res) {
     store = await vaults.open(sid);
   }
   const { brain, dreamer } = servicesFor(store, sid);
+
+  // A brand-new sandbox arrives seeded with memories but no vectors, so its first
+  // question would be answered by lexical search alone — and the flagship question
+  // ("what do you remember about me?") matches almost no words. Embed once, in the
+  // background, so the first turn a judge ever runs is already hybrid.
+  if (!embedKicked.has(store) && store.vault.memories.some((m) => !m.vec)) {
+    embedKicked.add(store);
+    brain.backfillEmbeddings(24).catch(() => {});
+  }
 
   if (p === '/api/session') {
     return json(res, { sid, isNew, mode: SINGLE_VAULT ? 'owner' : 'sandbox' });

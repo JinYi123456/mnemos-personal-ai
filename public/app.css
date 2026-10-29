@@ -595,6 +595,7 @@ body.flare #galaxy { animation: flare 1.2s ease; }
   background: linear-gradient(135deg, rgba(60, 58, 122, 0.55), rgba(28, 32, 70, 0.6));
   border: 1px solid rgba(143, 123, 255, 0.4);
   border-radius: 999px; padding: 4px 10px;
+  flex: 0 0 auto;
   max-width: 168px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* the bar is already carrying eight controls on a 13" laptop — the vault id is a
@@ -662,4 +663,26 @@ body.flare #galaxy { animation: flare 1.2s ease; }
 .legend.limits li { font-size: 12px; line-height: 1.55; color: var(--ink-dim); }
 .legend.limits b { color: var(--gold-hot); font-weight: 600; }
 .legend.limits code { color: var(--cyan); font-size: 11px; }
+
+/* Phones: the rail becomes the screen it already behaves like. At 390px the drawer
+   covered the composer and clipped the top bar, which reads as a broken layout to a
+   judge who opens the link on a phone. */
+@media (max-width: 640px) {
+  .review-rail {
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: auto; height: 100vh; height: 100dvh; max-height: none;
+    border: 0; border-radius: 0;
+    padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+    z-index: 60;
+  }
+  .rail-head b { font-size: 15px; }
+  .rail-sub { font-size: 11.5px; }
+  .rail-you { font-size: 12.5px; }
+  .rail-go { font-size: 14px; padding: 11px 11px; }
+  .rail-go i { width: 21px; height: 21px; font-size: 12px; }
+  .rail-look { font-size: 12.5px; padding: 0 12px 11px; }
+  .rail-auto { font-size: 13px; padding: 6px 0; }
+  .rail-foot { font-size: 12px; }
+  .rail-head .pill { padding: 7px 12px; }
+}
 
