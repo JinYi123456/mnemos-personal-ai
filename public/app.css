@@ -427,6 +427,9 @@ body.flare #galaxy { animation: flare 1.2s ease; }
   .top-stats { display: none; }
   .bubble { max-width: 92%; }
   #panel { width: 100%; }
+  /* A phone is shorter than the first-run card: anchor it to the top and let it
+     scroll, instead of centring a card that then clips at both ends. */
+  .overlay { place-items: start center; overflow-y: auto; padding: 20px 0 28px; }
 }
 
 .cite-chip.uncited {

@@ -54,8 +54,9 @@ question into somebody else's vault), and it runs against the real models.
 
 ![The review rail mid-run: two steps checked off, the answer's [M…] chips, and the star one of them points at, flaring](assets/gallery-07-review-rail.png)
 
-**Impact, as one true story.** Its author has used it daily since 18 Oct as the checking tool
-on his own claims ([docs/DIARY.md](docs/DIARY.md)). On day 3 it asserted a confident rule
+**Impact, as one true story.** Thirteen dated sessions in thirteen days (17–29 Oct), ~17,000
+words, every entry pasting the citations the live demo actually returned — including the days
+it was wrong ([docs/DIARY.md](docs/DIARY.md)). On day 3 it asserted a confident rule
 about vault expiry that was flatly wrong — and the chips it cited pointed at memories that did
 not exist. Because every claim carried a receipt, the false belief was traceable to the star
 it came from, and the write path was fixed the same evening (`19ed0ce`, `e1421a5`, `f6480d3`)
@@ -80,7 +81,7 @@ differs in *border style*, not just hue.
 |---|---|
 | Runs on Nebius Token Factory | every turn, every dream, every embedding is a runtime call to `https://api.tokenfactory.nebius.com/v1`. The UI's **⚙ Under the hood** drawer shows the model, tier, tokens, latency and USD for each live call. |
 | ≥1 NVIDIA open-source model | four: `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` (fast tier), `nvidia/nemotron-3-super-120b-a12b` (reasoning), `nvidia/Nemotron-3-Ultra-550b-a55b` (frontier: dream synthesis + morning brief), `nvidia/Nemotron-3.5-Super-VL` (photo → memory). |
-| Personal AI track | persistent memory + reusable skills (`SKILL.md`) + your choice of tools + tasks across daily workflows + data under your control, and it uses the named toolchain: MCP memory server for **NVIDIA Hermes / NemoClaw** hosts, plus an **OpenShell** default-deny policy in [`deploy/openshell/`](deploy/openshell/README.md). |
+| Personal AI track | persistent memory + reusable skills (`SKILL.md`) + your choice of tools + tasks across daily workflows + data under your control. The named toolchain, stated exactly: an **MCP stdio server** the agent launches itself (config for Hermes Agent and Claude Code in [`mcp.example.json`](mcp.example.json); exercised against a generic MCP host in the test suite, **not** against NemoClaw), an **OpenShell** default-deny policy in [`deploy/openshell/`](deploy/openshell/README.md) (authored from their docs, **not** run in this build — the file says which fields are asserted), and Nebius Serverless Jobs [documented but deliberately not shipped](deploy/nebius-jobs/README.md). |
 | Working demo URL | [mnemos-personal-ai.onrender.com](https://mnemos-personal-ai.onrender.com) — for a first look use [`/?review=1`](https://mnemos-personal-ai.onrender.com/?review=1), the guided path above. (Free tier; a keep-alive cron usually keeps it warm — measured 0.30 s on 2026-10-20, but 22.8 s after a cold boot on 2026-10-19 — and every restart re-seeds the sandbox vault, because Render free has no disk.) |
 | Public repo + open-source licence | MIT, visible in the repo's About panel. |
 | Best Use of Tavily | `web.search` is a native agent tool **and** the Dream Engine's world model ("outward dream": tonight's replay turns one memory into a query, searches, and wakes with new stars). Runtime calls, not a mention. |
