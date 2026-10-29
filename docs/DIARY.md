@@ -1516,3 +1516,21 @@ in, three clean memories came out, and one question later it told me the judging
 keep-alive endpoint I had never repeated, which is the whole promise of the product. The shortfall is not
 in recall at all — it is that the answer shipped one receipt where it used four, and garbled the name and
 the URL of the thing it had correctly remembered.
+
+### Day 13 addendum — same day, after closing the gap this session found
+
+**Flush shipped.** `await ctx.store.flush()` now runs in `handleChat` right after the turn
+([src/server.js:537](../src/server.js#L537)), so what a turn learned is on disk before the `done`
+event. Verified on a fresh jar: `learned: 2` → `/api/export` holds both facts, and
+`vault.memories` equals `export.memories` (20 = 20). Days 4 through 13 filed this as an open
+defect; it is closed.
+
+**Correction — the keep-alive fact I fed it on turn 1 overstates reality, and I should have
+checked it before typing.** The workflow is *configured* for every 14 minutes
+([keep-alive.yml:10](../.github/workflows/keep-alive.yml#L10)), but GitHub's scheduler throttled
+that schedule to roughly 2–5 hours between runs in the Day 2 measurements ("7 minutes of dead
+demo"), and the README carries both numbers ("0.30 s warm, 22.8 s cold"). So the star
+`M83c619c1` — "curls /api/health every 14 minutes … to prevent sleeping" — is true of the
+*configuration*, not of the effect. The model repeated my overstatement faithfully: the recall
+worked and the input was wrong. Corrected here rather than edited out, which is the only way a
+diary like this is worth reading.

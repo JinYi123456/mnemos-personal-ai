@@ -531,6 +531,10 @@ async function handleChat(req, res, ctx) {
       image,
       emit: (ev) => res.write(`data: ${JSON.stringify(ev)}\n\n`),
     });
+    // A chat turn learns memories; without a flush the file on disk lags the sky, so
+    // Export (the review rail's step 5) and any restart lose what the visitor just
+    // taught it. The diary has been filing this as a defect every day since Day 4.
+    await ctx.store.flush();
     res.write(`data: ${JSON.stringify({ type: 'done', ...result, budget: gate.remaining(clientIp(req), ctx.sid) })}\n\n`);
   } catch (e) {
     res.write(`data: ${JSON.stringify({ type: 'error', error: String(/** @type {any} */ (e).message || e) })}\n\n`);
