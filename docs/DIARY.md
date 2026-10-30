@@ -1534,3 +1534,110 @@ demo"), and the README carries both numbers ("0.30 s warm, 22.8 s cold"). So the
 *configuration*, not of the effect. The model repeated my overstatement faithfully: the recall
 worked and the input was wrong. Corrected here rather than edited out, which is the only way a
 diary like this is worth reading.
+
+## Day 14 — 2026-10-30 · scheduled dogfood session #14
+
+**Session #** 2 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode
+`native`, wall time 7.1 s / 3.7 s. Cookie jar and raw captures (`t1.sse`, `t2.sse`, `mem_after.json`,
+`export.json`, `st_jar.json`, `live_app.js`) written to `C:/Users/User/AppData/Local/Temp/mnemos-day14/`,
+outside the repo; sid `a5f3398da2ea6ad10cb05ef5`, minted by the first request — a plain `GET /api/memories`,
+which opened on the stock **18** — all of them `source: user`, `source: chat` count **0**. Fourteenth
+consecutive fresh-seed sky.
+
+**What I told it (turn 1).** Three facts, each grepped before I typed it
+([keep-alive.yml:10,22](../.github/workflows/keep-alive.yml#L10), [src/server.js:205](../src/server.js#L205)),
+and the third deliberately the *corrected* version of what I overstated on Day 13: (1) judging for the
+Nebius x NVIDIA Global AI Hackathon runs Dec 1-15, 2026 and is asynchronous — a judge just clicks the link;
+(2) the demo is on Render free tier, which sleeps after 15 minutes of quiet; (3) the keep-alive cron is
+`*/14`, **but** GitHub throttles `schedule` triggers to roughly every 2-5 hours, so the demo does go cold and
+a real cold start is about 22.8 seconds. The question this run was supposed to answer: does the store keep an
+unflattering nuance, or smooth it back into "kept awake"?
+
+**What it wrote.** Exactly **3** memories, one per fact, no duplicates, vault 18 → **21**, all `source: chat`,
+all `uses: 1`, `strength: 0.48`:
+- `Me70b97d5` — *"Judging for the Nebius x NVIDIA Global AI Hackathon runs Dec 1-15, 2026, and is asynchronous: a judge just clicks our link"*
+- `M288a655c` — *"A GitHub Actions workflow pings /api/health every 14 minutes (cron */14), but GitHub throttles it to roughly every 2-5 hours, causing the demo to go cold and a real cold-start time of about 22.8 seconds"*
+- `M6eb24fe7` — *"The Mnemos demo is hosted on the Render free tier, which sleeps after 15 minutes of quiet"*
+
+**The nuance survived.** `M288a655c` keeps the throttle, the consequence and the number in one star, with no
+"prevents sleeping" clause anywhere in it. Day 13's failure — the recall faithfully repeating my
+overstatement — did not recur, because the input was right this time. That is neither a product win nor a
+product loss: it says the extractor is honest about what it is handed, which is all a reader is ever entitled
+to ask of it.
+
+**What I asked (turn 2).** *"Testing your memory: when does judging for the hackathon happen, and how do we
+keep the demo online? Give me the exact window, the mechanism, and how long a real cold start actually
+takes."* — no fact repeated, no directive-sounding phrasing.
+
+**What it recalled.** The `recall` event listed `e70b97d5, 288a655c, 6eb24fe7` first, then three seed stars
+(`41312395, b5bf8012, 5b521587`): all three memories from sixty seconds earlier outranked the seed pool, and
+the weak-recall floor never had to intervene. Reply, verbatim from `t2.sse`:
+
+> Judging for the Nebius × NVIDIA Global AI Hackathon runs **asynchronously from December 1 through December
+> 15, 2026** – judges simply click the provided judging link whenever they're ready.
+> **Keeping the demo online**
+> - The Mnemos demo is hosted on Render's free tier, which **sleeps after 15 minutes of inactivity**.
+> - To prevent the app from sleeping, a GitHub Actions workflow pings `https://api.health/` **every 14
+>   minutes** (cron `*/14`).
+> - GitHub's rate-limiting throttles those pings to roughly **every 2–5 hours**, which means the demo can
+>   still go cold during quieter periods.
+> **Real cold-start time**
+> - When the app has been idle long enough to be killed, the first request incurs a cold start of **≈ 22.8
+>   seconds**.
+
+All three sub-questions answered, correctly, one turn after intake, from memory. `learned: 0, skipped: 0,
+asked: true` — the question turn wrote nothing. `unsupported: []`, clean for a second session running.
+
+**`cites: []` again — and the diary was wrong about what the UI does with that.** Zero chips typed on the
+recall turn (Day 13: one; Day 8 and Day 12: zero; this is the norm, not a regression) — `cites` is extracted
+from `[M…]` tokens in the reply text against the recalled pool
+([src/brain.js:818-828](../src/brain.js#L818)), and this model does not type them. But Day 13's
+recommendation (1) — *"the data needed to close the under-report is already in the `done` payload and is
+discarded"* — is **false**, and I fetched the deployed bundle to check rather than re-read the local file:
+`GET /app.js` on the live demo contains `cite-chip uncited` and the string "matched but not cited", and
+[public/app.js:855-859](../public/app.js#L855) renders every `matchedUncited` entry as a hollow ◌ chip under
+an explicit label, with "drew on N memories but cited none — treat this answer as unverified" as the fallback
+at [public/app.js:866-867](../public/app.js#L866). That surface shipped in `b5db2fa`, dated **2026-10-16** —
+thirteen days before Day 13 filed it as missing. So today's screen shows **three** receipts — `M288a655c`
+overlap 23, `M6eb24fe7` 11, `Me70b97d5` 9 — all hollow, because the product's matcher found them and the
+model never claimed them. Correction, in the same spirit as Day 13's addendum: the real complaint is about
+the model's silence, and I wrote it as an accusation against the UI.
+
+**Three defects still live.** (1) **The endpoint is still rendered as a URL that does not exist**: the reply
+types `https://api.health/` where the star it leaned on says `/api/health` — the same mangling Day 13 caught,
+reproduced independently on a fresh jar, and this time there is no chip above it to contradict, only the
+hollow ◌ underneath. (2) **`unsupported` fires where it is useless and goes quiet where it matters**: turn 1
+flagged `["1","15","2026","2","3","14","5","22"]` — eight figures lifted out of *my own message* on the turn
+that then stored them (`learned: 3`), because the pool is `recalled` and nothing else
+([src/brain.js:332,836](../src/brain.js#L332)) — while turn 2, the turn that actually answered from memory,
+returned `[]`. Same two-root diagnosis as Day 11/12/13, third reproduction. (3) Turn 1 closes with *"Let me
+know if you'd like to store any of these details as a memory"* one line after `learned: 3` had already stored
+all three, and after the reply had recapped them; the offer describes work the turn already did.
+
+**Durability — the ninth-day defect is closed and verified.** `await ctx.store.flush()`
+([src/server.js:537](../src/server.js#L537), shipped in `aa60417`) holds on a real session: same jar,
+`/api/memories` = **21**, `/api/export` = **21**, all three new ids present in the export, and `Dec 1-15`
+in it. Footnote for anyone scripting against this, because it caught me: `/api/memories` returns short
+`M`+8-hex ids while `/api/export` returns the full 64-hex hashes, so a chip's `data-id` can never
+string-match an export id — my first pass reported "absent from export" and that was my bug, not the
+product's. Second footnote: `GET /api/status` **without** the jar mints a different vault and reports
+`memories: 18`, `tokensLeftToday: 400000`; with the jar the same call reports **21** and **394,581**. A bare
+status poll is not evidence about a session.
+
+**Cost.** Global since-wake `spend` = 8 calls / **$0.00041269** = 3 fast ($0.00040476) + 5 embed
+($0.00000793). On screen: 2 `meter` events = $0.00035640 (3,956 prompt + 496 completion tokens). The
+remainder reconciles to the cent: $0.00041269 − $0.00035640 = $0.00005629 = one hidden fast call
+($0.00004836) + the 5 embeds ($0.00000793). And the call count decomposes exactly against my two turns —
+5 embed = 2 query vectors + 3 stored memories, 3 fast = 2 answers + 1 hidden — which is stronger evidence
+than Day 13 had: no other visitor touched this instance between its wake and my export, so the ledger really
+is mine, and the Day 11/12/13 attribution rule reproduces again (one hidden fast call on the turn where
+extraction runs, none on the ask turn).
+
+**Did it change what I do?** Yes, twice: it killed a claim I had written in this diary yesterday, and the
+`/api/health` → `https://api.health/` mangling reproduced on a second independent session, which moves that
+fix up the list. **Was the recall actually useful?** As information, no — it told me back three things I had
+typed sixty seconds earlier, and I already knew all of them; as verification, yes, and this is the cleanest
+session of the fourteen: it kept the caveat that made the fact unfashionable, ranked the three new stars
+above the seed pool, wrote them to disk before I asked for the export, and billed $0.00041269 doing it. The
+shortfall is in the same place Day 13 left it — the answer ships three receipts it never signed — except
+that today I checked the UI before blaming it.
