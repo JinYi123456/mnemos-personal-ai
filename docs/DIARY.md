@@ -1538,9 +1538,10 @@ diary like this is worth reading.
 ## Day 14 — 2026-10-30 · scheduled dogfood session #14
 
 **Session #** 2 turns (`POST /api/chat`, SSE), model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, tool mode
-`native`, wall time 7.1 s / 3.7 s. Cookie jar and raw captures (`t1.sse`, `t2.sse`, `mem_after.json`,
-`export.json`, `st_jar.json`, `live_app.js`) written to `C:/Users/User/AppData/Local/Temp/mnemos-day14/`,
-outside the repo; sid `a5f3398da2ea6ad10cb05ef5`, minted by the first request — a plain `GET /api/memories`,
+`native`, wall time 7.1 s / 3.7 s. Cookie jar and raw captures (`t1.sse`, `t2.sse`, `pre_memories.json`,
+`mem_after.json`, `export.json`, `st_jar.json`, `live_app.js`) archived outside the repo at
+`C:/Users/User/.qoder/mnemos-dogfood/day14/`; sid `a5f3398da2ea6ad10cb05ef5`, minted by the first request — a
+plain `GET /api/memories`,
 which opened on the stock **18** — all of them `source: user`, `source: chat` count **0**. Fourteenth
 consecutive fresh-seed sky.
 
